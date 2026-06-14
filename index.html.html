@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매크로 & 자산 모니터링 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
+        .dashboard-container { width: 100%; max-width: 1200px; }
+        .header { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        
+        #cards-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 240px; gap: 20px; }
+        @media (max-width: 900px) { #cards-container { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { #cards-container { grid-template-columns: 1fr; } }
+
+        .card { 
+            position: relative; background-color: white; border-radius: 12px; padding: 15px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; 
+            justify-content: space-between; cursor: grab; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:active { cursor: grabbing; } 
+        .card:hover.asset-card { transform: translateY(-3px); box-shadow: 0 8px 12px rgba(0,0,0,0.1); }
+
+        .delete-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.5rem; color: #bdc3c7; cursor: pointer; padding: 0; line-height: 1; z-index: 10; }
+        .delete-btn:hover { color: #e74c3c; }
+
+        .asset-info h2 { margin: 0; font-size: 1.1rem; color: #34495e; padding-right: 20px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .asset-info p { margin: 3px 0 0 0; color: #7f8c8d; font-size: 0.85rem; }
+        
+        .chart-container { flex-grow: 1; position: relative; margin: 10px 0; min-height: 70px; }
+        
+        .data-section { display: flex; justify-content: space-between; align-items: flex-end; }
+        .mdd-wrapper { display: flex; flex-direction: column; }
+        .price-info { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 3px; }
+        .price-current { font-weight: bold; color: #2c3e50; }
+        .price-high { color: #e74c3c; font-size: 0.75rem; margin-left: 4px; font-weight: bold; }
+        
+        .mdd-value { font-size: 1.3rem; font-weight: bold; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
+        
+        .status-normal { background-color: #e8f8f5; color: #1abc9c; }
+        .status-warning { background-color: #fef9e7; color: #f39c12; }
+        .status-danger { background-color: #fdedec; color: #e74c3c; }
+        .status-loading { background-color: #f0f3f4; color: #7f8c8d; }
+
+        .empty-card { border: 2px dashed #bdc3c7; background-color: transparent; box-shadow: none; cursor: default; display: flex; align-items: center; justify-content: center; }
+        .empty-card:hover { transform: none; box-shadow: none; }
+        
+        .add-form { text-align: center; width: 100%; }
+        .add-form h3 { color: #95a5a6; margin-bottom: 15px; font-size: 1.1rem; }
+        .add-form input { width: 80%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
+        .add-form button { padding: 8px 25px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .add-form button:hover { background-color: #2980b9; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>📊 나의 매크로 모니터링 대시보드</h1>
+        </div>
+        <div id="cards-container"></div>
+    </div>
+
+    <script>
+        // ★★★ 본인의 구글 웹 앱 URL로 반드시 교체해주세요! ★★★
+        const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzMne4czIH5dmOYdVrGvQ-Guu9Hp8lS9Z7H4_O4ZTYnV3lIwtvECYaQfnRELZjcmpM_/exec"; 
+        
+        // ★ 추가기능: 로컬 스토리지 키 이름 설정
+        const STORAGE_KEY = "myMacroDashboardAssets";
+
+        const DEFAULT_ASSETS = [
+            { ticker: 'MAGS', name: 'MAGS ETF (빅테크7)' },
+            { ticker: '^NDX', name: '나스닥 100 지수' },
+            { ticker: 'SGOV', name: '초단기채 (현금)' },
+            { ticker: '^TNX', name: '10년물 국채 금리' },
+            { ticker: '^VIX', name: 'VIX (공포 지수)' },
+            { ticker: 'KRW=X', name: '원/달러 환율' }
+        ];
+
+        // ★ 추가기능: 앱이 켜질 때, 브라우저 창고에 저장된 데이터가 있는지 확인하고 불러옵니다.
+        let savedData = localStorage.getItem(STORAGE_KEY);
+        let assets = savedData ? JSON.parse(savedData) : DEFAULT_ASSETS;
+
+        // ★ 추가기능: 배열의 상태가 바뀔 때마다 브라우저 창고에 덮어쓰기 하는 함수
+        function saveAssetsToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(assets));
+        }
+
+        let chartInstances = {};
+        const MAX_CARDS = 12;
+
+        async function renderDashboard() {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = ''; 
+
+            for (let i = 0; i < MAX_CARDS; i++) {
+                if (i < assets.length) {
+                    let asset = assets[i];
+                    const cardId = 'card-' + asset.ticker.replace(/[^a-zA-Z0-9]/g, ''); 
+                    
+                    container.innerHTML += `
+                        <div class="card asset-card" id="${cardId}" data-ticker="${asset.ticker}">
+                            <button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>
+                            <div class="asset-info">
+                                <h2><span id="name-${cardId}">${asset.name || '종목명 찾는 중 🔍'}</span></h2>
+                                <p>${asset.ticker}</p>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="canvas-${cardId}"></canvas>
+                            </div>
+                            <div class="data-section">
+                                <div class="mdd-wrapper">
+                                    <div class="price-info">
+                                        현재: <span id="price-${cardId}" class="price-current">-</span>
+                                        <span class="price-high">(🔴 <span id="high-${cardId}">-</span>)</span>
+                                    </div>
+                                    <div id="mdd-${cardId}" class="mdd-value">-</div>
+                                </div>
+                                <div id="status-${cardId}" class="status-badge status-loading">조회 중 ⏳</div>
+                            </div>
+                        </div>
+                    `;
+                    fetchData(asset, cardId);
+                } 
+                else if (i === assets.length) {
+                    container.innerHTML += `
+                        <div class="card empty-card non-draggable">
+                            <div class="add-form">
+                                <h3>➕ 새 종목 추가</h3>
+                                <input type="text" id="grid-ticker-input" placeholder="티커 (예: TSLA)" onkeypress="if(event.keyCode==13) gridAddAsset();">
+                                <br>
+                                <button onclick="gridAddAsset()">추가하기</button>
+                            </div>
+                        </div>
+                    `;
+                } 
+                else {
+                    container.innerHTML += `<div class="card empty-card non-draggable"></div>`;
+                }
+            }
+            initDragAndDrop();
+        }
+
+        function initDragAndDrop() {
+            const container = document.getElementById('cards-container');
+            new Sortable(container, {
+                animation: 200,
+                filter: '.non-draggable',
+                preventOnFilter: false,
+                onEnd: function (evt) {
+                    if (evt.oldIndex !== evt.newIndex && evt.newIndex < assets.length) {
+                        const movedItem = assets.splice(evt.oldIndex, 1)[0];
+                        assets.splice(evt.newIndex, 0, movedItem);
+                        
+                        // ★ 드래그로 순서를 바꾼 후에도 무조건 저장!
+                        saveAssetsToStorage();
+                    } else if (evt.newIndex >= assets.length) {
+                        renderDashboard();
+                    }
+                }
+            });
+        }
+
+        async function fetchData(asset, cardId) {
+            try {
+                if (MY_PROXY_URL === "YOUR_WEB_APP_URL") throw new Error("URL 미입력");
+
+                const fetchUrl = `${MY_PROXY_URL}?ticker=${encodeURIComponent(asset.ticker)}`;
+                const response = await fetch(fetchUrl);
+                
+                if (!response.ok) throw new Error("네트워크 오류");
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+
+                if (data.name && !asset.name) {
+                    document.getElementById(`name-${cardId}`).innerText = data.name;
+                    asset.name = data.name; 
+                    // ★ 빈 이름이었던 종목의 진짜 이름을 찾았을 때도 잊지 않고 저장!
+                    saveAssetsToStorage();
+                }
+
+                let currentPrice = data.price;
+                let high52 = data.high52;
+
+                const isDanger = updateCardUI(asset, cardId, currentPrice, high52);
+                drawChart(cardId, data.chartLabels, data.chartData, isDanger);
+
+            } catch (error) {
+                document.getElementById(`status-${cardId}`).innerText = `❌ ${error.message}`;
+                document.getElementById(`status-${cardId}`).className = "status-badge status-danger";
+            }
+        }
+
+        function updateCardUI(asset, cardId, currentPrice, high52) {
+            let mdd = (currentPrice / high52) - 1;
+            let mddPercentage = (mdd * 100).toFixed(2) + "%";
+            let statusMsg = "";
+            let statusClass = "";
+            let isDanger = false;
+            let displayPrice, displayHigh;
+
+            if (asset.ticker === 'KRW=X') {
+                displayPrice = Math.round(currentPrice).toLocaleString('ko-KR') + "원";
+                displayHigh = Math.round(high52).toLocaleString('ko-KR') + "원";
+                mddPercentage = "환율"; 
+                statusMsg = "💵 외환 모니터링"; statusClass = "status-normal";
+            } 
+            else if (asset.ticker === '^TNX') {
+                displayPrice = currentPrice.toFixed(2) + "%";
+                displayHigh = high52.toFixed(2) + "%";
+                mddPercentage = "금리"; 
+                if (currentPrice >= 5.0) { statusMsg = "🚨 위험신호"; statusClass = "status-danger"; isDanger = true; }
+                else if (currentPrice >= 4.5) { statusMsg = "⚠️ 경고"; statusClass = "status-warning"; isDanger = true; }
+                else { statusMsg = "✅ 안정"; statusClass = "status-normal"; }
+            } 
+            else if (asset.ticker === '^VIX') {
+                displayPrice = currentPrice.toFixed(2) + "pt";
+                displayHigh = high52.toFixed(2) + "pt";
+                mddPercentage = "공포지수"; 
+                if (currentPrice >= 35) { statusMsg = "🚨 극도의 공포"; statusClass = "status-danger"; isDanger = true; }
+                else if (currentPrice >= 25) { statusMsg = "⚠️ 변동성 확대"; statusClass = "status-warning"; isDanger = true; }
+                else { statusMsg = "✅ 평상시"; statusClass = "status-normal"; }
+            } 
+            else {
+                displayPrice = "$" + currentPrice.toFixed(2);
+                displayHigh = "$" + high52.toFixed(2);
+                if (mdd <= -0.30) { statusMsg = "🚨 3차 영끌"; statusClass = "status-danger"; isDanger = true; }
+                else if (mdd <= -0.20) { statusMsg = "⚠️ 2차 패닉셀"; statusClass = "status-warning"; isDanger = true; }
+                else if (mdd <= -0.15) { statusMsg = "🎯 1차 진입"; statusClass = "status-warning"; }
+                else { statusMsg = "☕ 관망"; statusClass = "status-normal"; }
+            }
+
+            document.getElementById(`price-${cardId}`).innerText = displayPrice;
+            document.getElementById(`high-${cardId}`).innerText = displayHigh;
+            document.getElementById(`mdd-${cardId}`).innerText = mddPercentage;
+            
+            const statusElement = document.getElementById(`status-${cardId}`);
+            statusElement.innerText = statusMsg;
+            statusElement.className = "status-badge " + statusClass;
+
+            return isDanger;
+        }
+
+        function drawChart(cardId, labels, data, isDanger) {
+            const canvasId = `canvas-${cardId}`;
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            const lineColor = isDanger ? '#e74c3c' : '#3498db';
+            const bgColor = isDanger ? 'rgba(231, 76, 60, 0.1)' : 'rgba(52, 152, 219, 0.1)';
+
+            let maxVal = -Infinity;
+            let maxIdx = -1;
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] > maxVal) { maxVal = data[i]; maxIdx = i; }
+            }
+
+            let pointRadii = new Array(data.length).fill(0);
+            let pointColors = new Array(data.length).fill('transparent');
+            if (maxIdx !== -1) { pointRadii[maxIdx] = 4; pointColors[maxIdx] = '#e74c3c'; }
+
+            if (chartInstances[cardId]) { chartInstances[cardId].destroy(); }
+
+            chartInstances[cardId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data, borderColor: lineColor, backgroundColor: bgColor,
+                        borderWidth: 1.5, fill: true,
+                        pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors,
+                        pointHoverRadius: 6, tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: {
+                        x: { display: true, ticks: { maxTicksLimit: 5, maxRotation: 0, font: { size: 9 }, color: '#95a5a6' }, grid: { display: false } },
+                        y: { display: false }
+                    },
+                    layout: { padding: { top: 5, bottom: 0 } }
+                }
+            });
+        }
+
+        function gridAddAsset() {
+            const inputEl = document.getElementById('grid-ticker-input');
+            const tickerValue = inputEl.value.trim().toUpperCase();
+            
+            if (!tickerValue) { alert("티커를 입력해주세요!"); return; }
+            if (assets.length >= MAX_CARDS) { alert("더 이상 추가할 수 없습니다. (최대 12개)"); return; }
+            if (assets.some(asset => asset.ticker === tickerValue)) { alert("이미 추가된 종목입니다."); return; }
+
+            assets.push({ ticker: tickerValue, name: "" });
+            
+            // ★ 종목이 추가되었을 때 저장!
+            saveAssetsToStorage();
+            renderDashboard();
+        }
+
+        function removeAsset(ticker) {
+            assets = assets.filter(asset => asset.ticker !== ticker);
+            
+            // ★ 종목이 삭제되었을 때 저장!
+            saveAssetsToStorage();
+            renderDashboard();
+        }
+
+        renderDashboard();
+    </script>
+</body>
+</html>
