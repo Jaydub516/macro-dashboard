@@ -8,13 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     
     <style>
+        /* 💻 기본 디자인 (PC 화면 기준) */
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
         .dashboard-container { width: 100%; max-width: 1200px; }
         .header { text-align: center; color: #2c3e50; margin-bottom: 30px; }
         
         #cards-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 240px; gap: 20px; }
-        @media (max-width: 900px) { #cards-container { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { #cards-container { grid-template-columns: 1fr; } }
 
         .card { 
             position: relative; background-color: white; border-radius: 12px; padding: 15px; 
@@ -53,7 +52,30 @@
         .add-form h3 { color: #95a5a6; margin-bottom: 15px; font-size: 1.1rem; }
         .add-form input { width: 80%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
         .add-form button { padding: 8px 25px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
-        .add-form button:hover { background-color: #2980b9; }
+        
+        /* 📱 반응형 디자인: 태블릿 화면 (가로 900px 이하) */
+        @media (max-width: 900px) { 
+            #cards-container { grid-template-columns: repeat(2, 1fr); } 
+        }
+
+        /* 📱 반응형 디자인: 스마트폰 화면 (가로 600px 이하) */
+        @media (max-width: 600px) { 
+            body { padding: 10px; } /* 전체 여백 축소 */
+            .header { margin-bottom: 15px; }
+            .header h1 { font-size: 1.3rem; } /* 제목 크기 축소 */
+            
+            #cards-container { 
+                grid-template-columns: 1fr; /* 1줄로 세로 정렬 */
+                grid-auto-rows: 210px; /* 모바일에 맞게 카드 높이 축소 */
+                gap: 12px; /* 카드 사이 간격 축소 */
+            }
+            
+            .card { padding: 12px; } /* 카드 내부 여백 축소 */
+            .asset-info h2 { font-size: 1rem; }
+            .mdd-value { font-size: 1.1rem; } /* 숫자 크기 살짝 축소 */
+            .chart-container { min-height: 50px; margin: 5px 0; } /* 차트 높이 조절 */
+            .add-form input { width: 90%; }
+        }
     </style>
 </head>
 <body>
@@ -67,9 +89,8 @@
 
     <script>
         // ★★★ 본인의 구글 웹 앱 URL로 반드시 교체해주세요! ★★★
-        const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzMne4czIH5dmOYdVrGvQ-Guu9Hp8lS9Z7H4_O4ZTYnV3lIwtvECYaQfnRELZjcmpM_/exec"; 
+        const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbym5VcNH4gfUUpwObaVHKIOI6s638EDvuUW89-1MXmUQ_OHXB14UTcMAMdmBFF14dPe/exec"; 
         
-        // ★ 추가기능: 로컬 스토리지 키 이름 설정
         const STORAGE_KEY = "myMacroDashboardAssets";
 
         const DEFAULT_ASSETS = [
@@ -81,11 +102,9 @@
             { ticker: 'KRW=X', name: '원/달러 환율' }
         ];
 
-        // ★ 추가기능: 앱이 켜질 때, 브라우저 창고에 저장된 데이터가 있는지 확인하고 불러옵니다.
         let savedData = localStorage.getItem(STORAGE_KEY);
         let assets = savedData ? JSON.parse(savedData) : DEFAULT_ASSETS;
 
-        // ★ 추가기능: 배열의 상태가 바뀔 때마다 브라우저 창고에 덮어쓰기 하는 함수
         function saveAssetsToStorage() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(assets));
         }
@@ -149,14 +168,17 @@
             const container = document.getElementById('cards-container');
             new Sortable(container, {
                 animation: 200,
+                // 모바일 환경에서 화면 스크롤과 카드 드래그가 겹치는 것을 방지하기 위해
+                // 카드 전체가 아니라 특정 부분(헤더 등)을 잡아야 드래그되도록 하려면 handle 옵션을 쓸 수 있습니다.
+                // 여기서는 카드를 꾹 눌러야 이동하도록 딜레이를 줍니다.
+                delay: 150, 
+                delayOnTouchOnly: true, // 스마트폰 터치 화면에서만 딜레이 적용 (스크롤 방해 안 함)
                 filter: '.non-draggable',
                 preventOnFilter: false,
                 onEnd: function (evt) {
                     if (evt.oldIndex !== evt.newIndex && evt.newIndex < assets.length) {
                         const movedItem = assets.splice(evt.oldIndex, 1)[0];
                         assets.splice(evt.newIndex, 0, movedItem);
-                        
-                        // ★ 드래그로 순서를 바꾼 후에도 무조건 저장!
                         saveAssetsToStorage();
                     } else if (evt.newIndex >= assets.length) {
                         renderDashboard();
@@ -179,7 +201,6 @@
                 if (data.name && !asset.name) {
                     document.getElementById(`name-${cardId}`).innerText = data.name;
                     asset.name = data.name; 
-                    // ★ 빈 이름이었던 종목의 진짜 이름을 찾았을 때도 잊지 않고 저장!
                     saveAssetsToStorage();
                 }
 
@@ -297,7 +318,6 @@
 
             assets.push({ ticker: tickerValue, name: "" });
             
-            // ★ 종목이 추가되었을 때 저장!
             saveAssetsToStorage();
             renderDashboard();
         }
@@ -305,7 +325,6 @@
         function removeAsset(ticker) {
             assets = assets.filter(asset => asset.ticker !== ticker);
             
-            // ★ 종목이 삭제되었을 때 저장!
             saveAssetsToStorage();
             renderDashboard();
         }
