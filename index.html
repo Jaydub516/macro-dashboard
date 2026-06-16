@@ -3,126 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>매크로 & 자산 배분 대시보드</title>
+    <title>매크로 & 자산 배분 마스터 대시보드</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     
     <style>
-        /* 🌓 다크 모드 지원을 위한 CSS 변수 세팅 */
         :root {
-            --bg-body: #f0f2f5;
-            --bg-card: #ffffff;
-            --text-main: #2c3e50;
-            --text-sub: #7f8c8d;
-            --border-dash: #bdc3c7;
-            --price-num: #2c3e50;
-            --input-border: #dddddd;
+            --bg-body: #f0f2f5; --bg-card: #ffffff; --text-main: #2c3e50; --text-sub: #7f8c8d;
+            --border-dash: #bdc3c7; --price-num: #2c3e50; --input-border: #dddddd;
+            --tab-active: #3498db; --tab-combined: #9b59b6; --tab-bg: #e0e0e0; --account-summary-bg: #eaf2f8;
         }
         .dark-mode {
-            --bg-body: #121212;
-            --bg-card: #1e1e1e;
-            --text-main: #e0e0e0;
-            --text-sub: #a0a0a0;
-            --border-dash: #444444;
-            --price-num: #ffffff;
-            --input-border: #444444;
+            --bg-body: #121212; --bg-card: #1e1e1e; --text-main: #e0e0e0; --text-sub: #a0a0a0;
+            --border-dash: #444444; --price-num: #ffffff; --input-border: #444444;
+            --tab-active: #2980b9; --tab-combined: #8e44ad; --tab-bg: #2c2c2c; --account-summary-bg: #1a252f;
         }
 
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: var(--bg-body); color: var(--text-main); padding: 20px; display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: var(--bg-body); color: var(--text-main); padding: 20px; display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s; margin: 0; }
         .dashboard-container { width: 100%; max-width: 1200px; }
         
-        .header-wrap { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; width: 100%; }
-        .header-wrap h1 { margin: 0; font-size: 1.8rem; }
-        
-        /* 다크모드 토글 스위치 */
-        .theme-toggle { background: var(--bg-card); border: 1px solid var(--text-sub); color: var(--text-main); padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-        
-        /* 📊 고정 3열 4행 그리드 레이아웃 설정 */
-        #cards-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 240px; gap: 20px; }
+        .header-wrap { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%; flex-wrap: wrap; gap: 10px; }
+        .header-wrap h1 { margin: 0; font-size: 1.6rem; }
+        .header-controls { display: flex; gap: 8px; }
+        .header-btn { background: var(--bg-card); border: 1px solid var(--text-sub); color: var(--text-main); padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+        .header-btn:hover { background: var(--tab-bg); }
 
-        /* 📱 반응형 레이아웃 디자인 (태블릿 & 모바일) */
-        @media (max-width: 900px) { #cards-container { grid-template-columns: repeat(2, 1fr); } }
+        .tab-container { display: flex; gap: 8px; margin-bottom: 20px; width: 100%; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; scrollbar-color: var(--border-dash) transparent; }
+        .tab-container::-webkit-scrollbar { height: 6px; }
+        .tab-container::-webkit-scrollbar-thumb { background: var(--border-dash); border-radius: 3px; }
+        
+        .tab-btn { flex: 0 0 auto; padding: 12px 18px; background: var(--tab-bg); border: none; color: var(--text-main); font-weight: bold; font-size: 0.95rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .tab-btn.active { background: var(--tab-active); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .tab-btn.active-combined { background: var(--tab-combined); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        .tab-btn-wrapper { position: relative; flex: 0 0 auto; display: flex; }
+        .tab-btn-wrapper .tab-btn { padding-right: 35px; } 
+        .delete-tab-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.3rem; color: #aab7b8; cursor: pointer; line-height: 1; transition: color 0.2s; }
+        .delete-tab-btn:hover { color: #e74c3c; }
+        
+        .tab-add-btn { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: 2px dashed var(--border-dash); color: var(--text-sub); font-weight: bold; font-size: 0.9rem; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; justify-content: center;}
+        .tab-add-btn:hover { border-color: var(--tab-active); color: var(--tab-active); }
+
+        .combined-selector-box { background: var(--bg-card); padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-dash); display: none; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .combined-selector-box span { font-weight: bold; font-size: 0.9rem; color: var(--text-main); margin-right: 5px; }
+        .acc-checkbox-label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; cursor: pointer; color: var(--text-main); background: var(--tab-bg); padding: 4px 10px; border-radius: 15px; }
+        
+        .account-summary-box { background: var(--account-summary-bg); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; transition: background 0.3s; }
+        .summary-item { display: flex; flex-direction: column; }
+        .summary-item .label { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 3px; }
+        .summary-item .value { font-size: 1.3rem; font-weight: bold; }
+        .cash-sim-input { padding: 8px; border: 1px solid var(--input-border); border-radius: 6px; width: 140px; text-align: right; background: var(--bg-card); color: var(--text-main); font-weight: bold; }
+
+        #cards-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 275px; gap: 20px; width: 100%; }
+        .summary-chart-card { grid-column: 1 / -1; height: auto; min-height: 260px; }
+
+        @media (max-width: 900px) { 
+            #cards-container:not(.mobile-3col) { grid-template-columns: repeat(2, 1fr); } 
+            .summary-chart-card { grid-column: 1 / -1 !important; }
+        }
+        
         @media (max-width: 600px) { 
-            body { padding: 10px; } 
-            .header-wrap { margin-bottom: 15px; }
-            .header-wrap h1 { font-size: 1.3rem; } 
-            #cards-container { grid-template-columns: 1fr; grid-auto-rows: 210px; gap: 12px; } 
-            .card { padding: 12px; } 
-            .asset-info h2 { font-size: 1rem; }
-            .mdd-value { font-size: 1.1rem; } 
-            .chart-container { min-height: 50px; margin: 5px 0; } 
-            .add-form input, .add-form select { width: 90%; }
+            body { padding: 10px; } .header-wrap h1 { font-size: 1.2rem; }
+            #cards-container:not(.mobile-3col) { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 15px; }
+            .summary-chart-card { grid-column: 1 / -1 !important; }
+            .account-summary-box { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+            #cards-container.mobile-3col { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 210px; gap: 6px; }
+            #cards-container.mobile-3col .card { padding: 8px; border-radius: 8px; }
+            #cards-container.mobile-3col .asset-info h2 { font-size: 0.75rem; padding-right: 10px; }
+            #cards-container.mobile-3col .asset-info p { font-size: 0.6rem; margin-top: 1px; }
+            #cards-container.mobile-3col .delete-btn { font-size: 1rem; top: 6px; right: 6px; }
+            #cards-container.mobile-3col .chart-container { min-height: 40px; margin: 2px 0; }
+            #cards-container.mobile-3col .mdd-value { font-size: 0.9rem; }
+            #cards-container.mobile-3col .price-info { font-size: 0.65rem; }
+            #cards-container.mobile-3col .price-high { font-size: 0.6rem; }
+            #cards-container.mobile-3col .status-badge { font-size: 0.6rem; padding: 2px 5px; }
+            #cards-container.mobile-3col .rebalance-signal { font-size: 0.6rem; padding: 2px 4px; }
+            #cards-container.mobile-3col .weight-badge-line { font-size: 0.65rem; line-height: 1.1; }
+            #cards-container.mobile-3col .card-edit-row { display: none; }
+            #cards-container.mobile-3col .summary-chart-card { grid-column: 1 / -1; height: 230px; }
         }
 
-        /* 공통 카드 스타일 */
-        .card { 
-            position: relative; background-color: var(--bg-card); border-radius: 12px; padding: 15px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; 
-            justify-content: space-between; cursor: grab; transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
-            box-sizing: border-box;
-        }
-        .card:active { cursor: grabbing; } 
-        .card:hover.asset-card, .card:hover.countdown-card { transform: translateY(-3px); box-shadow: 0 8px 12px rgba(0,0,0,0.1); }
-
-        /* 우측 상단 삭제 버튼 */
-        .delete-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.5rem; color: #bdc3c7; cursor: pointer; padding: 0; line-height: 1; z-index: 10; }
+        .card { position: relative; background-color: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; box-sizing: border-box; overflow: hidden; }
+        .card:active { cursor: grabbing; }
+        .card:hover.asset-card, .card:hover.scheduler-card { transform: translateY(-3px); box-shadow: 0 8px 12px rgba(0,0,0,0.1); }
+        .delete-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.4rem; color: #bdc3c7; cursor: pointer; padding: 0; line-height: 1; z-index: 10; }
         .delete-btn:hover { color: #e74c3c; }
+        
+        .asset-info h2 { margin: 0; font-size: 1rem; color: var(--text-main); padding-right: 20px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .asset-info p { margin: 3px 0 0 0; color: var(--text-sub); font-size: 0.75rem; }
+        
+        /* 💡 종목명 인라인 수정을 위한 클릭 효과 스타일 */
+        .editable-name { cursor: text; border-bottom: 1px dashed var(--border-dash); transition: border-color 0.2s; padding-bottom: 1px; display: inline-block; min-width: 50px; }
+        .editable-name:focus { outline: none; border-bottom-color: var(--tab-active); color: var(--tab-active); }
 
-        .asset-info h2 { margin: 0; font-size: 1.05rem; color: var(--text-main); padding-right: 20px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-        .asset-info p { margin: 3px 0 0 0; color: var(--text-sub); font-size: 0.8rem; }
+        .chart-container { flex-grow: 1; position: relative; margin: 5px 0; min-height: 65px; }
         
-        /* 미니 차트 도화지 영역 */
-        .chart-container { flex-grow: 1; position: relative; margin: 5px 0; min-height: 70px; }
-        
-        /* 하단 가격 및 알람 섹션 */
-        .data-section { display: flex; justify-content: space-between; align-items: flex-end; }
-        .mdd-wrapper { display: flex; flex-direction: column; }
-        .price-info { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 2px; }
+        .data-section { display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.8rem; }
+        .mdd-wrapper { display: flex; flex-direction: column; gap: 2px; width: 60%; }
+        .price-line { color: var(--text-sub); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
         .price-current { font-weight: bold; color: var(--price-num); }
-        .price-high { color: #e74c3c; font-size: 0.75rem; margin-left: 3px; font-weight: bold; }
-        
-        .mdd-value { font-size: 1.25rem; font-weight: bold; }
-        .status-badge { padding: 3px 9px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; }
-        
-        /* 상태별 알람 색상 정의 */
-        .status-normal { background-color: #e8f8f5; color: #1abc9c; }
-        .status-warning { background-color: #fef9e7; color: #f39c12; }
-        .status-danger { background-color: #fdedec; color: #e74c3c; }
-        .status-loading { background-color: #f0f3f4; color: #7f8c8d; }
+        .price-high { color: #e74c3c; font-size: 0.75rem; font-weight: bold; }
+        .weight-badge-line { font-size: 0.75rem; color: var(--text-main); margin-top: 2px; }
+        .weight-bold { font-weight: bold; color: var(--tab-active); }
+        .right-display-wrapper { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; width: 40%; text-align: right; }
+        .mdd-value { font-size: 1.15rem; font-weight: bold; }
+        .status-badge { padding: 3px 8px; border-radius: 20px; font-weight: bold; font-size: 0.7rem; white-space: nowrap; }
+        .rebalance-signal { font-size: 0.75rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-top: 2px; }
+        .sig-buy { background: #ebf5fb; color: #2980b9; }
+        .sig-sell { background: #fdedec; color: #e74c3c; }
+        .sig-hold { background: #f0f3f4; color: #7f8c8d; }
 
-        /* ➕ 빈칸 및 종목 추가 폼 스타일 */
+        .card-edit-row { display: flex; gap: 6px; margin-top: 8px; }
+        .edit-item { flex: 1; display: flex; align-items: center; background: var(--bg-body); border-radius: 6px; padding: 2px 6px; border: 1px solid var(--input-border); }
+        .edit-label { font-size: 0.75rem; color: var(--text-sub); min-width: 36px; font-weight: bold; white-space: nowrap; }
+        .edit-item input { width: 100%; border: none; background: transparent; color: var(--text-main); font-size: 0.85rem; text-align: right; padding: 4px 0; outline: none; }
+
         .empty-card { border: 2px dashed var(--border-dash); background-color: transparent; box-shadow: none; cursor: default; display: flex; align-items: center; justify-content: center; }
         .empty-card:hover { transform: none; box-shadow: none; }
-        
         .add-form { text-align: center; width: 100%; padding: 10px; box-sizing: border-box; }
-        .add-form h3 { color: var(--text-sub); margin: 0 0 10px 0; font-size: 1rem; }
-        .add-form select, .add-form input { width: 85%; padding: 8px; border: 1px solid var(--input-border); background: var(--bg-card); color: var(--text-main); border-radius: 6px; font-size: 0.9rem; margin-bottom: 8px; text-align: center; box-sizing: border-box; }
-        .add-form input { text-transform: uppercase; }
-        .add-form button { padding: 6px 20px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
-        .add-form button:hover { background-color: #2980b9; }
+        .add-form h3 { color: var(--text-sub); margin: 0 0 10px 0; font-size: 0.95rem; }
+        .add-form select, .add-form input { width: 85%; padding: 7px; border: 1px solid var(--input-border); background: var(--bg-card); color: var(--text-main); border-radius: 6px; font-size: 0.85rem; margin-bottom: 6px; text-align: center; box-sizing: border-box; }
+        .add-form input[type="text"] { text-transform: uppercase; }
+        .add-form input#add-name { text-transform: none; } /* 종목명은 대소문자 변환 제외 */
+        .add-form button { padding: 6px 18px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
 
-        /* 🚨 카운트다운 타이머 디스플레이 */
-        .timer-display { font-size: 1.4rem; font-weight: bold; color: #e74c3c; text-align: center; margin: 15px 0; font-variant-numeric: tabular-nums; }
+        .scheduler-list { font-size: 0.8rem; list-style: none; padding: 0; margin: 10px 0 0 0; width: 100%; }
+        .scheduler-list li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-dash); }
+        .scheduler-list li:last-child { border-bottom: none; }
+        .sched-date { font-weight: bold; color: #e74c3c; }
     </style>
 </head>
 <body>
 
     <div class="dashboard-container">
         <div class="header-wrap">
-            <h1>📊 나의 매크로 모니터링 보드</h1>
-            <button class="theme-toggle" onclick="toggleTheme()">🌙 다크 모드</button>
+            <h1>📊 매크로 & 자산 배분 시스템</h1>
+            <div class="header-controls">
+                <button class="header-btn" onclick="toggleLayout()" id="layout-btn">📱 모바일 1열/3열</button>
+                <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 다크 모드</button>
+            </div>
         </div>
-        <div id="cards-container"></div>
+
+        <div class="tab-container" id="tab-container"></div>
+
+        <div class="combined-selector-box" id="combined-selector">
+            <span>합산할 계좌 선택:</span>
+            <div id="checkbox-container" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="account-summary-box" id="summary-widget" style="display:none;">
+            <div class="summary-item">
+                <span class="label">총 자산 평가액</span>
+                <span class="value" id="sum-total-value">0원</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">보유 주식 총액</span>
+                <span class="value" id="sum-stock-value">0원</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">계좌 내 현금 잔고</span>
+                <span class="value" id="sum-cash-value">0원</span>
+            </div>
+            <div class="summary-item" id="sim-input-wrapper">
+                <span class="label">📊 추가 현금 투입 시뮬레이션</span>
+                <input type="number" class="cash-sim-input" id="cash-simulation-val" value="0" step="100000" oninput="calculateRebalancingEngine()">
+            </div>
+        </div>
+
+        <div id="cards-container" class="mobile-1col"></div>
     </div>
 
     <script>
-        // ★★★ 본인의 구글 웹 앱 URL로 반드시 교체해주세요! ★★★
+        // ★★★ 본인의 구글 웹 앱 URL 주소를 교체해 주세요! ★★★
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         
-        const STORAGE_KEY = "myMacroMasterDashboard";
+        const STORAGE_KEY_PREFIX = "macroDashboardV6_";
+        let currentView = 'macro';
 
-        // 초기 기본 자산 세팅 구성 (TGA 및 D-Day 포함)
-        const DEFAULT_ASSETS = [
+        const DEFAULT_MACRO_ASSETS = [
             { type: 'asset', ticker: 'MAGS', name: 'MAGS ETF (빅테크7)' },
             { type: 'asset', ticker: '^NDX', name: '나스닥 100 지수' },
             { type: 'asset', ticker: 'SGOV', name: '초단기채 (현금)' },
@@ -130,155 +189,262 @@
             { type: 'asset', ticker: '^VIX', name: 'VIX (공포 지수)' },
             { type: 'asset', ticker: 'KRW=X', name: '원/달러 환율' },
             { type: 'asset', ticker: 'FRED:WTREGEN', name: '미 재무부 TGA 잔고' },
-            { type: 'countdown', ticker: 'ELECTION2026', name: '🚨 미국 국채 발행 집중기 리스크', targetDate: '2026-11-03' }
+            { type: 'scheduler', ticker: 'BESSENT_QRA', name: '📅 Scott Bessent 재무부 정책 일정' }
         ];
 
-        let assets = localStorage.getItem(STORAGE_KEY) ? JSON.parse(localStorage.getItem(STORAGE_KEY)) : DEFAULT_ASSETS;
-        let chartInstances = {};
-        let timerIntervals = {};
-        const MAX_CARDS = 12; // 3열 x 4행 고정
+        const DEFAULT_TABS = [
+            { id: 'pension', name: '💰 연금저축 계좌' },
+            { id: 'isa', name: '💼 ISA 계좌' },
+            { id: 'overseas', name: '🇺🇸 해외 위탁계좌' } 
+        ];
 
-        function saveAssetsToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(assets)); }
+        let macroAssets = localStorage.getItem(STORAGE_KEY_PREFIX + 'macro') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'macro')) : DEFAULT_MACRO_ASSETS;
+        let portfolioTabs = localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) : DEFAULT_TABS;
+        let combinedSelections = localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) : DEFAULT_TABS.map(t => t.id);
 
-        // 테마 초기화 및 설정 기억
-        if(localStorage.getItem("theme") === "dark") { document.body.classList.add("dark-mode"); document.querySelector(".theme-toggle").innerText = "☀️ 라이트 모드"; }
+        let portfolios = {}; 
+        portfolioTabs.forEach(tab => {
+            let data = localStorage.getItem(STORAGE_KEY_PREFIX + tab.id);
+            if (data) portfolios[tab.id] = JSON.parse(data);
+            else {
+                if (tab.id === 'pension') portfolios[tab.id] = [
+                    { type: 'portfolio', ticker: '371160.KS', name: 'TIGER 미국테크TOP10', quantity: 120, targetWeight: 30 },
+                    { type: 'portfolio', ticker: '434300.KS', name: 'ACE 미국나스닥100', quantity: 85, targetWeight: 20 },
+                    { type: 'portfolio', ticker: '360750.KS', name: 'TIGER 미국S&P500', quantity: 150, targetWeight: 20 },
+                    { type: 'portfolio', ticker: 'SGOV', name: '달러 초단기채 현금 완충재', quantity: 10, targetWeight: 30 }
+                ];
+                else if (tab.id === 'isa') portfolios[tab.id] = [
+                    { type: 'portfolio', ticker: '371160.KS', name: 'TIGER 미국테크TOP10', quantity: 210, targetWeight: 50 },
+                    { type: 'portfolio', ticker: '458730.KS', name: 'TIGER 미국배당다우존스', quantity: 380, targetWeight: 50 }
+                ];
+                else if (tab.id === 'overseas') portfolios[tab.id] = [
+                    { type: 'portfolio', ticker: 'AAPL', name: '애플', quantity: 15, targetWeight: 40 },
+                    { type: 'portfolio', ticker: 'TSLA', name: '테슬라', quantity: 12, targetWeight: 30 },
+                    { type: 'portfolio', ticker: 'QQQ', name: 'Invesco QQQ', quantity: 5, targetWeight: 30 }
+                ];
+                else portfolios[tab.id] = [];
+            }
+        });
+
+        let livePrices = {}; let chartInstances = {}; let summaryChartInstance = null; const MAX_CARDS = 12;
+
+        let mobileLayout = localStorage.getItem('mobileLayoutV6') || '1col';
+        if (mobileLayout === '3col') { document.getElementById('cards-container').classList.add('mobile-3col'); }
+
+        function toggleLayout() {
+            const container = document.getElementById('cards-container');
+            if (container.classList.contains('mobile-3col')) { container.classList.remove('mobile-3col'); localStorage.setItem('mobileLayoutV6', '1col'); }
+            else { container.classList.add('mobile-3col'); localStorage.setItem('mobileLayoutV6', '3col'); }
+            if(currentView !== 'macro') calculateRebalancingEngine();
+        }
+
+        if(localStorage.getItem("themeV6") === "dark") { document.body.classList.add("dark-mode"); }
         function toggleTheme() {
             document.body.classList.toggle("dark-mode");
             const isDark = document.body.classList.contains("dark-mode");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
+            localStorage.setItem("themeV6", isDark ? "dark" : "light");
             document.querySelector(".theme-toggle").innerText = isDark ? "☀️ 라이트 모드" : "🌙 다크 모드";
+            if(currentView !== 'macro') calculateRebalancingEngine();
+        }
+
+        function saveTabs() { localStorage.setItem(STORAGE_KEY_PREFIX + 'tabs', JSON.stringify(portfolioTabs)); }
+        function saveCombinedSelections() { localStorage.setItem(STORAGE_KEY_PREFIX + 'combinedSelections', JSON.stringify(combinedSelections)); }
+        function saveCurrentState() {
+            if (currentView === 'macro') localStorage.setItem(STORAGE_KEY_PREFIX + 'macro', JSON.stringify(macroAssets));
+            else if (currentView !== 'combined') localStorage.setItem(STORAGE_KEY_PREFIX + currentView, JSON.stringify(portfolios[currentView]));
+        }
+
+        function getAggregatedAssets() {
+            let aggregatedMap = {};
+            combinedSelections.forEach(accId => {
+                let accAssets = portfolios[accId] || [];
+                accAssets.forEach(a => {
+                    if (!aggregatedMap[a.ticker]) { aggregatedMap[a.ticker] = { type: 'portfolio', ticker: a.ticker, name: a.name, quantity: 0, targetWeight: 0 }; }
+                    aggregatedMap[a.ticker].quantity += parseFloat(a.quantity) || 0;
+                });
+            });
+            return Object.values(aggregatedMap);
+        }
+
+        function getActiveArray() {
+            if (currentView === 'macro') return macroAssets;
+            if (currentView === 'combined') return getAggregatedAssets();
+            return portfolios[currentView] || [];
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tab-container');
+            let html = `<button class="tab-btn ${currentView === 'macro' ? 'active' : ''}" onclick="switchView('macro')">📊 거시경제</button>`;
+            html += `<button class="tab-btn ${currentView === 'combined' ? 'active-combined' : ''}" onclick="switchView('combined')">🌐 전체 합산</button>`;
+            portfolioTabs.forEach(tab => {
+                html += `
+                    <div class="tab-btn-wrapper">
+                        <button class="tab-btn ${currentView === tab.id ? 'active' : ''}" onclick="switchView('${tab.id}')">${tab.name}</button>
+                        <span class="delete-tab-btn" onclick="deleteAccount('${tab.id}', event)" title="계좌 삭제">&times;</span>
+                    </div>
+                `;
+            });
+            html += `<button class="tab-add-btn" onclick="addNewAccount()">➕ 계좌 추가</button>`;
+            container.innerHTML = html;
+        }
+
+        function switchView(viewMode) {
+            currentView = viewMode; renderTabs();
+            const summaryWidget = document.getElementById('summary-widget');
+            const simWrapper = document.getElementById('sim-input-wrapper');
+            const combinedBox = document.getElementById('combined-selector');
+            const checkboxContainer = document.getElementById('checkbox-container');
+
+            if (viewMode === 'macro') { summaryWidget.style.display = 'none'; combinedBox.style.display = 'none'; }
+            else if (viewMode === 'combined') {
+                summaryWidget.style.display = 'flex'; simWrapper.style.display = 'flex'; combinedBox.style.display = 'flex';
+                let cbHtml = '';
+                portfolioTabs.forEach(tab => {
+                    let isChecked = combinedSelections.includes(tab.id) ? 'checked' : '';
+                    cbHtml += `<label class="acc-checkbox-label"><input type="checkbox" value="${tab.id}" ${isChecked} onchange="updateCombinedSelection()"> ${tab.name}</label>`;
+                });
+                checkboxContainer.innerHTML = cbHtml; document.getElementById('cash-simulation-val').value = 0;
+            } else { summaryWidget.style.display = 'flex'; simWrapper.style.display = 'flex'; combinedBox.style.display = 'none'; document.getElementById('cash-simulation-val').value = 0; }
+            renderDashboard();
+        }
+
+        function updateCombinedSelection() {
+            let checkboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]');
+            combinedSelections = []; checkboxes.forEach(cb => { if(cb.checked) combinedSelections.push(cb.value); });
+            saveCombinedSelections(); renderDashboard(); 
+        }
+
+        function addNewAccount() {
+            let name = prompt("새로운 계좌 이름을 입력하세요\n(예: 해외위탁계좌, IRP 등)");
+            if (!name || name.trim() === "") return;
+            let newId = 'acc_' + Date.now();
+            portfolioTabs.push({ id: newId, name: "💼 " + name.trim() }); portfolios[newId] = [];
+            combinedSelections.push(newId); saveCombinedSelections(); saveTabs(); switchView(newId);
+        }
+
+        function deleteAccount(id, event) {
+            event.stopPropagation(); 
+            if(confirm("정말 이 계좌를 삭제하시겠습니까?")) {
+                portfolioTabs = portfolioTabs.filter(t => t.id !== id); delete portfolios[id];
+                localStorage.removeItem(STORAGE_KEY_PREFIX + id); combinedSelections = combinedSelections.filter(cId => cId !== id);
+                saveCombinedSelections(); saveTabs(); if (currentView === id) switchView('macro'); else renderTabs(); 
+            }
         }
 
         async function renderDashboard() {
             const container = document.getElementById('cards-container');
-            
-            // 기존 상주 타이머들 초기화
-            Object.values(timerIntervals).forEach(clearInterval);
-            timerIntervals = {};
+            Object.values(chartInstances).forEach(c => c.destroy()); chartInstances = {};
+            if(summaryChartInstance) { summaryChartInstance.destroy(); summaryChartInstance = null; }
             container.innerHTML = ''; 
 
+            let activeList = getActiveArray();
+            let isCombined = (currentView === 'combined');
+
+            if (currentView !== 'macro' && activeList.length > 0) {
+                container.innerHTML += `
+                    <div class="card summary-chart-card non-draggable">
+                        <div class="asset-info" style="margin-bottom: 10px;">
+                            <h2>${isCombined ? '🌐 전체 합산' : '🎯 계좌'} 포트폴리오 비중 분석 (목표 대비 실제)</h2>
+                            <p>파이 차트보다 직관적인 가로 막대 비교</p>
+                        </div>
+                        <div class="chart-container" style="height: 100%; min-height: 180px;"><canvas id="portfolio-summary-chart"></canvas></div>
+                    </div>
+                `;
+            }
+
             for (let i = 0; i < MAX_CARDS; i++) {
-                if (i < assets.length) {
-                    let asset = assets[i];
-                    const cardId = 'card-' + asset.ticker.replace(/[^a-zA-Z0-9]/g, ''); 
+                if (i < activeList.length) {
+                    let asset = activeList[i]; const cardId = 'card-' + asset.ticker.replace(/[^a-zA-Z0-9]/g, ''); 
                     
-                    if (asset.type === 'countdown') {
+                    if (asset.type === 'scheduler') {
                         container.innerHTML += `
-                            <div class="card countdown-card" id="${cardId}">
-                                <button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>
-                                <div class="asset-info">
-                                    <h2>${asset.name}</h2>
-                                    <p>타겟 기한: ${asset.targetDate}</p>
-                                </div>
-                                <div class="timer-display" id="timer-${cardId}">00일 00:00:00</div>
-                                <div class="data-section" style="justify-content: center;">
-                                    <div class="status-badge status-warning">⏳ 리스크 카운트다운</div>
-                                </div>
+                            <div class="card scheduler-card non-draggable" id="${cardId}">
+                                <div class="asset-info"><h2>${asset.name}</h2><p>재무부 정책 집중 일정</p></div>
+                                <ul class="scheduler-list">
+                                    <li><span>국채 발행 계획 (QRA)</span><span class="sched-date">2026-07-29</span></li>
+                                    <li><span>차환 발행 집중 주간</span><span class="sched-date">2026-08-15</span></li>
+                                    <li><span>의회 예산국 적자 점검</span><span class="sched-date">2026-09-30</span></li>
+                                    <li><span>차기 대선 / 발행한도</span><span class="sched-date" style="color:#e74c3c;">2026-11-03</span></li>
+                                </ul>
+                                <div class="data-section" style="justify-content:center; margin-top:5px;"><div class="status-badge status-danger">🚨 유동성 경계 필요</div></div>
                             </div>
                         `;
-                        runCountdown(asset.targetDate, `timer-${cardId}`);
                     } else {
+                        let isPortfolio = asset.type === 'portfolio';
                         container.innerHTML += `
-                            <div class="card asset-card" id="${cardId}" data-ticker="${asset.ticker}">
-                                <button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>
+                            <div class="card asset-card ${isCombined ? 'non-draggable' : ''}" id="${cardId}" data-ticker="${asset.ticker}">
+                                ${!isCombined ? `<button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>` : ''}
                                 <div class="asset-info">
-                                    <h2><span id="name-${cardId}">${asset.name || '데이터 연동 중 🔍'}</span></h2>
-                                    <p>${asset.ticker}</p>
+                                    <!-- 💡 클릭 가능한 종목명 인라인 편집 기능 부여 -->
+                                    <h2><span id="name-${cardId}" class="editable-name" contenteditable="${!isCombined}" onblur="updateInlineAsset('${asset.ticker}', 'name', this.innerText.trim())" title="${!isCombined ? '클릭해서 종목명 수정' : ''}">${asset.name || '동기화 중...'}</span></h2>
+                                    <p>${asset.ticker} ${isPortfolio ? `<span class='weight-bold' id="target-weight-display-${cardId}">[목표 ${isCombined ? '계산중' : asset.targetWeight}%]</span>` : ''} ${isCombined ? `<span class='weight-bold' style="margin-left:4px; color:var(--text-sub); font-size:0.75rem;">(총 ${asset.quantity}주)</span>` : ''}</p>
                                 </div>
                                 <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
                                 <div class="data-section">
                                     <div class="mdd-wrapper">
-                                        <div class="price-info">
+                                        <div class="price-line">
                                             현재: <span id="price-${cardId}" class="price-current">-</span>
-                                            <span class="price-high">(🔴 <span id="high-${cardId}">-</span>)</span>
+                                            <span id="high-wrapper-${cardId}" class="price-high">(🔴 <span id="high-${cardId}">-</span>)</span>
                                         </div>
-                                        <div id="mdd-${cardId}" class="mdd-value">-</div>
+                                        <div id="extra-info-line-${cardId}" class="weight-badge-line">-</div>
                                     </div>
-                                    <div id="status-${cardId}" class="status-badge status-loading">조회 중 ⏳</div>
+                                    <div class="right-display-wrapper">
+                                        <div id="mdd-${cardId}" class="mdd-value">-</div>
+                                        <div id="status-${cardId}" class="status-badge status-loading">조회 중⏳</div>
+                                        <div id="signal-${cardId}" class="rebalance-signal" style="display:none;">-</div>
+                                    </div>
                                 </div>
+                                ${isPortfolio && !isCombined ? `
+                                    <div class="card-edit-row non-draggable">
+                                        <div class="edit-item"><span class="edit-label">수량</span><input type="number" id="edit-qty-${cardId}" value="${asset.quantity}" oninput="updateInlineAsset('${asset.ticker}', 'quantity', this.value)"></div>
+                                        <div class="edit-item"><span class="edit-label">비중%</span><input type="number" id="edit-weight-${cardId}" value="${asset.targetWeight}" oninput="updateInlineAsset('${asset.ticker}', 'targetWeight', this.value)"></div>
+                                    </div>
+                                ` : ''}
                             </div>
                         `;
                         fetchData(asset, cardId);
                     }
                 } 
-                else if (i === assets.length) {
+                else if (i === activeList.length && !isCombined) {
                     container.innerHTML += `
                         <div class="card empty-card non-draggable">
                             <div class="add-form">
                                 <h3>➕ 새 모듈 정의</h3>
-                                <select id="add-type" onchange="toggleFormFields()">
-                                    <option value="asset">일반 해외 자산 ($ / pt / %)</option>
-                                    <option value="fx-linked">원화 환산 실질 자산 (종목_KRW)</option>
-                                    <option value="countdown">D-Day 일정 관리</option>
+                                <select id="add-type">
+                                    ${currentView === 'macro' ? `<option value="asset">일반 자산</option><option value="fx-linked">원화 환산 결합 (_KRW)</option>` : `<option value="portfolio">계좌 편입 자산 (미국직투/국내선택)</option>`}
                                 </select>
                                 <input type="text" id="add-ticker" placeholder="티커 코드 입력">
-                                <input type="text" id="add-extra" placeholder="종목 설명 또는 목표 날짜" style="display:none;">
+                                <!-- 💡 종목 추가 시 이름도 함께 지정할 수 있는 입력칸 추가 -->
+                                <input type="text" id="add-name" placeholder="종목명 입력 (선택/국내종목 권장)">
                                 <button onclick="gridAddModule()">추가하기</button>
                             </div>
                         </div>
                     `;
-                    toggleFormFields();
                 } 
-                else {
-                    container.innerHTML += `<div class="card empty-card non-draggable"></div>`;
-                }
+                else { container.innerHTML += `<div class="card empty-card non-draggable" style="border-color:transparent;"></div>`; }
             }
-            initDragAndDrop();
+            if(!isCombined) initDragAndDrop();
         }
 
-        function toggleFormFields() {
-            const type = document.getElementById('add-type').value;
-            const tickerInput = document.getElementById('add-ticker');
-            const extraInput = document.getElementById('add-extra');
-            
-            if (type === 'countdown') {
-                tickerInput.placeholder = "식별 코드 (예: FOMC)";
-                extraInput.placeholder = "날짜 (YYYY-MM-DD)";
-                extraInput.style.display = "block";
-            } else if (type === 'fx-linked') {
-                tickerInput.placeholder = "미국 티커 입력 (자동 환산)";
-                extraInput.style.display = "none";
-            } else {
-                tickerInput.placeholder = "티커 (예: TSLA, AAPL)";
-                extraInput.style.display = "none";
+        // 💡 텍스트(이름) 저장과 숫자(수량/비중) 저장을 동시에 처리하도록 업데이트
+        function updateInlineAsset(ticker, field, value) {
+            let list = getActiveArray(); let asset = list.find(a => a.ticker === ticker);
+            if (asset) { 
+                if (field === 'name') asset[field] = value;
+                else asset[field] = parseFloat(value) || 0; 
+                saveCurrentState(); 
+                if (currentView !== 'macro') calculateRebalancingEngine(); 
             }
         }
 
-        function runCountdown(targetStr, elementId) {
-            function updateTimer() {
-                const diff = new Date(targetStr) - new Date();
-                const el = document.getElementById(elementId);
-                if (!el) return;
-                if (diff <= 0) {
-                    el.innerText = "기한 만료 🚨";
-                    return;
-                }
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const mins = Math.floor((diff / (1000 * 60)) % 60);
-                const secs = Math.floor((diff / 1000) % 60);
-                el.innerText = `${days}일 ${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-            }
-            updateTimer();
-            timerIntervals[elementId] = setInterval(updateTimer, 1000);
-        }
-
-        // 🛠️ 버그 수정 버전 드래그 앤 드롭 바인딩 함수
         function initDragAndDrop() {
             new Sortable(document.getElementById('cards-container'), {
-                animation: 200, 
-                delay: 150, 
-                delayOnTouchOnly: true, 
-                filter: '.non-draggable',
-                preventOnFilter: false, // 💡 [필수 반영] 내부 인풋창 클릭/선택 차단 해제 옵션
+                animation: 200, delay: 150, delayOnTouchOnly: true, filter: '.non-draggable', preventOnFilter: false, 
                 onEnd: function (evt) {
-                    if (evt.oldIndex !== evt.newIndex && evt.newIndex < assets.length) {
-                        const movedItem = assets.splice(evt.oldIndex, 1)[0];
-                        assets.splice(evt.newIndex, 0, movedItem);
-                        saveAssetsToStorage();
-                    } else if (evt.newIndex >= assets.length) {
-                        renderDashboard();
-                    }
+                    let offset = (currentView !== 'macro' && getActiveArray().length > 0) ? 1 : 0;
+                    let list = getActiveArray(); let oldIdx = evt.oldIndex - offset; let newIdx = evt.newIndex - offset;
+                    if (oldIdx !== newIdx && newIdx < list.length && oldIdx >= 0 && newIdx >= 0) { const movedItem = list.splice(oldIdx, 1)[0]; list.splice(newIdx, 0, movedItem); saveCurrentState(); } 
+                    else { renderDashboard(); }
                 }
             });
         }
@@ -290,131 +456,246 @@
                 const data = await response.json();
                 if (!data.success) throw new Error(data.error);
 
-                if (data.name && !asset.name) {
-                    document.getElementById(`name-${cardId}`).innerText = data.name;
-                    asset.name = data.name; saveAssetsToStorage();
+                let list = getActiveArray(); let match = list.find(a => a.ticker === asset.ticker);
+                
+                // 💡 사용자가 직접 이름을 변경한 적이 없을 때만(API가 준 티커와 같거나 비어있을 때) 야후 API 이름을 덮어씌움
+                if (data.name && match && (!match.name || match.name === match.ticker) && data.name !== match.ticker) { 
+                    const nameEl = document.getElementById(`name-${cardId}`);
+                    if (nameEl) nameEl.innerText = data.name; 
+                    match.name = data.name; saveCurrentState(); 
                 }
+
+                livePrices[asset.ticker] = data.price;
                 updateCardUI(asset, cardId, data.price, data.high52);
                 drawChart(cardId, data.chartLabels, data.chartData, document.getElementById(`status-${cardId}`).classList.contains("status-danger"));
+                if (currentView !== 'macro') calculateRebalancingEngine();
             } catch (error) {
-                document.getElementById(`status-${cardId}`).innerText = `❌ ${error.message}`;
-                document.getElementById(`status-${cardId}`).className = "status-badge status-danger";
+                document.getElementById(`status-${cardId}`).innerText = `❌ 에러`; document.getElementById(`status-${cardId}`).className = "status-badge status-danger";
             }
         }
 
         function updateCardUI(asset, cardId, currentPrice, high52) {
             let mdd = (currentPrice / high52) - 1;
             let mddPercentage = (mdd * 100).toFixed(2) + "%";
-            let statusMsg = ""; let statusClass = ""; let isDanger = false;
+            let statusMsg = "✅ 관망"; let statusClass = "status-normal"; let isDanger = false;
             let displayPrice, displayHigh;
+            
+            const isKoreanAsset = asset.ticker.indexOf('.KS') !== -1 || asset.ticker.indexOf('.KQ') !== -1 || asset.ticker.indexOf('_KRW') !== -1;
 
             if (asset.ticker.indexOf('FRED:') === 0) {
-                displayPrice = "$" + currentPrice.toFixed(1) + "B";
-                displayHigh = "$" + high52.toFixed(1) + "B";
-                mddPercentage = "유동성";
-                if (currentPrice < 300) { statusMsg = "🚨 유동성 고갈"; statusClass = "status-danger"; isDanger = true; }
-                else { statusMsg = "💵 재정고 모니터링"; statusClass = "status-normal"; }
+                displayPrice = "$" + currentPrice.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "B";
+                displayHigh = "$" + high52.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "B";
+                mddPercentage = "유동성"; statusMsg = "💵 TGA 추적"; statusClass = "status-normal";
             }
             else if (asset.ticker === 'KRW=X') {
-                displayPrice = Math.round(currentPrice).toLocaleString('ko-KR') + "원";
-                displayHigh = Math.round(high52).toLocaleString('ko-KR') + "원";
+                displayPrice = currentPrice.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "원";
+                displayHigh = high52.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "원";
                 mddPercentage = "환율"; statusMsg = "💵 외환 모니터링"; statusClass = "status-normal";
             } 
             else if (asset.ticker === '^TNX') {
                 displayPrice = currentPrice.toFixed(2) + "%"; displayHigh = high52.toFixed(2) + "%";
                 mddPercentage = "금리"; 
                 if (currentPrice >= 5.0) { statusMsg = "🚨 금리 발작"; statusClass = "status-danger"; isDanger = true; }
-                else if (currentPrice >= 4.5) { statusMsg = "⚠️ 금리 경고"; statusClass = "status-warning"; isDanger = true; }
-                else { statusMsg = "✅ 안정"; statusClass = "status-normal"; }
+                else if (currentPrice >= 4.5) { statusMsg = "⚠️ 발작 대기"; statusClass = "status-warning"; isDanger = true; }
             } 
             else if (asset.ticker === '^VIX') {
-                displayPrice = currentPrice.toFixed(2) + "pt"; displayHigh = high52.toFixed(2) + "pt";
+                displayPrice = currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "pt";
+                displayHigh = high52.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "pt";
                 mddPercentage = "공포지수"; 
-                if (currentPrice >= 35) { statusMsg = "🚨 위험 청산"; statusClass = "status-danger"; isDanger = true; }
+                if (currentPrice >= 35) { statusMsg = "🚨 패닉 리스크"; statusClass = "status-danger"; isDanger = true; }
                 else if (currentPrice >= 25) { statusMsg = "⚠️ 변동성 확대"; statusClass = "status-warning"; isDanger = true; }
-                else { statusMsg = "✅ 안정"; statusClass = "status-normal"; }
             } 
             else {
-                const isWon = asset.ticker.indexOf('_KRW') !== -1;
-                displayPrice = isWon ? Math.round(currentPrice).toLocaleString('ko-KR') + "원" : "$" + currentPrice.toFixed(2);
-                displayHigh = isWon ? Math.round(high52).toLocaleString('ko-KR') + "원" : "$" + high52.toFixed(2);
-                
-                if (mdd <= -0.30) { statusMsg = "🚨 3차 분할 매수"; statusClass = "status-danger"; isDanger = true; }
-                else if (mdd <= -0.20) { statusMsg = "⚠️ 2차 분할 매수"; statusClass = "status-warning"; isDanger = true; }
-                else if (mdd <= -0.15) { statusMsg = "🎯 1차 분할 매수"; statusClass = "status-warning"; }
-                else { statusMsg = "☕ 관망"; statusClass = "status-normal"; }
+                displayPrice = isKoreanAsset ? Math.round(currentPrice).toLocaleString('ko-KR') + "원" : "$" + currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                displayHigh = isKoreanAsset ? Math.round(high52).toLocaleString('ko-KR') + "원" : "$" + high52.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (mdd <= -0.30) { statusMsg = "🚨 3차 분할진입"; statusClass = "status-danger"; isDanger = true; }
+                else if (mdd <= -0.20) { statusMsg = "⚠️ 2차 분할진입"; statusClass = "status-warning"; isDanger = true; }
+                else if (mdd <= -0.15) { statusMsg = "🎯 1차 분할진입"; statusClass = "status-warning"; }
             }
 
             document.getElementById(`price-${cardId}`).innerText = displayPrice;
             document.getElementById(`high-${cardId}`).innerText = displayHigh;
-            document.getElementById(`mdd-${cardId}`).innerText = mddPercentage;
             
-            const statusElement = document.getElementById(`status-${cardId}`);
-            statusElement.innerText = statusMsg; statusElement.className = "status-badge " + statusClass;
+            if (asset.type !== 'portfolio') {
+                document.getElementById(`mdd-${cardId}`).innerText = mddPercentage;
+                document.getElementById(`status-${cardId}`).innerText = statusMsg;
+                document.getElementById(`status-${cardId}`).className = "status-badge " + statusClass;
+            } else {
+                document.getElementById(`high-wrapper-${cardId}`).style.color = '#7f8c8d';
+                document.getElementById(`high-wrapper-${cardId}`).innerHTML = `(고가 ${displayHigh})`;
+            }
             return isDanger;
         }
 
+        const barValuePlugin = {
+            id: 'barValuePlugin',
+            afterDatasetsDraw(chart) {
+                const { ctx } = chart; const isDark = document.body.classList.contains("dark-mode");
+                ctx.font = 'bold 11px "Malgun Gothic"'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = isDark ? '#e0e0e0' : '#2c3e50';
+                chart.data.datasets.forEach((dataset, i) => {
+                    const meta = chart.getDatasetMeta(i); if (meta.hidden) return;
+                    meta.data.forEach((bar, index) => { const value = dataset.data[index]; if (value > 0) { ctx.fillText(value + '%', bar.x + 5, bar.y); } });
+                });
+            }
+        };
+
+        function calculateRebalancingEngine() {
+            let list = getActiveArray(); let isCombined = (currentView === 'combined');
+            let totalAccountValueInWon = 0;
+            let chartLabels = []; let actualData = []; let targetData = [];
+
+            const currentFxRate = livePrices['KRW=X'] || 1350; 
+
+            let combinedTargetValuesInWon = {};
+            let totalCombinedValueInWon = 0;
+
+            if (isCombined) {
+                combinedSelections.forEach(accId => {
+                    let accAssets = portfolios[accId] || [];
+                    let accTotalWon = 0;
+                    accAssets.forEach(a => {
+                        let price = livePrices[a.ticker] || 0;
+                        const isWon = a.ticker.indexOf('.KS') !== -1 || a.ticker.indexOf('.KQ') !== -1 || a.ticker.indexOf('_KRW') !== -1;
+                        let assetWonValue = isWon ? (price * (parseFloat(a.quantity) || 0)) : (price * (parseFloat(a.quantity) || 0) * currentFxRate);
+                        accTotalWon += assetWonValue;
+                    });
+                    totalCombinedValueInWon += accTotalWon;
+
+                    accAssets.forEach(a => {
+                        if(!combinedTargetValuesInWon[a.ticker]) combinedTargetValuesInWon[a.ticker] = 0;
+                        combinedTargetValuesInWon[a.ticker] += accTotalWon * ((parseFloat(a.targetWeight) || 0) / 100);
+                    });
+                });
+            }
+
+            list.forEach(asset => {
+                let price = livePrices[asset.ticker] || 0;
+                const isWon = asset.ticker.indexOf('.KS') !== -1 || asset.ticker.indexOf('.KQ') !== -1 || asset.ticker.indexOf('_KRW') !== -1;
+                
+                asset.evalValueWon = isWon ? (price * (asset.quantity || 0)) : (price * (asset.quantity || 0) * currentFxRate);
+                totalAccountValueInWon += asset.evalValueWon;
+
+                if (isCombined) {
+                    let targetValWon = combinedTargetValuesInWon[asset.ticker] || 0;
+                    asset.targetWeight = totalCombinedValueInWon > 0 ? (targetValWon / totalCombinedValueInWon) * 100 : 0;
+                }
+            });
+
+            let sgovAsset = list.find(a => a.ticker === 'SGOV');
+            let currentCashValWon = sgovAsset ? sgovAsset.evalValueWon : 0;
+            
+            let simulationBonusCashWon = parseFloat(document.getElementById('cash-simulation-val').value) || 0;
+            let finalTotalAccountValueWon = totalAccountValueInWon + simulationBonusCashWon;
+
+            document.getElementById('sum-total-value').innerText = Math.round(finalTotalAccountValueWon).toLocaleString('ko-KR') + "원";
+            document.getElementById('sum-stock-value').innerText = Math.round(totalAccountValueInWon - currentCashValWon).toLocaleString('ko-KR') + "원";
+            document.getElementById('sum-cash-value').innerText = Math.round(currentCashValWon).toLocaleString('ko-KR') + "원";
+
+            list.forEach(asset => {
+                const cardId = 'card-' + asset.ticker.replace(/[^a-zA-Z0-9]/g, '');
+                const mddEl = document.getElementById(`mdd-${cardId}`);
+                const extraEl = document.getElementById(`extra-info-line-${cardId}`);
+                const statusEl = document.getElementById(`status-${cardId}`);
+                const sigEl = document.getElementById(`signal-${cardId}`);
+                const twDisplay = document.getElementById(`target-weight-display-${cardId}`);
+                
+                let actualWeight = finalTotalAccountValueWon > 0 ? (asset.evalValueWon / finalTotalAccountValueWon) * 100 : 0;
+                let targetWeight = asset.targetWeight || 0;
+                let weightGap = actualWeight - targetWeight;
+
+                chartLabels.push(asset.name || asset.ticker);
+                actualData.push(actualWeight.toFixed(1));
+                targetData.push(targetWeight.toFixed(1));
+
+                if (!mddEl || !extraEl) return;
+
+                mddEl.innerText = actualWeight.toFixed(1) + "%";
+                if(twDisplay) twDisplay.innerText = `[목표 ${targetWeight.toFixed(1)}%]`;
+                
+                extraEl.innerHTML = `평가액: <span class='price-current'>${Math.round(asset.evalValueWon).toLocaleString('ko-KR')}원</span><br>괴리율: <span style="color:${weightGap >= 0 ? '#1abc9c' : '#e74c3c'}; font-weight:bold;">${weightGap >= 0 ? '+' : ''}${weightGap.toFixed(1)}%</span>`;
+                
+                let optimalTargetValueWon = finalTotalAccountValueWon * (targetWeight / 100);
+                let tradeRequiredWon = optimalTargetValueWon - asset.evalValueWon;
+                
+                sigEl.style.display = "inline-block";
+                if (Math.abs(tradeRequiredWon) < 15000) {
+                    statusEl.innerText = "☕ 유지"; statusEl.className = "status-badge status-normal";
+                    sigEl.innerText = "HOLD"; sigEl.className = "rebalance-signal sig-hold";
+                } else if (tradeRequiredWon > 0) {
+                    statusEl.innerText = "🎯 과소비중"; statusEl.className = "status-badge status-warning";
+                    sigEl.innerText = `+${Math.round(tradeRequiredWon).toLocaleString('ko-KR')}원 매수`; sigEl.className = "rebalance-signal sig-buy";
+                } else {
+                    statusEl.innerText = "⚠️ 과대비중"; statusEl.className = "status-badge status-danger";
+                    sigEl.innerText = `${Math.round(tradeRequiredWon).toLocaleString('ko-KR')}원 매도`; sigEl.className = "rebalance-signal sig-sell";
+                }
+            });
+
+            const canvas = document.getElementById('portfolio-summary-chart');
+            if (canvas && chartLabels.length > 0) {
+                const ctx = canvas.getContext('2d'); const isDark = document.body.classList.contains("dark-mode"); const textColor = isDark ? '#a0a0a0' : '#7f8c8d';
+                if (summaryChartInstance) summaryChartInstance.destroy();
+                let datasets = [
+                    { label: '현재 실제 비중 (%)', data: actualData, backgroundColor: '#3498db', borderRadius: 4, barPercentage: 0.7, categoryPercentage: 0.8 },
+                    { label: '목표 비중 (%)', data: targetData, backgroundColor: 'rgba(231, 76, 60, 0.6)', borderRadius: 4, barPercentage: 0.7, categoryPercentage: 0.8 }
+                ];
+                summaryChartInstance = new Chart(ctx, {
+                    type: 'bar', data: { labels: chartLabels, datasets: datasets }, plugins: [barValuePlugin],
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { color: textColor, font: { size: 11, family: 'Malgun Gothic' } } },
+                            tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.raw + '%'; } } }
+                        },
+                        scales: {
+                            x: { max: 100, ticks: { color: textColor, callback: function(value) { return value + "%"; } }, grid: { color: isDark ? '#333' : '#eee' } },
+                            y: { ticks: { color: textColor, font: { size: 11, family: 'Malgun Gothic' } }, grid: { display: false } }
+                        },
+                        layout: { padding: { right: 35 } }
+                    }
+                });
+            }
+        }
+
         function drawChart(cardId, labels, data, isDanger) {
-            const canvasId = `canvas-${cardId}`;
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const lineColor = isDanger ? '#e74c3c' : '#3498db';
-            const bgColor = isDanger ? 'rgba(231, 76, 60, 0.05)' : 'rgba(52, 152, 219, 0.05)';
-
-            let maxVal = -Infinity; let maxIdx = -1;
-            for (let i = 0; i < data.length; i++) { if (data[i] > maxVal) { maxVal = data[i]; maxIdx = i; } }
-
-            let pointRadii = new Array(data.length).fill(0);
-            let pointColors = new Array(data.length).fill('transparent');
-            if (maxIdx !== -1) { pointRadii[maxIdx] = 4; pointColors[maxIdx] = '#e74c3c'; }
-
+            const canvasId = `canvas-${cardId}`; const canvas = document.getElementById(canvasId); if (!canvas) return; const ctx = canvas.getContext('2d');
+            const lineColor = isDanger ? '#e74c3c' : '#3498db'; const bgColor = isDanger ? 'rgba(231, 76, 60, 0.05)' : 'rgba(52, 152, 219, 0.05)';
+            let maxVal = -Infinity; let maxIdx = -1; for (let i = 0; i < data.length; i++) { if (data[i] > maxVal) { maxVal = data[i]; maxIdx = i; } }
+            let pointRadii = new Array(data.length).fill(0); let pointColors = new Array(data.length).fill('transparent'); if (maxIdx !== -1) { pointRadii[maxIdx] = 4; pointColors[maxIdx] = '#e74c3c'; }
             if (chartInstances[cardId]) chartInstances[cardId].destroy();
-
             chartInstances[cardId] = new Chart(ctx, {
                 type: 'line', data: { labels: labels, datasets: [{ data: data, borderColor: lineColor, backgroundColor: bgColor, borderWidth: 1.5, fill: true, pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors, pointHoverRadius: 6, tension: 0.08 }] },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                    scales: {
-                        x: { display: true, ticks: { maxTicksLimit: 4, font: { size: 9 }, color: '#95a5a6' }, grid: { display: false } },
-                        y: { display: false }
-                    },
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: { x: { display: true, ticks: { maxTicksLimit: 4, font: { size: 9 }, color: '#95a5a6' }, grid: { display: false } }, y: { display: false } },
                     layout: { padding: { top: 5, bottom: 0 } }
                 }
             });
         }
 
+        // 💡 새 모듈 추가 시 종목명(Name)도 함께 받아 저장하도록 구조 개편
         function gridAddModule() {
-            const type = document.getElementById('add-type').value;
+            const type = document.getElementById('add-type').value; 
             let ticker = document.getElementById('add-ticker').value.trim().toUpperCase();
-            const extra = document.getElementById('add-extra').value.trim();
+            let customName = document.getElementById('add-name').value.trim(); 
             
             if (!ticker) { alert("코드를 입력해 주세요."); return; }
-            if (assets.length >= MAX_CARDS) { alert("공간이 부족합니다. (최대 12개 고정)"); return; }
+            let list = getActiveArray(); if (list.length >= MAX_CARDS) { alert("한 화면당 최대 12개 모듈로 제한됩니다."); return; }
+            if (list.some(a => a.ticker === ticker)) { alert("이미 등록된 기호입니다."); return; }
 
-            if (type === 'countdown') {
-                if (!extra) { alert("목표 기한(YYYY-MM-DD)을 입력해 주세요."); return; }
-                assets.push({ type: 'countdown', ticker: ticker, name: ticker, targetDate: extra });
-            } else if (type === 'fx-linked') {
-                ticker = ticker + "_KRW";
-                if (assets.some(a => a.ticker === ticker)) { alert("이미 존재합니다."); return; }
-                assets.push({ type: 'asset', ticker: ticker, name: "" });
-            } else {
-                if (assets.some(a => a.ticker === ticker)) { alert("이미 존재합니다."); return; }
-                assets.push({ type: 'asset', ticker: ticker, name: "" });
-            }
+            if (type === 'portfolio') list.push({ type: 'portfolio', ticker: ticker, name: customName, quantity: 0, targetWeight: 0 });
+            else list.push({ type: 'asset', ticker: type === 'fx-linked' ? ticker + "_KRW" : ticker, name: customName });
 
-            saveAssetsToStorage();
-            renderDashboard();
+            saveCurrentState(); renderDashboard();
         }
 
         function removeAsset(ticker) {
-            assets = assets.filter(asset => asset.ticker !== ticker);
-            saveAssetsToStorage();
-            renderDashboard();
+            let list = getActiveArray(); let updatedList = list.filter(a => a.ticker !== ticker);
+            if (currentView === 'macro') macroAssets = updatedList; else portfolios[currentView] = updatedList;
+            saveCurrentState(); renderDashboard();
         }
 
-        renderDashboard();
+        renderTabs(); switchView(currentView);
     </script>
 </body>
+</html>
