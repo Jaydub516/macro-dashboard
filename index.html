@@ -112,7 +112,7 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--bg-card); width: 100%; max-width: 700px; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-content h2 { margin-top: 0; font-size: 1.3rem; border-bottom: 2px solid var(--border-dash); padding-bottom: 10px; }
-        .modal-textarea { width: 100%; padding: 10px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--bg-body); color: var(--text-main); font-size: 0.85rem; box-sizing: border-box; resize: vertical; margin-bottom: 15px; }
+        .modal-textarea { width: 100%; padding: 10px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--bg-body); color: var(--text-main); font-size: 0.85rem; box-sizing: border-box; resize: vertical; margin-bottom: 15px; font-family: monospace; }
 
         .drag-handle { cursor: grab; color: #bdc3c7; font-size: 1.2rem; flex-shrink: 0; line-height: 1.2; margin-top: 1px; }
         .drag-handle:active { cursor: grabbing; color: var(--tab-active); }
@@ -135,16 +135,35 @@
 </head>
 <body>
 
+    <!-- 💡 1. 신규 추가: 모바일-PC 기기 동기화 백업/복원 모달 -->
+    <div id="sync-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2>🔄 PC ↔ 모바일 데이터 동기화</h2>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; line-height: 1.5;">
+                현재 기기에 저장된 종목, 수량, 계좌 등의 모든 데이터를 텍스트로 추출하여 다른 기기로 복사할 수 있습니다.<br>
+                (카카오톡 '내게 쓰기' 등을 활용하여 모바일로 옮겨보세요!)
+            </p>
+            <textarea id="sync-data-area" class="modal-textarea" rows="6" placeholder="여기에 백업 데이터를 붙여넣고 복원 버튼을 누르세요..."></textarea>
+            
+            <div style="display:flex; gap:10px; justify-content:space-between; margin-top:10px;">
+                <button class="header-btn" style="background:#34495e; color:white; border:none;" onclick="exportData()">📤 데이터 추출 (복사)</button>
+                <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none;" onclick="importData()">📥 붙여넣고 복원하기</button>
+            </div>
+            <div style="text-align:right; margin-top:15px;">
+                <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='none'">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 엑셀 일괄 복사 연동 모달 -->
     <div id="data-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>⚙️ 엑셀 과거 자산 연동 (최신화 덮어쓰기)</h2>
             <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; line-height: 1.4;">
                 가지고 계신 <b>[과거 자산 종합.xlsx]</b> 파일을 열고,<br>
                 데이터 영역(기간, 계좌명, 투자원금, 평가금액)을 복사해서 붙여넣어 주세요.<br>
-                (엑셀 쉼표, 원화 기호 등을 완벽하게 자체 필터링하여 즉시 반영합니다.)
             </p>
             <textarea id="csv-history-data" class="modal-textarea" rows="10" placeholder="26년 1월   한투AIM(재원)   62,400,000   85,434,964..."></textarea>
-            
             <div style="display:flex; gap:10px; justify-content:flex-end;">
                 <button class="header-btn" onclick="document.getElementById('data-modal').style.display='none'">닫기</button>
                 <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none;" onclick="parseAndSaveHistoryCSV()">💾 즉시 데이터 반영</button>
@@ -152,6 +171,7 @@
         </div>
     </div>
 
+    <!-- 차트 클릭 시 뜨는 개별 월 수정 모달 -->
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 400px; text-align: left;">
             <h2 id="edit-modal-title" style="margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid var(--border-dash); padding-bottom: 10px;">데이터 수정</h2>
@@ -177,6 +197,8 @@
             <div class="header-wrap">
                 <h1>📊 매크로 & 자산 배분 시스템</h1>
                 <div class="header-controls">
+                    <!-- 💡 신규 동기화 버튼 추가 -->
+                    <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='flex'">🔄 기기 동기화</button>
                     <button class="header-btn btn-highlight" onclick="document.getElementById('data-modal').style.display='flex'">⚙️ 과거 데이터 연동</button>
                     <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 모드</button>
                 </div>
@@ -221,14 +243,15 @@
             </div>
         </div>
 
+        <!-- 동적 렌더링 컨테이너 -->
         <div id="dynamic-content-area"></div>
     </div>
 
     <script>
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         
-        // 💡 1. 영구 보존 키 (V26 버전 업그레이드)
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV26_";
+        // 💡 1. 영구 보존 키 고정 (V27 버전 업그레이드)
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV27_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
@@ -246,10 +269,10 @@
         function getAccIdByName(name) { return 'acc_' + name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9가-힣]/g, ''); }
 
         // ============================================================================
-        // 💡 2. 초강력 데이터 마이그레이션 엔진 (모든 구버전 탐색 및 데이터 철통 방어)
+        // 💡 2. 강력한 마이그레이션 엔진 (과거 모든 버전 훑어서 데이터 끌어오기)
         // ============================================================================
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
-            const oldPrefixes = ['macroDashboard_MasterV25_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV22_', 'macroDashboard_Master_'];
+            const oldPrefixes = ['macroDashboard_MasterV26_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV22_', 'macroDashboard_Master_'];
             let found = false;
             for (let prefix of oldPrefixes) {
                 if (localStorage.getItem(prefix + 'tabs')) {
@@ -261,12 +284,61 @@
                             found = true;
                         }
                     }
-                    break; // 가장 최근 구버전을 찾으면 즉시 중단
+                    if (found) break; // 가장 최근 데이터 복원 후 중단
                 }
             }
         }
 
-        // CSV 라인 파싱
+        // ============================================================================
+        // 💡 3. 기기 간 동기화 백업 / 복원 로직 (PC <-> 모바일)
+        // ============================================================================
+        function exportData() {
+            let backup = {};
+            for(let i=0; i<localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if(key.startsWith(STORAGE_KEY_PREFIX)) {
+                    backup[key] = localStorage.getItem(key);
+                }
+            }
+            // base64로 인코딩하여 전송 중 텍스트 깨짐 방지
+            let dataStr = btoa(encodeURIComponent(JSON.stringify(backup)));
+            let textArea = document.getElementById('sync-data-area');
+            textArea.value = dataStr;
+            
+            // 클립보드 자동 복사
+            navigator.clipboard.writeText(dataStr).then(() => {
+                alert('데이터가 성공적으로 복사되었습니다!\n카카오톡 "내게 쓰기" 등에 붙여넣고 모바일 기기로 전송하세요.');
+            }).catch(err => {
+                textArea.select();
+                document.execCommand('copy');
+                alert('데이터가 성공적으로 복사되었습니다!\n카카오톡 "내게 쓰기" 등에 붙여넣고 모바일 기기로 전송하세요.');
+            });
+        }
+
+        function importData() {
+            let dataStr = document.getElementById('sync-data-area').value.trim();
+            if(!dataStr) { alert("백업 데이터를 빈칸에 붙여넣어주세요."); return; }
+            try {
+                let backup = JSON.parse(decodeURIComponent(atob(dataStr)));
+                let count = 0;
+                for(let key in backup) {
+                    if(key.startsWith(STORAGE_KEY_PREFIX)) {
+                        localStorage.setItem(key, backup[key]);
+                        count++;
+                    }
+                }
+                if(count > 0) {
+                    alert("데이터 복원이 완벽하게 완료되었습니다!");
+                    location.reload();
+                } else {
+                    alert("유효한 백업 데이터 구조가 아닙니다.");
+                }
+            } catch(e) {
+                alert("데이터 복원 중 오류가 발생했습니다. 카카오톡 등에서 전체 텍스트가 빠짐없이 정확히 복사되었는지 확인해 주세요.");
+            }
+        }
+
+        // CSV 라인 파싱 (쉼표 완벽 방어)
         function parseRow(line) {
             let s = line.trim();
             if (s.includes('\t')) return s.split('\t').map(v => v.trim());
@@ -281,7 +353,7 @@
             return res.map(v => v.replace(/"/g, ''));
         }
 
-        // 💡 3. 새로고침 없는 엑셀 데이터 다이나믹 업데이트 
+        // 새로고침 없는 엑셀 데이터 다이나믹 업데이트
         function parseAndSaveHistoryCSV() {
             const text = document.getElementById('csv-history-data').value.trim();
             if(!text) { alert("입력된 데이터가 없습니다."); return; }
@@ -334,12 +406,12 @@
                 localStorage.setItem(STORAGE_KEY_PREFIX + 'combinedSelections', JSON.stringify(currentTabs.map(t=>t.id)));
             }
 
-            alert(count + '건의 과거 성과 데이터가 반영되었습니다!');
+            alert(count + '건의 과거 성과 데이터가 성공적으로 병합되었습니다!');
             
-            // 💡 location.reload() 제거 -> 즉시 상태 변수 갱신 후 뷰 리렌더링
             document.getElementById('data-modal').style.display = 'none';
             document.getElementById('csv-history-data').value = '';
             
+            // 전역 변수 갱신 후 즉각 뷰 렌더링 (No-Reload)
             portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
             combinedSelections = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) || [];
             portfolios = {}; 
@@ -348,13 +420,12 @@
             switchView(currentView);
         }
 
-        // 상태 변수 초기화
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v26')) {
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v27')) {
             let tabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
             if(tabs.length === 0) {
-                alert("초기화된 환경입니다. [과거 데이터 연동] 메뉴에서 엑셀을 붙여넣어 계좌를 활성화해주세요!");
+                alert("초기화된 환경입니다. [과거 데이터 연동] 또는 [기기 동기화] 기능을 이용해 데이터를 불러오세요!");
             }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v26', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v27', 'true');
         }
 
         let portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
@@ -539,7 +610,7 @@
             <div id="cards-container">`;
             
             if(portfolioTabs.length === 0) {
-                htmlStr += `<div style="width:100%; padding:30px; text-align:center; color:var(--text-sub);">등록된 계좌가 없습니다. 상단 [과거 데이터 연동] 버튼을 통해 엑셀을 붙여넣으세요.</div>`;
+                htmlStr += `<div style="width:100%; padding:30px; text-align:center; color:var(--text-sub);">등록된 계좌가 없습니다. 상단 [과거 데이터 연동] 버튼을 통해 데이터를 가져오세요.</div>`;
             }
 
             (portfolioTabs || []).forEach(tab => {
@@ -573,12 +644,13 @@
                 let activeList = getActiveArray() || []; let isCombined = (currentView === 'combined');
                 let htmlStr = '';
 
+                // 공통 요약 차트
                 if (currentView !== 'macro' && activeList.length > 0) {
                     htmlStr += `
                         <div class="summary-chart-card" style="margin-bottom: 20px;">
                             <div class="summary-charts-flex">
                                 <div class="chart-box-half" style="flex:1;">
-                                    <div class="asset-info" style="margin-bottom:8px;"><h2>🎯 자산 비중</h2></div>
+                                    <div class="asset-info" style="margin-bottom:8px;"><h2>🎯 목표 vs 실제 비중</h2></div>
                                     <div style="height:200px; position:relative;"><canvas id="portfolio-summary-chart"></canvas></div>
                                 </div>
                                 <div class="chart-box-half" style="flex:1.5;">
@@ -692,7 +764,7 @@
                 container.innerHTML = htmlStr;
                 initDragAndDrop();
 
-                // 💡 4. 병렬 스태거링 (초고속 차트 로딩 엔진 적용)
+                // 💡 초고속 비동기 병렬 통신 엔진 (Staggered Parallel Fetching)
                 let fetchPromises = [];
                 let delay = 0;
                 for (let asset of activeList) {
@@ -706,19 +778,16 @@
                             continue;
                         }
                         
-                        // 대기 없이 즉시 프로미스를 배열에 밀어넣음 (딜레이만 차등 부여)
                         fetchPromises.push(new Promise(async (resolve) => {
                             await new Promise(r => setTimeout(r, delay));
                             await fetchData(asset, cardId);
                             resolve();
                         }));
-                        delay += 100; // 0.1초씩 요청 타이밍 분산 (429 방어용)
+                        delay += 100; // 0.1초씩 부하 분산하며 동시 로딩
                     }
                 }
                 
-                // 모든 비동기 통신이 완료될 때까지 동시 대기
                 await Promise.all(fetchPromises);
-                
                 if(currentView !== 'macro') calculateRebalancingEngine();
 
             } catch(e) { console.error("Dashboard Render Error:", e); }
@@ -895,18 +964,33 @@
                 const barCanvas = document.getElementById('portfolio-summary-chart');
                 if (barCanvas && chartLabels.length > 0) {
                     if (summaryChartInstance) summaryChartInstance.destroy();
+                    const isDark = document.body.classList.contains("dark-mode");
+                    const textColor = isDark ? '#a0a0a0' : '#7f8c8d';
+                    const gridColor = isDark ? '#333' : '#eee';
+                    const palette = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f1c40f', '#e67e22', '#1abc9c', '#34495e', '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#f39c12', '#d35400', '#c0392b'];
+                    
+                    let summaryDatasets = chartLabels.map((label, idx) => {
+                        return {
+                            label: label,
+                            data: [targetData[idx] || 0, actualData[idx] || 0],
+                            backgroundColor: palette[idx % palette.length],
+                            borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff'
+                        };
+                    });
+
                     summaryChartInstance = new Chart(barCanvas.getContext('2d'), {
-                        type: 'bar', data: { labels: chartLabels, datasets: [
-                            { label: '실제', data: actualData, backgroundColor: '#3498db', borderRadius: 4 },
-                            { label: '목표', data: targetData, backgroundColor: 'rgba(231, 76, 60, 0.5)', borderRadius: 4 }
-                        ] }, plugins: [{
-                            id: 'barValuePlugin',
-                            afterDatasetsDraw(chart) {
-                                const ctx = chart.ctx; ctx.font = 'bold 11px "Malgun Gothic"'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = document.body.classList.contains("dark-mode") ? '#e0e0e0' : '#2c3e50';
-                                chart.data.datasets.forEach((dataset, i) => { const meta = chart.getDatasetMeta(i); if (meta.hidden) return; meta.data.forEach((bar, idx) => { if (dataset.data[idx] > 0) ctx.fillText(dataset.data[idx] + '%', bar.x + 5, bar.y); }); });
-                            }
-                        }],
-                        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, max: 100, ticks: { font:{size:9} } }, y: { stacked: true, ticks: { font:{size:10} } } }, layout: { padding: { right: 35 } } }
+                        type: 'bar', data: { labels: ['🎯 목표 비중', '📊 실제 비중'], datasets: summaryDatasets }, 
+                        options: { 
+                            indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+                            plugins: { 
+                                legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: {size: 10}, color: textColor } },
+                                tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.raw + '%'; } } }
+                            }, 
+                            scales: { 
+                                x: { stacked: true, max: 100, ticks: { color: textColor, callback: function(val){return val+"%"} }, grid: { color: gridColor } }, 
+                                y: { stacked: true, ticks: { color: textColor, font:{weight:'bold'} }, grid: { display: false } } 
+                            } 
+                        }
                     });
                 }
 
@@ -924,7 +1008,6 @@
                                 { type: 'line', label: '수익률 (%)', data: trendRateData, borderColor: '#f39c12', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f39c12', yAxisID: 'y1', tension: 0.1 }
                             ]
                         },
-                        // 💡 차트 충돌 방지 라벨 엔진 적용 완료
                         plugins: [{
                             id: 'trendLabelPlugin',
                             afterDatasetsDraw(chart) {
@@ -1019,7 +1102,7 @@
                             },
                             scales: { 
                                 x: { ticks: { color: textColor, font:{size:9} }, grid: { display: false } }, 
-                                y: { type: 'linear', display: true, position: 'left', ticks: { color: textColor, font:{size:9}, callback: function(val){return val.toLocaleString(); } }, grid: { color: isDark ? '#333' : '#eee' } },
+                                y: { type: 'linear', display: true, position: 'left', ticks: { color: textColor, font:{size:9}, callback: function(val){return Math.round(val/10000).toLocaleString() + '만'; } }, grid: { color: isDark ? '#333' : '#eee' } },
                                 y1: { type: 'linear', display: true, position: 'right', ticks: { color: textColor, font:{size:9}, callback: function(val){return val + '%'; } }, grid: { drawOnChartArea: false } }
                             }
                         }
