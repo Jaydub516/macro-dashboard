@@ -10,176 +10,229 @@
     <style>
         :root {
             --bg-body: #f0f2f5; --bg-card: #ffffff; --text-main: #2c3e50; --text-sub: #7f8c8d;
-            --border-dash: #bdc3c7; --price-num: #2c3e50; --input-border: #dddddd;
-            --tab-active: #3498db; --tab-combined: #9b59b6; --tab-bg: #e0e0e0; --account-summary-bg: #eaf2f8;
+            --border-dash: #bdc3c7; --input-border: #dddddd;
+            --tab-active: #3498db; --tab-combined: #9b59b6; --tab-portfolio: #e67e22; 
+            --tab-bg: #e0e0e0; --account-summary-bg: #eaf2f8; --profit-red: #e74c3c; --loss-blue: #2980b9;
         }
         .dark-mode {
             --bg-body: #121212; --bg-card: #1e1e1e; --text-main: #e0e0e0; --text-sub: #a0a0a0;
-            --border-dash: #444444; --price-num: #ffffff; --input-border: #444444;
-            --tab-active: #2980b9; --tab-combined: #8e44ad; --tab-bg: #2c2c2c; --account-summary-bg: #1a252f;
+            --border-dash: #444444; --input-border: #444444;
+            --tab-active: #2980b9; --tab-combined: #8e44ad; --tab-portfolio: #d35400; 
+            --tab-bg: #2c2c2c; --account-summary-bg: #1a252f; --profit-red: #ff6b6b; --loss-blue: #4dabf7;
         }
 
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: var(--bg-body); color: var(--text-main); padding: 20px; display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s; margin: 0; }
-        .dashboard-container { width: 100%; max-width: 1200px; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: var(--bg-body); color: var(--text-main); padding: 0; margin: 0; display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s; }
+        .dashboard-container { width: 100%; max-width: 1200px; padding: 20px; box-sizing: border-box; }
         
-        .header-wrap { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; width: 100%; flex-wrap: wrap; gap: 10px; }
-        .header-wrap h1 { margin: 0; font-size: 1.6rem; }
-        .header-controls { display: flex; gap: 8px; }
-        .header-btn { background: var(--bg-card); border: 1px solid var(--text-sub); color: var(--text-main); padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+        .sticky-nav-wrapper { position: sticky; top: 0; z-index: 1000; background-color: var(--bg-body); padding: 20px 20px 10px 20px; margin: -20px -20px 15px -20px; border-bottom: 1px solid var(--border-dash); box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .header-wrap { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; flex-wrap: wrap; gap: 10px; }
+        .header-wrap h1 { margin: 0; font-size: 1.5rem; }
+        .header-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+        .header-btn { background: var(--bg-card); border: 1px solid var(--text-sub); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
         .header-btn:hover { background: var(--tab-bg); }
+        .btn-highlight { border-color: var(--tab-portfolio); color: var(--tab-portfolio); }
 
-        .tab-container { display: flex; gap: 8px; margin-bottom: 20px; width: 100%; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; scrollbar-color: var(--border-dash) transparent; }
-        .tab-container::-webkit-scrollbar { height: 6px; }
-        .tab-container::-webkit-scrollbar-thumb { background: var(--border-dash); border-radius: 3px; }
-        
-        .tab-btn { flex: 0 0 auto; padding: 12px 18px; background: var(--tab-bg); border: none; color: var(--text-main); font-weight: bold; font-size: 0.95rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-        .tab-btn.active { background: var(--tab-active); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .tab-btn.active-combined { background: var(--tab-combined); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
-        .tab-btn-wrapper { position: relative; flex: 0 0 auto; display: flex; }
-        .tab-btn-wrapper .tab-btn { padding-right: 35px; } 
-        .delete-tab-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.3rem; color: #aab7b8; cursor: pointer; line-height: 1; transition: color 0.2s; }
-        .delete-tab-btn:hover { color: #e74c3c; }
-        
-        .tab-add-btn { flex: 0 0 auto; padding: 10px 15px; background: transparent; border: 2px dashed var(--border-dash); color: var(--text-sub); font-weight: bold; font-size: 0.9rem; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: flex; align-items: center; justify-content: center;}
-        .tab-add-btn:hover { border-color: var(--tab-active); color: var(--tab-active); }
+        .main-tab-container { display: flex; gap: 8px; width: 100%; }
+        .main-tab-btn { flex: 1; padding: 12px; background: var(--tab-bg); border: none; color: var(--text-main); font-weight: bold; font-size: 0.95rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .main-tab-btn.active-macro { background: var(--tab-active); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .main-tab-btn.active-combined { background: var(--tab-combined); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .main-tab-btn.active-portfolio { background: var(--tab-portfolio); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        .back-btn-wrap { margin-bottom: 15px; display: none; }
+        .back-btn { background: transparent; border: none; color: var(--text-sub); font-weight: bold; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 0; margin-bottom: 8px; }
+        .back-btn:hover { color: var(--tab-portfolio); }
+        .account-detail-title { margin: 5px 0; font-size: 1.4rem; color: var(--text-main); font-weight: bold; }
 
         .combined-selector-box { background: var(--bg-card); padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-dash); display: none; flex-wrap: wrap; gap: 10px; align-items: center; }
-        .combined-selector-box span { font-weight: bold; font-size: 0.9rem; color: var(--text-main); margin-right: 5px; }
-        .acc-checkbox-label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; cursor: pointer; color: var(--text-main); background: var(--tab-bg); padding: 4px 10px; border-radius: 15px; }
+        .acc-checkbox-label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; cursor: pointer; background: var(--tab-bg); padding: 4px 10px; border-radius: 15px; }
+
+        .account-summary-box { background: var(--account-summary-bg); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; transition: background 0.3s; }
+        .summary-item { display: flex; flex-direction: column; min-width: 140px; }
+        .summary-item .label { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 4px; font-weight: bold; }
+        .summary-item .value { font-size: 1.25rem; font-weight: bold; }
+        .cash-sim-input { padding: 6px; border: 1px solid var(--tab-active); border-radius: 6px; width: 130px; text-align: right; background: var(--bg-card); color: var(--text-main); font-weight: bold; font-size: 1rem; }
+        .profit-plus { color: var(--profit-red); }
+        .profit-minus { color: var(--loss-blue); }
+
+        #cards-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: max-content; gap: 20px; width: 100%; align-items: start; }
+        .card { min-height: 180px; position: relative; background-color: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; box-sizing: border-box; overflow: hidden; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 12px rgba(0,0,0,0.1); }
         
-        .account-summary-box { background: var(--account-summary-bg); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; transition: background 0.3s; }
-        .summary-item { display: flex; flex-direction: column; }
-        .summary-item .label { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 3px; }
-        .summary-item .value { font-size: 1.3rem; font-weight: bold; }
-        .cash-sim-input { padding: 8px; border: 1px solid var(--input-border); border-radius: 6px; width: 140px; text-align: right; background: var(--bg-card); color: var(--text-main); font-weight: bold; }
-
-        #cards-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 275px; gap: 20px; width: 100%; }
-        .summary-chart-card { grid-column: 1 / -1; height: auto; min-height: 260px; }
-
-        @media (max-width: 900px) { 
-            #cards-container:not(.mobile-3col) { grid-template-columns: repeat(2, 1fr); } 
-            .summary-chart-card { grid-column: 1 / -1 !important; }
-        }
-        
-        @media (max-width: 600px) { 
-            body { padding: 10px; } .header-wrap h1 { font-size: 1.2rem; }
-            #cards-container:not(.mobile-3col) { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 15px; }
-            .summary-chart-card { grid-column: 1 / -1 !important; }
-            .account-summary-box { flex-direction: column; align-items: flex-start; gap: 10px; }
-
-            #cards-container.mobile-3col { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 210px; gap: 6px; }
-            #cards-container.mobile-3col .card { padding: 8px; border-radius: 8px; }
-            #cards-container.mobile-3col .asset-info h2 { font-size: 0.75rem; padding-right: 10px; }
-            #cards-container.mobile-3col .asset-info p { font-size: 0.6rem; margin-top: 1px; }
-            #cards-container.mobile-3col .delete-btn { font-size: 1rem; top: 6px; right: 6px; }
-            #cards-container.mobile-3col .chart-container { min-height: 40px; margin: 2px 0; }
-            #cards-container.mobile-3col .mdd-value { font-size: 0.9rem; }
-            #cards-container.mobile-3col .price-info { font-size: 0.65rem; }
-            #cards-container.mobile-3col .price-high { font-size: 0.6rem; }
-            #cards-container.mobile-3col .status-badge { font-size: 0.6rem; padding: 2px 5px; }
-            #cards-container.mobile-3col .rebalance-signal { font-size: 0.6rem; padding: 2px 4px; }
-            #cards-container.mobile-3col .weight-badge-line { font-size: 0.65rem; line-height: 1.1; }
-            #cards-container.mobile-3col .card-edit-row { display: none; }
-            #cards-container.mobile-3col .summary-chart-card { grid-column: 1 / -1; height: 230px; }
-        }
-
-        .card { position: relative; background-color: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; box-sizing: border-box; overflow: hidden; }
-        .card:active { cursor: grabbing; }
-        .card:hover.asset-card, .card:hover.scheduler-card { transform: translateY(-3px); box-shadow: 0 8px 12px rgba(0,0,0,0.1); }
+        .asset-info h2 { margin: 0; font-size: 1.1rem; color: var(--text-main); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .asset-info p { margin: 3px 0 0 0; color: var(--text-sub); font-size: 0.8rem; }
         .delete-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 1.4rem; color: #bdc3c7; cursor: pointer; padding: 0; line-height: 1; z-index: 10; }
         .delete-btn:hover { color: #e74c3c; }
+
+        .price-line { font-size: 0.85rem; color: var(--text-sub); }
+        .price-current { font-weight: bold; color: var(--text-main); font-size: 1.1rem; }
+        .price-high { color: #e74c3c; font-size: 0.8rem; font-weight: bold; }
+        .mdd-value { font-size: 1.15rem; font-weight: bold; text-align: right; }
+        .status-badge { padding: 3px 8px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
         
-        .asset-info h2 { margin: 0; font-size: 1rem; color: var(--text-main); padding-right: 20px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-        .asset-info p { margin: 3px 0 0 0; color: var(--text-sub); font-size: 0.75rem; }
+        .summary-chart-card { grid-column: 1 / -1; height: auto; background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .summary-charts-flex { display: flex; gap: 20px; width: 100%; flex-wrap: wrap; }
+        .chart-box-half { flex: 1; min-width: 320px; position: relative; display: flex; flex-direction: column; }
+        .date-picker-wrap { display: flex; gap: 5px; align-items: center; }
+        .date-picker-wrap input[type="month"] { padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 0.75rem; background: var(--bg-card); color: var(--text-main); font-family: inherit; }
+
+        .hub-card { background: var(--bg-card); border-radius: 12px; padding: 20px; border: 2px solid transparent; box-shadow: 0 4px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s, border-color 0.2s; height: 160px; position: relative; box-sizing: border-box; }
+        .hub-card:hover { transform: translateY(-5px); border-color: var(--tab-portfolio); }
+        .hub-card h2 { margin: 0 0 10px 0; font-size: 1.2rem; }
+        .hub-val { font-size: 1.35rem; font-weight: bold; margin-bottom: 5px; }
+        .hub-roi { font-size: 1.05rem; font-weight: bold; }
+        .hub-add-card { border: 2px dashed var(--border-dash); background: transparent; box-shadow: none; color: var(--text-sub); }
+
+        .table-container { width: 100%; overflow-x: auto; background: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; margin-bottom: 20px; }
+        .portfolio-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px; }
+        .portfolio-table th, .portfolio-table td { padding: 12px 8px; border-bottom: 1px solid var(--border-dash); text-align: right; vertical-align: middle; }
+        .portfolio-table th { background: var(--bg-body); color: var(--text-sub); font-weight: bold; text-align: right; }
+        .portfolio-table th:first-child, .portfolio-table td:first-child { text-align: left; }
+        .portfolio-table th:nth-child(2), .portfolio-table td:nth-child(2) { text-align: center; }
+        .portfolio-table tbody tr:hover { background: rgba(0,0,0,0.02); }
         
-        /* 💡 종목명 인라인 수정을 위한 클릭 효과 스타일 */
-        .editable-name { cursor: text; border-bottom: 1px dashed var(--border-dash); transition: border-color 0.2s; padding-bottom: 1px; display: inline-block; min-width: 50px; }
+        .ticker-badge { background: var(--tab-bg); padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight:bold; }
+        .table-input { width: 75px; padding: 6px; border: 1px solid var(--input-border); border-radius: 6px; text-align: right; background: var(--bg-body); color: var(--text-main); font-size: 0.85rem; font-weight:bold; transition: border-color 0.2s; }
+        .table-input:focus { border-color: var(--tab-active); outline: none; }
+        
+        .btn-delete-sm { background: #fee; color: #e74c3c; border: 1px solid #fcc; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: background 0.2s; }
+        .btn-delete-sm:hover { background: #fcc; }
+        
+        .badge { padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
+        .badge-buy { background: #e3f2fd; color: #2980b9; border: 1px solid #bde0fe; }
+        .badge-sell { background: #fdedec; color: #e74c3c; border: 1px solid #fadbd8; }
+        .badge-hold { background: #f0f3f4; color: #7f8c8d; border: 1px solid #e5e8e8; }
+        
+        .editable-name { cursor: text; border-bottom: 1px dashed var(--border-dash); padding-bottom: 1px; display: inline-block; min-width: 50px; font-weight: bold;}
         .editable-name:focus { outline: none; border-bottom-color: var(--tab-active); color: var(--tab-active); }
 
-        .chart-container { flex-grow: 1; position: relative; margin: 5px 0; min-height: 65px; }
+        .add-module-box { display: flex; gap: 10px; align-items: center; background: var(--bg-card); padding: 15px; border-radius: 12px; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex-wrap: wrap; }
+        .add-module-box select, .add-module-box input { padding: 8px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--bg-body); color: var(--text-main); font-size: 0.85rem; }
+        .add-module-box button { padding: 8px 18px; background-color: var(--tab-active); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: var(--bg-card); width: 100%; max-width: 700px; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-content h2 { margin-top: 0; font-size: 1.3rem; border-bottom: 2px solid var(--border-dash); padding-bottom: 10px; }
+        .modal-textarea { width: 100%; padding: 10px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--bg-body); color: var(--text-main); font-size: 0.85rem; box-sizing: border-box; resize: vertical; margin-bottom: 15px; }
+
+        .drag-handle { cursor: grab; color: #bdc3c7; font-size: 1.2rem; flex-shrink: 0; line-height: 1.2; margin-top: 1px; }
+        .drag-handle:active { cursor: grabbing; color: var(--tab-active); }
+
+        @media (max-width: 900px) { #cards-container { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { 
+            body { padding: 0; } .dashboard-container { padding: 10px; }
+            .sticky-nav-wrapper { padding: 15px 10px 10px 10px; margin: -10px -10px 15px -10px; }
+            .header-wrap h1 { font-size: 1.15rem; }
+            .main-tab-btn { font-size: 0.85rem; padding: 10px 5px; }
+            #cards-container { grid-template-columns: 1fr; }
+            .account-summary-box { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .summary-item { width: 100%; flex-direction: row; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; margin-bottom: 8px; }
+            .summary-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+            .portfolio-table { min-width: 600px; }
+        }
         
-        .data-section { display: flex; justify-content: space-between; align-items: flex-end; font-size: 0.8rem; }
-        .mdd-wrapper { display: flex; flex-direction: column; gap: 2px; width: 60%; }
-        .price-line { color: var(--text-sub); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-        .price-current { font-weight: bold; color: var(--price-num); }
-        .price-high { color: #e74c3c; font-size: 0.75rem; font-weight: bold; }
-        .weight-badge-line { font-size: 0.75rem; color: var(--text-main); margin-top: 2px; }
-        .weight-bold { font-weight: bold; color: var(--tab-active); }
-        .right-display-wrapper { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; width: 40%; text-align: right; }
-        .mdd-value { font-size: 1.15rem; font-weight: bold; }
-        .status-badge { padding: 3px 8px; border-radius: 20px; font-weight: bold; font-size: 0.7rem; white-space: nowrap; }
-        .rebalance-signal { font-size: 0.75rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-top: 2px; }
-        .sig-buy { background: #ebf5fb; color: #2980b9; }
-        .sig-sell { background: #fdedec; color: #e74c3c; }
-        .sig-hold { background: #f0f3f4; color: #7f8c8d; }
-
-        .card-edit-row { display: flex; gap: 6px; margin-top: 8px; }
-        .edit-item { flex: 1; display: flex; align-items: center; background: var(--bg-body); border-radius: 6px; padding: 2px 6px; border: 1px solid var(--input-border); }
-        .edit-label { font-size: 0.75rem; color: var(--text-sub); min-width: 36px; font-weight: bold; white-space: nowrap; }
-        .edit-item input { width: 100%; border: none; background: transparent; color: var(--text-main); font-size: 0.85rem; text-align: right; padding: 4px 0; outline: none; }
-
-        .empty-card { border: 2px dashed var(--border-dash); background-color: transparent; box-shadow: none; cursor: default; display: flex; align-items: center; justify-content: center; }
-        .empty-card:hover { transform: none; box-shadow: none; }
-        .add-form { text-align: center; width: 100%; padding: 10px; box-sizing: border-box; }
-        .add-form h3 { color: var(--text-sub); margin: 0 0 10px 0; font-size: 0.95rem; }
-        .add-form select, .add-form input { width: 85%; padding: 7px; border: 1px solid var(--input-border); background: var(--bg-card); color: var(--text-main); border-radius: 6px; font-size: 0.85rem; margin-bottom: 6px; text-align: center; box-sizing: border-box; }
-        .add-form input[type="text"] { text-transform: uppercase; }
-        .add-form input#add-name { text-transform: none; } /* 종목명은 대소문자 변환 제외 */
-        .add-form button { padding: 6px 18px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
-
-        .scheduler-list { font-size: 0.8rem; list-style: none; padding: 0; margin: 10px 0 0 0; width: 100%; }
-        .scheduler-list li { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-dash); }
-        .scheduler-list li:last-child { border-bottom: none; }
-        .sched-date { font-weight: bold; color: #e74c3c; }
+        .chart-container { flex-grow: 1; position: relative; margin: 5px 0; min-height: 50px; }
     </style>
 </head>
 <body>
 
+    <div id="data-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>⚙️ 엑셀 과거 자산 연동 (최신화 덮어쓰기)</h2>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; line-height: 1.4;">
+                가지고 계신 <b>[과거 자산 종합.xlsx]</b> 파일을 열고,<br>
+                데이터 영역(기간, 계좌명, 투자원금, 평가금액)을 복사해서 붙여넣어 주세요.<br>
+                (엑셀 쉼표, 원화 기호 등을 완벽하게 자체 필터링하여 즉시 반영합니다.)
+            </p>
+            <textarea id="csv-history-data" class="modal-textarea" rows="10" placeholder="26년 1월   한투AIM(재원)   62,400,000   85,434,964..."></textarea>
+            
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="header-btn" onclick="document.getElementById('data-modal').style.display='none'">닫기</button>
+                <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none;" onclick="parseAndSaveHistoryCSV()">💾 즉시 데이터 반영</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: left;">
+            <h2 id="edit-modal-title" style="margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid var(--border-dash); padding-bottom: 10px;">데이터 수정</h2>
+            <input type="hidden" id="edit-modal-ym">
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; font-size:0.85rem; color:var(--text-sub); margin-bottom:5px; font-weight:bold;">누적 투자원금 (원)</label>
+                <input type="number" id="edit-modal-principal" class="table-input" style="width: 100%; box-sizing:border-box; text-align:left; font-size:1rem; padding:10px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display:block; font-size:0.85rem; color:var(--text-sub); margin-bottom:5px; font-weight:bold;">총 평가액 (원)</label>
+                <input type="number" id="edit-modal-eval" class="table-input" style="width: 100%; box-sizing:border-box; text-align:left; font-size:1rem; padding:10px;">
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="header-btn" onclick="document.getElementById('edit-modal').style.display='none'">취소</button>
+                <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none;" onclick="saveChartEdit()">💾 저장</button>
+            </div>
+        </div>
+    </div>
+
     <div class="dashboard-container">
-        <div class="header-wrap">
-            <h1>📊 매크로 & 자산 배분 시스템</h1>
-            <div class="header-controls">
-                <button class="header-btn" onclick="toggleLayout()" id="layout-btn">📱 모바일 1열/3열</button>
-                <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 다크 모드</button>
+        
+        <div class="sticky-nav-wrapper">
+            <div class="header-wrap">
+                <h1>📊 매크로 & 자산 배분 시스템</h1>
+                <div class="header-controls">
+                    <button class="header-btn btn-highlight" onclick="document.getElementById('data-modal').style.display='flex'">⚙️ 과거 데이터 연동</button>
+                    <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 모드</button>
+                </div>
+            </div>
+
+            <div class="main-tab-container" id="main-tabs">
+                <button class="main-tab-btn active-macro" id="tab-macro" onclick="switchView('macro')">📊 거시경제</button>
+                <button class="main-tab-btn" id="tab-combined" onclick="switchView('combined')">🌐 전체 합산</button>
+                <button class="main-tab-btn" id="tab-portfolio_hub" onclick="switchView('portfolio_hub')">💼 포트폴리오</button>
             </div>
         </div>
 
-        <div class="tab-container" id="tab-container"></div>
+        <div class="back-btn-wrap" id="back-btn-wrap">
+            <button class="back-btn" onclick="switchView('portfolio_hub')">◀ 계좌 목록으로</button>
+            <h2 class="account-detail-title"><span id="detail-account-name" class="editable-name" contenteditable="true" onblur="updateAccountName(this.innerText)">계좌명</span></h2>
+        </div>
 
         <div class="combined-selector-box" id="combined-selector">
-            <span>합산할 계좌 선택:</span>
-            <div id="checkbox-container" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <span style="width:100%;">합산할 계좌 선택:</span>
+            <div id="checkbox-container" style="display:flex; gap:8px; flex-wrap:wrap; width:100%;"></div>
         </div>
 
         <div class="account-summary-box" id="summary-widget" style="display:none;">
-            <div class="summary-item">
-                <span class="label">총 자산 평가액</span>
-                <span class="value" id="sum-total-value">0원</span>
+            <div style="display:flex; flex-direction:column; gap:10px; width:48%;">
+                <div class="summary-item"><span class="label">총 자산 평가액</span><span class="value" id="sum-total-value">0원</span></div>
+                <div class="summary-item"><span class="label" id="profit-label">총 실시간 수익금</span><span class="value" id="sum-profit-value">0원 (0.0%)</span></div>
             </div>
-            <div class="summary-item">
-                <span class="label">보유 주식 총액</span>
-                <span class="value" id="sum-stock-value">0원</span>
-            </div>
-            <div class="summary-item">
-                <span class="label">계좌 내 현금 잔고</span>
-                <span class="value" id="sum-cash-value">0원</span>
-            </div>
-            <div class="summary-item" id="sim-input-wrapper">
-                <span class="label">📊 추가 현금 투입 시뮬레이션</span>
-                <input type="number" class="cash-sim-input" id="cash-simulation-val" value="0" step="100000" oninput="calculateRebalancingEngine()">
+            
+            <div style="display:flex; flex-direction:column; gap:10px; width:48%; align-items: flex-end;">
+                <div class="summary-item" style="align-items:flex-end;">
+                    <span class="label">💡 이번 달 누적 투자 원금</span>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <input type="number" class="cash-sim-input" id="principal-val" value="0" step="10000" onchange="updatePrincipal(this.value)"> <span>원</span>
+                    </div>
+                </div>
+                <div class="summary-item" style="align-items:flex-end;" id="sim-input-wrapper">
+                    <span class="label">현금 추가 시뮬레이션</span>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <input type="number" class="cash-sim-input" style="border-color:var(--input-border);" id="cash-simulation-val" value="0" step="100000" oninput="calculateRebalancingEngine()"> <span>원</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="cards-container" class="mobile-1col"></div>
+        <div id="dynamic-content-area"></div>
     </div>
 
     <script>
-        // ★★★ 본인의 구글 웹 앱 URL 주소를 교체해 주세요! ★★★
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         
-        const STORAGE_KEY_PREFIX = "macroDashboardV6_";
-        let currentView = 'macro';
+        // 💡 1. 영구 보존 키 (V26 버전 업그레이드)
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV26_";
+        
+        let currentView = 'portfolio_hub';
+        let trendStartDateStr = '2026-01';
+        let trendEndDateStr = '2026-07'; 
 
         const DEFAULT_MACRO_ASSETS = [
             { type: 'asset', ticker: 'MAGS', name: 'MAGS ETF (빅테크7)' },
@@ -187,76 +240,156 @@
             { type: 'asset', ticker: 'SGOV', name: '초단기채 (현금)' },
             { type: 'asset', ticker: '^TNX', name: '10년물 국채 금리' },
             { type: 'asset', ticker: '^VIX', name: 'VIX (공포 지수)' },
-            { type: 'asset', ticker: 'KRW=X', name: '원/달러 환율' },
-            { type: 'asset', ticker: 'FRED:WTREGEN', name: '미 재무부 TGA 잔고' },
-            { type: 'scheduler', ticker: 'BESSENT_QRA', name: '📅 Scott Bessent 재무부 정책 일정' }
+            { type: 'asset', ticker: 'KRW=X', name: '원/달러 환율' }
         ];
 
-        const DEFAULT_TABS = [
-            { id: 'pension', name: '💰 연금저축 계좌' },
-            { id: 'isa', name: '💼 ISA 계좌' },
-            { id: 'overseas', name: '🇺🇸 해외 위탁계좌' } 
-        ];
+        function getAccIdByName(name) { return 'acc_' + name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9가-힣]/g, ''); }
 
-        let macroAssets = localStorage.getItem(STORAGE_KEY_PREFIX + 'macro') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'macro')) : DEFAULT_MACRO_ASSETS;
-        let portfolioTabs = localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) : DEFAULT_TABS;
-        let combinedSelections = localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) : DEFAULT_TABS.map(t => t.id);
-
-        let portfolios = {}; 
-        portfolioTabs.forEach(tab => {
-            let data = localStorage.getItem(STORAGE_KEY_PREFIX + tab.id);
-            if (data) portfolios[tab.id] = JSON.parse(data);
-            else {
-                if (tab.id === 'pension') portfolios[tab.id] = [
-                    { type: 'portfolio', ticker: '371160.KS', name: 'TIGER 미국테크TOP10', quantity: 120, targetWeight: 30 },
-                    { type: 'portfolio', ticker: '434300.KS', name: 'ACE 미국나스닥100', quantity: 85, targetWeight: 20 },
-                    { type: 'portfolio', ticker: '360750.KS', name: 'TIGER 미국S&P500', quantity: 150, targetWeight: 20 },
-                    { type: 'portfolio', ticker: 'SGOV', name: '달러 초단기채 현금 완충재', quantity: 10, targetWeight: 30 }
-                ];
-                else if (tab.id === 'isa') portfolios[tab.id] = [
-                    { type: 'portfolio', ticker: '371160.KS', name: 'TIGER 미국테크TOP10', quantity: 210, targetWeight: 50 },
-                    { type: 'portfolio', ticker: '458730.KS', name: 'TIGER 미국배당다우존스', quantity: 380, targetWeight: 50 }
-                ];
-                else if (tab.id === 'overseas') portfolios[tab.id] = [
-                    { type: 'portfolio', ticker: 'AAPL', name: '애플', quantity: 15, targetWeight: 40 },
-                    { type: 'portfolio', ticker: 'TSLA', name: '테슬라', quantity: 12, targetWeight: 30 },
-                    { type: 'portfolio', ticker: 'QQQ', name: 'Invesco QQQ', quantity: 5, targetWeight: 30 }
-                ];
-                else portfolios[tab.id] = [];
+        // ============================================================================
+        // 💡 2. 초강력 데이터 마이그레이션 엔진 (모든 구버전 탐색 및 데이터 철통 방어)
+        // ============================================================================
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
+            const oldPrefixes = ['macroDashboard_MasterV25_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV22_', 'macroDashboard_Master_'];
+            let found = false;
+            for (let prefix of oldPrefixes) {
+                if (localStorage.getItem(prefix + 'tabs')) {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        let key = localStorage.key(i);
+                        if (key.startsWith(prefix)) {
+                            let newKey = key.replace(prefix, STORAGE_KEY_PREFIX);
+                            localStorage.setItem(newKey, localStorage.getItem(key));
+                            found = true;
+                        }
+                    }
+                    break; // 가장 최근 구버전을 찾으면 즉시 중단
+                }
             }
-        });
+        }
 
-        let livePrices = {}; let chartInstances = {}; let summaryChartInstance = null; const MAX_CARDS = 12;
+        // CSV 라인 파싱
+        function parseRow(line) {
+            let s = line.trim();
+            if (s.includes('\t')) return s.split('\t').map(v => v.trim());
+            let res = []; let inQ = false; let cur = '';
+            for(let i=0; i<s.length; i++){
+                let c = s[i];
+                if(c === '"') inQ = !inQ;
+                else if(c === ',' && !inQ) { res.push(cur.trim()); cur=''; }
+                else cur += c;
+            }
+            res.push(cur.trim());
+            return res.map(v => v.replace(/"/g, ''));
+        }
 
-        let mobileLayout = localStorage.getItem('mobileLayoutV6') || '1col';
-        if (mobileLayout === '3col') { document.getElementById('cards-container').classList.add('mobile-3col'); }
+        // 💡 3. 새로고침 없는 엑셀 데이터 다이나믹 업데이트 
+        function parseAndSaveHistoryCSV() {
+            const text = document.getElementById('csv-history-data').value.trim();
+            if(!text) { alert("입력된 데이터가 없습니다."); return; }
+            
+            const lines = text.split('\n');
+            let historyMap = {}; let tabsMap = {};
+            let count = 0;
+            
+            lines.forEach(line => {
+                if(!line.trim()) return;
+                const cols = parseRow(line);
+                if(cols.length >= 4 && !cols[0].includes('기간')) {
+                    let period = cols[0].trim(); 
+                    let match = period.match(/(\d{2})년\s*(\d+)월/);
+                    let ym = period;
+                    if(match) { ym = `20${match[1]}-${match[2].padStart(2, '0')}`; }
+
+                    let accName = cols[1].trim(); let accId = getAccIdByName(accName);
+                    tabsMap[accId] = accName;
+
+                    let principal = parseFloat(cols[2].replace(/[^\d.-]/g, '')) || 0; 
+                    let evalVal = parseFloat(cols[3].replace(/[^\d.-]/g, '')) || 0;
+                    
+                    if(!historyMap[accId]) historyMap[accId] = [];
+                    historyMap[accId].push({ date: ym + '-28', principal: principal, evalValue: evalVal });
+                    count++;
+                }
+            });
+
+            if(count === 0) { alert("데이터를 인식하지 못했습니다."); return; }
+
+            let currentTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
+            Object.keys(historyMap).forEach(accId => {
+                let existingHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId) || '[]');
+                let newHistoryDict = {};
+                existingHistory.forEach(h => newHistoryDict[h.date.substring(0,7)] = h);
+                historyMap[accId].forEach(nh => newHistoryDict[nh.date.substring(0,7)] = nh); 
+
+                let sortedHistory = Object.values(newHistoryDict).sort((a,b) => a.date.localeCompare(b.date));
+                localStorage.setItem(STORAGE_KEY_PREFIX + 'history_' + accId, JSON.stringify(sortedHistory));
+
+                let tab = currentTabs.find(t => t.id === accId);
+                let latestP = sortedHistory[sortedHistory.length-1].principal;
+                if(!tab) { currentTabs.push({ id: accId, name: "💼 " + tabsMap[accId], principal: latestP }); } 
+                else { tab.principal = latestP; }
+            });
+
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'tabs', JSON.stringify(currentTabs));
+            if(!localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) {
+                localStorage.setItem(STORAGE_KEY_PREFIX + 'combinedSelections', JSON.stringify(currentTabs.map(t=>t.id)));
+            }
+
+            alert(count + '건의 과거 성과 데이터가 반영되었습니다!');
+            
+            // 💡 location.reload() 제거 -> 즉시 상태 변수 갱신 후 뷰 리렌더링
+            document.getElementById('data-modal').style.display = 'none';
+            document.getElementById('csv-history-data').value = '';
+            
+            portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
+            combinedSelections = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) || [];
+            portfolios = {}; 
+            portfolioTabs.forEach(tab => { portfolios[tab.id] = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + tab.id)) || []; });
+            
+            switchView(currentView);
+        }
+
+        // 상태 변수 초기화
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v26')) {
+            let tabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
+            if(tabs.length === 0) {
+                alert("초기화된 환경입니다. [과거 데이터 연동] 메뉴에서 엑셀을 붙여넣어 계좌를 활성화해주세요!");
+            }
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v26', 'true');
+        }
+
+        let portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
+        let combinedSelections = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) || [];
+        let portfolios = {}; 
+        portfolioTabs.forEach(tab => { portfolios[tab.id] = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + tab.id)) || []; });
+        let macroAssets = localStorage.getItem(STORAGE_KEY_PREFIX + 'macro') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'macro')) : DEFAULT_MACRO_ASSETS;
+
+        let livePrices = {}; let chartInstances = {}; let summaryChartInstance = null; let trendChartInstance = null;
+
+        if(localStorage.getItem("theme_Master") === "dark") document.body.classList.add("dark-mode");
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+            localStorage.setItem("theme_Master", document.body.classList.contains("dark-mode") ? "dark" : "light");
+            if(currentView !== 'macro' && currentView !== 'portfolio_hub') calculateRebalancingEngine();
+        }
 
         function toggleLayout() {
             const container = document.getElementById('cards-container');
-            if (container.classList.contains('mobile-3col')) { container.classList.remove('mobile-3col'); localStorage.setItem('mobileLayoutV6', '1col'); }
-            else { container.classList.add('mobile-3col'); localStorage.setItem('mobileLayoutV6', '3col'); }
-            if(currentView !== 'macro') calculateRebalancingEngine();
-        }
-
-        if(localStorage.getItem("themeV6") === "dark") { document.body.classList.add("dark-mode"); }
-        function toggleTheme() {
-            document.body.classList.toggle("dark-mode");
-            const isDark = document.body.classList.contains("dark-mode");
-            localStorage.setItem("themeV6", isDark ? "dark" : "light");
-            document.querySelector(".theme-toggle").innerText = isDark ? "☀️ 라이트 모드" : "🌙 다크 모드";
-            if(currentView !== 'macro') calculateRebalancingEngine();
+            if (container) {
+                if (container.classList.contains('mobile-3col')) { container.classList.remove('mobile-3col'); localStorage.setItem('mobileLayout_Master', '1col'); }
+                else { container.classList.add('mobile-3col'); localStorage.setItem('mobileLayout_Master', '3col'); }
+            }
         }
 
         function saveTabs() { localStorage.setItem(STORAGE_KEY_PREFIX + 'tabs', JSON.stringify(portfolioTabs)); }
         function saveCombinedSelections() { localStorage.setItem(STORAGE_KEY_PREFIX + 'combinedSelections', JSON.stringify(combinedSelections)); }
         function saveCurrentState() {
             if (currentView === 'macro') localStorage.setItem(STORAGE_KEY_PREFIX + 'macro', JSON.stringify(macroAssets));
-            else if (currentView !== 'combined') localStorage.setItem(STORAGE_KEY_PREFIX + currentView, JSON.stringify(portfolios[currentView]));
+            else if (currentView !== 'combined' && currentView !== 'portfolio_hub') localStorage.setItem(STORAGE_KEY_PREFIX + currentView, JSON.stringify(portfolios[currentView] || []));
         }
 
         function getAggregatedAssets() {
             let aggregatedMap = {};
-            combinedSelections.forEach(accId => {
+            (combinedSelections || []).forEach(accId => {
                 let accAssets = portfolios[accId] || [];
                 accAssets.forEach(a => {
                     if (!aggregatedMap[a.ticker]) { aggregatedMap[a.ticker] = { type: 'portfolio', ticker: a.ticker, name: a.name, quantity: 0, targetWeight: 0 }; }
@@ -269,43 +402,80 @@
         function getActiveArray() {
             if (currentView === 'macro') return macroAssets;
             if (currentView === 'combined') return getAggregatedAssets();
+            if (currentView === 'portfolio_hub') return []; 
             return portfolios[currentView] || [];
         }
 
-        function renderTabs() {
-            const container = document.getElementById('tab-container');
-            let html = `<button class="tab-btn ${currentView === 'macro' ? 'active' : ''}" onclick="switchView('macro')">📊 거시경제</button>`;
-            html += `<button class="tab-btn ${currentView === 'combined' ? 'active-combined' : ''}" onclick="switchView('combined')">🌐 전체 합산</button>`;
-            portfolioTabs.forEach(tab => {
-                html += `
-                    <div class="tab-btn-wrapper">
-                        <button class="tab-btn ${currentView === tab.id ? 'active' : ''}" onclick="switchView('${tab.id}')">${tab.name}</button>
-                        <span class="delete-tab-btn" onclick="deleteAccount('${tab.id}', event)" title="계좌 삭제">&times;</span>
-                    </div>
-                `;
-            });
-            html += `<button class="tab-add-btn" onclick="addNewAccount()">➕ 계좌 추가</button>`;
-            container.innerHTML = html;
+        function updateAccountName(newName) {
+            if (currentView === 'macro' || currentView === 'combined' || currentView === 'portfolio_hub') return;
+            let tab = portfolioTabs.find(t => t.id === currentView);
+            if (tab && newName.trim() !== "") { tab.name = newName.trim(); saveTabs(); }
+        }
+
+        function updatePrincipal(val) {
+            let newPrincipal = parseFloat(val) || 0;
+            if (currentView === 'combined') {
+                alert("합산 화면에서는 개별 계좌의 원금 합계가 자동 정산됩니다.");
+                calculateRebalancingEngine();
+            } else {
+                let tab = portfolioTabs.find(t => t.id === currentView);
+                if(tab) { tab.principal = newPrincipal; saveTabs(); calculateRebalancingEngine(); }
+            }
+        }
+
+        function saveChartEdit() {
+            const ym = document.getElementById('edit-modal-ym').value;
+            const p = parseFloat(document.getElementById('edit-modal-principal').value) || 0;
+            const e = parseFloat(document.getElementById('edit-modal-eval').value) || 0;
+            
+            document.getElementById('edit-modal').style.display = 'none';
+            
+            let hKey = STORAGE_KEY_PREFIX + 'history_' + currentView;
+            let history = JSON.parse(localStorage.getItem(hKey)) || [];
+            let match = history.find(h => h.date.substring(0,7) === ym);
+            if (match) { match.principal = p; match.evalValue = e; } 
+            else { history.push({ date: ym + '-28', principal: p, evalValue: e }); }
+            history.sort((a,b) => a.date.localeCompare(b.date));
+            localStorage.setItem(hKey, JSON.stringify(history));
+            
+            calculateRebalancingEngine();
         }
 
         function switchView(viewMode) {
-            currentView = viewMode; renderTabs();
-            const summaryWidget = document.getElementById('summary-widget');
-            const simWrapper = document.getElementById('sim-input-wrapper');
-            const combinedBox = document.getElementById('combined-selector');
-            const checkboxContainer = document.getElementById('checkbox-container');
+            currentView = viewMode;
+            document.querySelectorAll('.main-tab-btn').forEach(btn => btn.className = 'main-tab-btn');
+            if(viewMode === 'macro') document.getElementById('tab-macro').className = 'main-tab-btn active-macro';
+            else if(viewMode === 'combined') document.getElementById('tab-combined').className = 'main-tab-btn active-combined';
+            else document.getElementById('tab-portfolio_hub').className = 'main-tab-btn active-portfolio';
 
-            if (viewMode === 'macro') { summaryWidget.style.display = 'none'; combinedBox.style.display = 'none'; }
-            else if (viewMode === 'combined') {
-                summaryWidget.style.display = 'flex'; simWrapper.style.display = 'flex'; combinedBox.style.display = 'flex';
+            const summaryWidget = document.getElementById('summary-widget');
+            const combinedBox = document.getElementById('combined-selector');
+            const backBtn = document.getElementById('back-btn-wrap');
+            const principalInput = document.getElementById('principal-val');
+
+            summaryWidget.style.display = 'none'; combinedBox.style.display = 'none'; backBtn.style.display = 'none';
+
+            if (viewMode === 'macro') {
+                renderDashboard();
+            } else if (viewMode === 'portfolio_hub') {
+                renderHubView();
+            } else if (viewMode === 'combined') {
+                summaryWidget.style.display = 'flex'; combinedBox.style.display = 'flex';
+                principalInput.disabled = true;
                 let cbHtml = '';
-                portfolioTabs.forEach(tab => {
-                    let isChecked = combinedSelections.includes(tab.id) ? 'checked' : '';
+                (portfolioTabs || []).forEach(tab => {
+                    let isChecked = (combinedSelections || []).includes(tab.id) ? 'checked' : '';
                     cbHtml += `<label class="acc-checkbox-label"><input type="checkbox" value="${tab.id}" ${isChecked} onchange="updateCombinedSelection()"> ${tab.name}</label>`;
                 });
-                checkboxContainer.innerHTML = cbHtml; document.getElementById('cash-simulation-val').value = 0;
-            } else { summaryWidget.style.display = 'flex'; simWrapper.style.display = 'flex'; combinedBox.style.display = 'none'; document.getElementById('cash-simulation-val').value = 0; }
-            renderDashboard();
+                document.getElementById('checkbox-container').innerHTML = cbHtml; 
+                renderDashboard();
+            } else {
+                summaryWidget.style.display = 'flex'; backBtn.style.display = 'block';
+                principalInput.disabled = false;
+                let tab = portfolioTabs.find(t => t.id === currentView);
+                if(tab) { document.getElementById('detail-account-name').innerText = tab.name; principalInput.value = Math.round(tab.principal || 0); }
+                renderDashboard();
+            }
         }
 
         function updateCombinedSelection() {
@@ -315,387 +485,583 @@
         }
 
         function addNewAccount() {
-            let name = prompt("새로운 계좌 이름을 입력하세요\n(예: 해외위탁계좌, IRP 등)");
-            if (!name || name.trim() === "") return;
-            let newId = 'acc_' + Date.now();
-            portfolioTabs.push({ id: newId, name: "💼 " + name.trim() }); portfolios[newId] = [];
-            combinedSelections.push(newId); saveCombinedSelections(); saveTabs(); switchView(newId);
+            let name = prompt("새로운 계좌 이름을 입력하세요"); if (!name) return;
+            let newId = 'acc_' + Date.now(); portfolioTabs.push({ id: newId, name: "💼 " + name.trim(), principal: 0 });
+            portfolios[newId] = []; combinedSelections.push(newId); saveCombinedSelections(); saveTabs(); switchView(newId);
         }
 
-        function deleteAccount(id, event) {
-            event.stopPropagation(); 
-            if(confirm("정말 이 계좌를 삭제하시겠습니까?")) {
-                portfolioTabs = portfolioTabs.filter(t => t.id !== id); delete portfolios[id];
-                localStorage.removeItem(STORAGE_KEY_PREFIX + id); combinedSelections = combinedSelections.filter(cId => cId !== id);
-                saveCombinedSelections(); saveTabs(); if (currentView === id) switchView('macro'); else renderTabs(); 
+        function bulkTakeSnapshot() {
+            let dateStr = new Date().toISOString().split('T')[0];
+            let ym = dateStr.substring(0,7);
+            if(!confirm(`현재 실시간 주가와 원금을 기준으로 모든 계좌의 [${ym}] 마감 기록을 저장하시겠습니까?\n(이미 이번 달 기록이 있다면 새 값으로 덮어씁니다.)`)) return;
+
+            let fxRate = livePrices['KRW=X'] || 1350;
+            
+            portfolioTabs.forEach(tab => {
+                let accAssets = portfolios[tab.id] || [];
+                let totalVal = 0;
+                accAssets.forEach(a => {
+                    let t = (a.ticker || '').toUpperCase();
+                    let p = livePrices[a.ticker] || 1;
+                    if(['CASH','예수금','현금'].includes(t)) p = 1;
+                    const isWon = t.indexOf('.KS') !== -1 || t.indexOf('.KQ') !== -1 || t === 'CASH';
+                    totalVal += isWon ? (p * (parseFloat(a.quantity)||0)) : (p * (parseFloat(a.quantity)||0) * fxRate);
+                });
+                
+                let hKey = STORAGE_KEY_PREFIX + 'history_' + tab.id;
+                let history = JSON.parse(localStorage.getItem(hKey)) || [];
+                history = history.filter(h => h.date.substring(0,7) !== ym);
+                history.push({ date: ym + '-28', principal: tab.principal || 0, evalValue: totalVal });
+                history.sort((a,b) => a.date.localeCompare(b.date));
+                localStorage.setItem(hKey, JSON.stringify(history));
+            });
+            alert('✅ 모든 계좌의 이번 달 실적 마감이 완료되어 차트에 영구 반영되었습니다.');
+            renderHubView();
+        }
+
+        async function renderHubView() {
+            const container = document.getElementById('dynamic-content-area');
+            Object.values(chartInstances).forEach(c => c.destroy()); chartInstances = {};
+            
+            let fxRate = livePrices['KRW=X'] || 1350;
+            if(!livePrices['KRW=X']) {
+                try {
+                    const res = await fetch(`${MY_PROXY_URL}?ticker=KRW=X`);
+                    const data = await res.json(); if(data.success) { livePrices['KRW=X'] = data.price; fxRate = data.price; }
+                } catch(e){}
             }
+
+            let htmlStr = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                <h2 style="margin:0; font-size:1.3rem; color:var(--text-main);">전체 포트폴리오 요약</h2>
+                <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none; padding:8px 15px;" onclick="bulkTakeSnapshot()">📸 현재 상태로 전체 일괄 마감</button>
+            </div>
+            <div id="cards-container">`;
+            
+            if(portfolioTabs.length === 0) {
+                htmlStr += `<div style="width:100%; padding:30px; text-align:center; color:var(--text-sub);">등록된 계좌가 없습니다. 상단 [과거 데이터 연동] 버튼을 통해 엑셀을 붙여넣으세요.</div>`;
+            }
+
+            (portfolioTabs || []).forEach(tab => {
+                let accAssets = portfolios[tab.id] || []; let evalWon = 0;
+                accAssets.forEach(a => {
+                    let tickerStr = (a.ticker || '').toUpperCase();
+                    let price = livePrices[a.ticker] || 1;
+                    if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
+                    const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
+                    evalWon += isWon ? (price * (parseFloat(a.quantity)||0)) : (price * (parseFloat(a.quantity)||0) * fxRate);
+                });
+                let principal = tab.principal || 0; let profit = evalWon - principal;
+                let roi = principal > 0 ? (profit / principal) * 100 : 0;
+                htmlStr += `
+                    <div class="card hub-card" onclick="switchView('${tab.id}')">
+                        <button class="hub-delete-btn" onclick="event.stopPropagation(); if(confirm('이 계좌를 영구 삭제하시겠습니까?')){ portfolioTabs = portfolioTabs.filter(t=>t.id!=='${tab.id}'); saveTabs(); switchView('portfolio_hub'); }">&times;</button>
+                        <div><h2 style="margin:0; font-size:1.15rem;">${tab.name}</h2><p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-sub);">누적 원금: ${Math.round(principal).toLocaleString()}원</p></div>
+                        <div style="margin-top:10px;"><div class="hub-val" style="color:var(--tab-active);">${Math.round(evalWon).toLocaleString()}원</div><div class="hub-roi ${profit>=0?'profit-plus':'profit-minus'}">${profit>=0?'+':''}${Math.round(profit).toLocaleString()}원 (${roi.toFixed(1)}%)</div></div>
+                    </div>
+                `;
+            });
+            htmlStr += `<div class="card hub-card hub-add-card" onclick="addNewAccount()"><h2>➕ 빈 계좌 생성</h2></div></div>`;
+            container.innerHTML = htmlStr;
         }
 
         async function renderDashboard() {
-            const container = document.getElementById('cards-container');
-            Object.values(chartInstances).forEach(c => c.destroy()); chartInstances = {};
-            if(summaryChartInstance) { summaryChartInstance.destroy(); summaryChartInstance = null; }
-            container.innerHTML = ''; 
+            try {
+                if(currentView === 'portfolio_hub') return;
+                const container = document.getElementById('dynamic-content-area');
+                Object.values(chartInstances).forEach(c => c.destroy()); chartInstances = {};
+                let activeList = getActiveArray() || []; let isCombined = (currentView === 'combined');
+                let htmlStr = '';
 
-            let activeList = getActiveArray();
-            let isCombined = (currentView === 'combined');
-
-            if (currentView !== 'macro' && activeList.length > 0) {
-                container.innerHTML += `
-                    <div class="card summary-chart-card non-draggable">
-                        <div class="asset-info" style="margin-bottom: 10px;">
-                            <h2>${isCombined ? '🌐 전체 합산' : '🎯 계좌'} 포트폴리오 비중 분석 (목표 대비 실제)</h2>
-                            <p>파이 차트보다 직관적인 가로 막대 비교</p>
-                        </div>
-                        <div class="chart-container" style="height: 100%; min-height: 180px;"><canvas id="portfolio-summary-chart"></canvas></div>
-                    </div>
-                `;
-            }
-
-            for (let i = 0; i < MAX_CARDS; i++) {
-                if (i < activeList.length) {
-                    let asset = activeList[i]; const cardId = 'card-' + asset.ticker.replace(/[^a-zA-Z0-9]/g, ''); 
-                    
-                    if (asset.type === 'scheduler') {
-                        container.innerHTML += `
-                            <div class="card scheduler-card non-draggable" id="${cardId}">
-                                <div class="asset-info"><h2>${asset.name}</h2><p>재무부 정책 집중 일정</p></div>
-                                <ul class="scheduler-list">
-                                    <li><span>국채 발행 계획 (QRA)</span><span class="sched-date">2026-07-29</span></li>
-                                    <li><span>차환 발행 집중 주간</span><span class="sched-date">2026-08-15</span></li>
-                                    <li><span>의회 예산국 적자 점검</span><span class="sched-date">2026-09-30</span></li>
-                                    <li><span>차기 대선 / 발행한도</span><span class="sched-date" style="color:#e74c3c;">2026-11-03</span></li>
-                                </ul>
-                                <div class="data-section" style="justify-content:center; margin-top:5px;"><div class="status-badge status-danger">🚨 유동성 경계 필요</div></div>
-                            </div>
-                        `;
-                    } else {
-                        let isPortfolio = asset.type === 'portfolio';
-                        container.innerHTML += `
-                            <div class="card asset-card ${isCombined ? 'non-draggable' : ''}" id="${cardId}" data-ticker="${asset.ticker}">
-                                ${!isCombined ? `<button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>` : ''}
-                                <div class="asset-info">
-                                    <!-- 💡 클릭 가능한 종목명 인라인 편집 기능 부여 -->
-                                    <h2><span id="name-${cardId}" class="editable-name" contenteditable="${!isCombined}" onblur="updateInlineAsset('${asset.ticker}', 'name', this.innerText.trim())" title="${!isCombined ? '클릭해서 종목명 수정' : ''}">${asset.name || '동기화 중...'}</span></h2>
-                                    <p>${asset.ticker} ${isPortfolio ? `<span class='weight-bold' id="target-weight-display-${cardId}">[목표 ${isCombined ? '계산중' : asset.targetWeight}%]</span>` : ''} ${isCombined ? `<span class='weight-bold' style="margin-left:4px; color:var(--text-sub); font-size:0.75rem;">(총 ${asset.quantity}주)</span>` : ''}</p>
+                if (currentView !== 'macro' && activeList.length > 0) {
+                    htmlStr += `
+                        <div class="summary-chart-card" style="margin-bottom: 20px;">
+                            <div class="summary-charts-flex">
+                                <div class="chart-box-half" style="flex:1;">
+                                    <div class="asset-info" style="margin-bottom:8px;"><h2>🎯 자산 비중</h2></div>
+                                    <div style="height:200px; position:relative;"><canvas id="portfolio-summary-chart"></canvas></div>
                                 </div>
-                                <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
-                                <div class="data-section">
-                                    <div class="mdd-wrapper">
-                                        <div class="price-line">
-                                            현재: <span id="price-${cardId}" class="price-current">-</span>
-                                            <span id="high-wrapper-${cardId}" class="price-high">(🔴 <span id="high-${cardId}">-</span>)</span>
+                                <div class="chart-box-half" style="flex:1.5;">
+                                    <div class="asset-info" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:5px;">
+                                        <h2>📈 성과 트렌드 <span style="font-size:0.8rem; font-weight:normal;">(막대를 클릭하면 과거 수정 가능)</span></h2>
+                                        <div class="date-picker-wrap">
+                                            <input type="month" id="trend-start" value="${trendStartDateStr}" onchange="trendStartDateStr=this.value; calculateRebalancingEngine();">
+                                            <span>~</span>
+                                            <input type="month" id="trend-end" value="${trendEndDateStr}" onchange="trendEndDateStr=this.value; calculateRebalancingEngine();">
                                         </div>
-                                        <div id="extra-info-line-${cardId}" class="weight-badge-line">-</div>
                                     </div>
-                                    <div class="right-display-wrapper">
-                                        <div id="mdd-${cardId}" class="mdd-value">-</div>
-                                        <div id="status-${cardId}" class="status-badge status-loading">조회 중⏳</div>
-                                        <div id="signal-${cardId}" class="rebalance-signal" style="display:none;">-</div>
-                                    </div>
+                                    <div style="height:200px; position:relative; cursor:pointer;"><canvas id="performance-trend-chart"></canvas></div>
                                 </div>
-                                ${isPortfolio && !isCombined ? `
-                                    <div class="card-edit-row non-draggable">
-                                        <div class="edit-item"><span class="edit-label">수량</span><input type="number" id="edit-qty-${cardId}" value="${asset.quantity}" oninput="updateInlineAsset('${asset.ticker}', 'quantity', this.value)"></div>
-                                        <div class="edit-item"><span class="edit-label">비중%</span><input type="number" id="edit-weight-${cardId}" value="${asset.targetWeight}" oninput="updateInlineAsset('${asset.ticker}', 'targetWeight', this.value)"></div>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `;
-                        fetchData(asset, cardId);
-                    }
-                } 
-                else if (i === activeList.length && !isCombined) {
-                    container.innerHTML += `
-                        <div class="card empty-card non-draggable">
-                            <div class="add-form">
-                                <h3>➕ 새 모듈 정의</h3>
-                                <select id="add-type">
-                                    ${currentView === 'macro' ? `<option value="asset">일반 자산</option><option value="fx-linked">원화 환산 결합 (_KRW)</option>` : `<option value="portfolio">계좌 편입 자산 (미국직투/국내선택)</option>`}
-                                </select>
-                                <input type="text" id="add-ticker" placeholder="티커 코드 입력">
-                                <!-- 💡 종목 추가 시 이름도 함께 지정할 수 있는 입력칸 추가 -->
-                                <input type="text" id="add-name" placeholder="종목명 입력 (선택/국내종목 권장)">
-                                <button onclick="gridAddModule()">추가하기</button>
                             </div>
                         </div>
                     `;
+                }
+
+                if (currentView === 'macro') {
+                    htmlStr += `<div id="cards-container">`;
+                    for (let i = 0; i < 12; i++) {
+                        if (i < activeList.length) {
+                            let asset = activeList[i]; const cardId = 'card-' + (asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, ''); 
+                            if (asset.type === 'scheduler') {
+                                htmlStr += `
+                                    <div class="card scheduler-card non-draggable" id="${cardId}">
+                                        <div class="asset-info"><h2>${asset.name}</h2><p>재무부 정책 집중 일정</p></div>
+                                        <ul class="scheduler-list"><li><span>국채 발행 계획 (QRA)</span><span class="sched-date">2026-07-29</span></li><li><span>의회 예산국 적자 점검</span><span class="sched-date">2026-09-30</span></li></ul>
+                                    </div>`;
+                            } else {
+                                htmlStr += `
+                                    <div class="card asset-card" id="${cardId}" data-ticker="${asset.ticker}">
+                                        <button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>
+                                        <div class="asset-info">
+                                            <h2><span class="editable-name" contenteditable="true" onblur="updateInlineAsset('${asset.ticker}', 'name', this.innerText.trim())">${asset.name || '동기화 중...'}</span></h2>
+                                            <p>${asset.ticker}</p>
+                                        </div>
+                                        <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
+                                        <div class="data-section">
+                                            <div class="mdd-wrapper">
+                                                <div class="price-line">현재: <span id="price-${cardId}" class="price-current">-</span></div>
+                                                <div class="price-high" id="high-wrapper-${cardId}" style="display:inline-block; font-size:0.75rem; color:var(--text-sub);">(<span style="color:#e74c3c;">🔴</span> 고점: <span id="high-${cardId}" style="color:#e74c3c; font-weight:bold;">-</span>)</div>
+                                            </div>
+                                            <div class="right-display-wrapper"><div id="mdd-${cardId}" class="mdd-value">-</div><div id="status-${cardId}" class="status-badge status-loading">조회 중⏳</div></div>
+                                        </div>
+                                    </div>`;
+                            }
+                        } else if (i === activeList.length) {
+                            htmlStr += `<div class="card empty-card non-draggable"><div class="add-form"><h3>➕ 모듈 추가</h3><input type="text" id="add-ticker" placeholder="티커 코드"><input type="text" id="add-name" placeholder="표시 이름"><button onclick="gridAddModule('macro')">추가하기</button></div></div>`;
+                        }
+                    }
+                    htmlStr += `</div>`;
                 } 
-                else { container.innerHTML += `<div class="card empty-card non-draggable" style="border-color:transparent;"></div>`; }
-            }
-            if(!isCombined) initDragAndDrop();
+                else {
+                    htmlStr += `
+                    <div class="table-container">
+                        <table class="portfolio-table">
+                            <thead>
+                                <tr>
+                                    <th>종목명 (클릭하여 수정)</th>
+                                    <th>티커</th>
+                                    <th>현재가</th>
+                                    <th>보유 수량</th>
+                                    <th>평가금액</th>
+                                    <th>목표 비중(%)</th>
+                                    <th>실제 비중(%)</th>
+                                    <th>리밸런싱 신호</th>
+                                    ${!isCombined ? `<th>관리</th>` : ''}
+                                </tr>
+                            </thead>
+                            <tbody id="portfolio-tbody">
+                    `;
+                    
+                    activeList.forEach(asset => {
+                        const cardId = 'row-' + (asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
+                        htmlStr += `
+                            <tr id="${cardId}" data-ticker="${asset.ticker}">
+                                <td style="text-align:left; vertical-align: top;">
+                                    <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                        ${!isCombined ? `<span class="drag-handle" title="순서 변경">☰</span>` : ''}
+                                        <span class="editable-name" contenteditable="${!isCombined}" style="flex: 1; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.4;" onblur="updateInlineAsset('${asset.ticker}', 'name', this.innerText.trim())">${asset.name || asset.ticker}</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:center;"><span class="ticker-badge">${asset.ticker}</span></td>
+                                <td id="price-${cardId}">-</td>
+                                <td>${isCombined ? asset.quantity : `<input type="number" class="table-input" id="edit-qty-${cardId}" value="${asset.quantity}" oninput="updateInlineAsset('${asset.ticker}', 'quantity', this.value)">`}</td>
+                                <td id="eval-${cardId}" style="font-weight:bold; color:var(--text-main);">0원</td>
+                                <td>${isCombined ? `<span id="target-weight-display-${cardId}">-</span>` : `<input type="number" class="table-input" id="edit-weight-${cardId}" value="${asset.targetWeight}" oninput="updateInlineAsset('${asset.ticker}', 'targetWeight', this.value)">`}</td>
+                                <td id="actual-weight-${cardId}" style="color:var(--tab-active); font-weight:bold;">0.0%</td>
+                                <td id="signal-${cardId}">-</td>
+                                ${!isCombined ? `<td><button class="btn-delete-sm" onclick="removeAsset('${asset.ticker}')">삭제</button></td>` : ''}
+                            </tr>
+                        `;
+                    });
+
+                    htmlStr += `</tbody></table></div>`;
+                    
+                    if(!isCombined) {
+                        htmlStr += `
+                        <div class="add-module-box">
+                            <span style="font-weight:bold; color:var(--text-sub);">➕ 편입 자산 추가:</span>
+                            <select id="add-type"><option value="portfolio">주식/ETF 티커</option><option value="cash">원화 현금(예수금)</option></select>
+                            <input type="text" id="add-ticker" placeholder="종목 티커" style="width:100px;">
+                            <input type="text" id="add-name" placeholder="종목명" style="width:130px;">
+                            <input type="number" id="add-qty" placeholder="수량" style="width:80px;">
+                            <button onclick="gridAddModule('portfolio')">목록에 추가</button>
+                        </div>`;
+                    }
+                }
+
+                container.innerHTML = htmlStr;
+                initDragAndDrop();
+
+                // 💡 4. 병렬 스태거링 (초고속 차트 로딩 엔진 적용)
+                let fetchPromises = [];
+                let delay = 0;
+                for (let asset of activeList) {
+                    if(asset.type !== 'scheduler') {
+                        const cardId = currentView === 'macro' ? 'card-' + (asset.ticker||'').replace(/[^a-zA-Z0-9]/g, '') : 'row-' + (asset.ticker||'').replace(/[^a-zA-Z0-9]/g, '');
+                        if(livePrices[asset.ticker]) {
+                            updateCardUI(asset, cardId, livePrices[asset.ticker], livePrices[asset.ticker+'_h'] || 1);
+                            if(currentView === 'macro' && window.rawChartData && window.rawChartData[asset.ticker]) {
+                                drawChart(cardId, window.rawChartData[asset.ticker].labels, window.rawChartData[asset.ticker].prices, false);
+                            }
+                            continue;
+                        }
+                        
+                        // 대기 없이 즉시 프로미스를 배열에 밀어넣음 (딜레이만 차등 부여)
+                        fetchPromises.push(new Promise(async (resolve) => {
+                            await new Promise(r => setTimeout(r, delay));
+                            await fetchData(asset, cardId);
+                            resolve();
+                        }));
+                        delay += 100; // 0.1초씩 요청 타이밍 분산 (429 방어용)
+                    }
+                }
+                
+                // 모든 비동기 통신이 완료될 때까지 동시 대기
+                await Promise.all(fetchPromises);
+                
+                if(currentView !== 'macro') calculateRebalancingEngine();
+
+            } catch(e) { console.error("Dashboard Render Error:", e); }
         }
 
-        // 💡 텍스트(이름) 저장과 숫자(수량/비중) 저장을 동시에 처리하도록 업데이트
         function updateInlineAsset(ticker, field, value) {
             let list = getActiveArray(); let asset = list.find(a => a.ticker === ticker);
-            if (asset) { 
-                if (field === 'name') asset[field] = value;
-                else asset[field] = parseFloat(value) || 0; 
-                saveCurrentState(); 
-                if (currentView !== 'macro') calculateRebalancingEngine(); 
-            }
+            if (asset) { asset[field] = (field==='name')? value: parseFloat(value)||0; saveCurrentState(); if (currentView !== 'macro') calculateRebalancingEngine(); }
         }
 
         function initDragAndDrop() {
-            new Sortable(document.getElementById('cards-container'), {
-                animation: 200, delay: 150, delayOnTouchOnly: true, filter: '.non-draggable', preventOnFilter: false, 
-                onEnd: function (evt) {
-                    let offset = (currentView !== 'macro' && getActiveArray().length > 0) ? 1 : 0;
-                    let list = getActiveArray(); let oldIdx = evt.oldIndex - offset; let newIdx = evt.newIndex - offset;
-                    if (oldIdx !== newIdx && newIdx < list.length && oldIdx >= 0 && newIdx >= 0) { const movedItem = list.splice(oldIdx, 1)[0]; list.splice(newIdx, 0, movedItem); saveCurrentState(); } 
-                    else { renderDashboard(); }
+            if (currentView === 'macro') {
+                const el = document.getElementById('cards-container');
+                if(el) {
+                    new Sortable(el, { animation: 200, filter: '.non-draggable', onEnd: function (evt) {
+                        let list = getActiveArray(); let movedItem = list.splice(evt.oldIndex, 1)[0]; list.splice(evt.newIndex, 0, movedItem); 
+                        saveCurrentState(); renderDashboard();
+                    }});
                 }
-            });
+            } else if (currentView !== 'combined') {
+                const el = document.getElementById('portfolio-tbody');
+                if(el) {
+                    new Sortable(el, { animation: 200, handle: '.drag-handle', onEnd: function (evt) {
+                        let list = getActiveArray(); let movedItem = list.splice(evt.oldIndex, 1)[0]; list.splice(evt.newIndex, 0, movedItem); 
+                        saveCurrentState(); renderDashboard();
+                    }});
+                }
+            }
         }
 
         async function fetchData(asset, cardId) {
+            const tickerStr = (asset.ticker || '').toUpperCase();
+            if(['CASH','예수금','현금'].includes(tickerStr)) {
+                livePrices[asset.ticker] = 1; livePrices[asset.ticker+'_h'] = 1;
+                updateCardUI(asset, cardId, 1, 1);
+                return;
+            }
             try {
-                if (MY_PROXY_URL === "YOUR_WEB_APP_URL") throw new Error("URL 미입력");
                 const response = await fetch(`${MY_PROXY_URL}?ticker=${encodeURIComponent(asset.ticker)}`);
-                const data = await response.json();
-                if (!data.success) throw new Error(data.error);
-
-                let list = getActiveArray(); let match = list.find(a => a.ticker === asset.ticker);
+                const data = await response.json(); if (!data.success) throw new Error();
+                livePrices[asset.ticker] = data.price; livePrices[asset.ticker+'_h'] = data.high52;
                 
-                // 💡 사용자가 직접 이름을 변경한 적이 없을 때만(API가 준 티커와 같거나 비어있을 때) 야후 API 이름을 덮어씌움
-                if (data.name && match && (!match.name || match.name === match.ticker) && data.name !== match.ticker) { 
-                    const nameEl = document.getElementById(`name-${cardId}`);
-                    if (nameEl) nameEl.innerText = data.name; 
-                    match.name = data.name; saveCurrentState(); 
+                if(currentView === 'macro') {
+                    if(!window.rawChartData) window.rawChartData = {};
+                    window.rawChartData[asset.ticker] = { prices: data.chartData, labels: data.chartLabels };
+                    drawChart(cardId, data.chartLabels, data.chartData, false);
                 }
-
-                livePrices[asset.ticker] = data.price;
                 updateCardUI(asset, cardId, data.price, data.high52);
-                drawChart(cardId, data.chartLabels, data.chartData, document.getElementById(`status-${cardId}`).classList.contains("status-danger"));
-                if (currentView !== 'macro') calculateRebalancingEngine();
             } catch (error) {
-                document.getElementById(`status-${cardId}`).innerText = `❌ 에러`; document.getElementById(`status-${cardId}`).className = "status-badge status-danger";
+                const pEl = document.getElementById(`price-${cardId}`);
+                if (pEl) pEl.innerText = "조회 지연"; 
             }
         }
 
         function updateCardUI(asset, cardId, currentPrice, high52) {
-            let mdd = (currentPrice / high52) - 1;
-            let mddPercentage = (mdd * 100).toFixed(2) + "%";
-            let statusMsg = "✅ 관망"; let statusClass = "status-normal"; let isDanger = false;
-            let displayPrice, displayHigh;
+            const tickerStr = (asset.ticker || '').toUpperCase();
+            const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
+            let cp = parseFloat(currentPrice) || 0; let hp = parseFloat(high52) || 0;
+            let displayPrice = isWon ? Math.round(cp).toLocaleString() + "원" : "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            let displayHigh = isWon ? Math.round(hp).toLocaleString() + "원" : "$" + hp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             
-            const isKoreanAsset = asset.ticker.indexOf('.KS') !== -1 || asset.ticker.indexOf('.KQ') !== -1 || asset.ticker.indexOf('_KRW') !== -1;
-
-            if (asset.ticker.indexOf('FRED:') === 0) {
-                displayPrice = "$" + currentPrice.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "B";
-                displayHigh = "$" + high52.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "B";
-                mddPercentage = "유동성"; statusMsg = "💵 TGA 추적"; statusClass = "status-normal";
-            }
-            else if (asset.ticker === 'KRW=X') {
-                displayPrice = currentPrice.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "원";
-                displayHigh = high52.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "원";
-                mddPercentage = "환율"; statusMsg = "💵 외환 모니터링"; statusClass = "status-normal";
-            } 
-            else if (asset.ticker === '^TNX') {
-                displayPrice = currentPrice.toFixed(2) + "%"; displayHigh = high52.toFixed(2) + "%";
-                mddPercentage = "금리"; 
-                if (currentPrice >= 5.0) { statusMsg = "🚨 금리 발작"; statusClass = "status-danger"; isDanger = true; }
-                else if (currentPrice >= 4.5) { statusMsg = "⚠️ 발작 대기"; statusClass = "status-warning"; isDanger = true; }
-            } 
-            else if (asset.ticker === '^VIX') {
-                displayPrice = currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "pt";
-                displayHigh = high52.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "pt";
-                mddPercentage = "공포지수"; 
-                if (currentPrice >= 35) { statusMsg = "🚨 패닉 리스크"; statusClass = "status-danger"; isDanger = true; }
-                else if (currentPrice >= 25) { statusMsg = "⚠️ 변동성 확대"; statusClass = "status-warning"; isDanger = true; }
-            } 
-            else {
-                displayPrice = isKoreanAsset ? Math.round(currentPrice).toLocaleString('ko-KR') + "원" : "$" + currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                displayHigh = isKoreanAsset ? Math.round(high52).toLocaleString('ko-KR') + "원" : "$" + high52.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                if (mdd <= -0.30) { statusMsg = "🚨 3차 분할진입"; statusClass = "status-danger"; isDanger = true; }
-                else if (mdd <= -0.20) { statusMsg = "⚠️ 2차 분할진입"; statusClass = "status-warning"; isDanger = true; }
-                else if (mdd <= -0.15) { statusMsg = "🎯 1차 분할진입"; statusClass = "status-warning"; }
-            }
-
-            document.getElementById(`price-${cardId}`).innerText = displayPrice;
-            document.getElementById(`high-${cardId}`).innerText = displayHigh;
+            const pEl = document.getElementById(`price-${cardId}`); if (pEl) pEl.innerText = displayPrice;
             
-            if (asset.type !== 'portfolio') {
-                document.getElementById(`mdd-${cardId}`).innerText = mddPercentage;
-                document.getElementById(`status-${cardId}`).innerText = statusMsg;
-                document.getElementById(`status-${cardId}`).className = "status-badge " + statusClass;
-            } else {
-                document.getElementById(`high-wrapper-${cardId}`).style.color = '#7f8c8d';
-                document.getElementById(`high-wrapper-${cardId}`).innerHTML = `(고가 ${displayHigh})`;
+            if (currentView === 'macro') {
+                const hEl = document.getElementById(`high-${cardId}`); if(hEl) hEl.innerText = displayHigh;
+                let mdd = hp > 0 ? (cp / hp) - 1 : 0; let mddPercentage = (mdd * 100).toFixed(2) + "%";
+                let statusMsg = "✅ 관망"; let statusClass = "status-normal";
+                if (tickerStr.indexOf('FRED:') === 0) { displayPrice = "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 1 }) + "B"; mddPercentage = "유동성"; statusMsg = "💵 TGA"; if(pEl) pEl.innerText = displayPrice; }
+                else if (tickerStr === 'KRW=X') { mddPercentage = "환율"; statusMsg = "💵 외환"; } 
+                else if (tickerStr === '^TNX') { displayPrice = cp.toFixed(2) + "%"; mddPercentage = "금리"; if (cp >= 4.5) { statusMsg = "⚠️ 발작 대기"; statusClass = "status-warning"; } if(pEl) pEl.innerText = displayPrice; } 
+                else if (tickerStr === '^VIX') { displayPrice = cp.toFixed(2) + "pt"; mddPercentage = "공포지수"; if (cp >= 25) { statusMsg = "⚠️ 변동성 확대"; statusClass = "status-warning"; } if(pEl) pEl.innerText = displayPrice; } 
+                else { if (mdd <= -0.15) { statusMsg = "🎯 1차 매수"; statusClass = "status-warning"; } }
+                
+                const mEl = document.getElementById(`mdd-${cardId}`); if (mEl) mEl.innerText = mddPercentage;
+                const sEl = document.getElementById(`status-${cardId}`); if (sEl) { sEl.style.display = 'inline-block'; sEl.innerText = statusMsg; sEl.className = "status-badge " + statusClass; }
             }
-            return isDanger;
         }
 
-        const barValuePlugin = {
-            id: 'barValuePlugin',
-            afterDatasetsDraw(chart) {
-                const { ctx } = chart; const isDark = document.body.classList.contains("dark-mode");
-                ctx.font = 'bold 11px "Malgun Gothic"'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-                ctx.fillStyle = isDark ? '#e0e0e0' : '#2c3e50';
-                chart.data.datasets.forEach((dataset, i) => {
-                    const meta = chart.getDatasetMeta(i); if (meta.hidden) return;
-                    meta.data.forEach((bar, index) => { const value = dataset.data[index]; if (value > 0) { ctx.fillText(value + '%', bar.x + 5, bar.y); } });
-                });
-            }
-        };
-
         function calculateRebalancingEngine() {
-            let list = getActiveArray(); let isCombined = (currentView === 'combined');
-            let totalAccountValueInWon = 0;
-            let chartLabels = []; let actualData = []; let targetData = [];
-
-            const currentFxRate = livePrices['KRW=X'] || 1350; 
-
-            let combinedTargetValuesInWon = {};
-            let totalCombinedValueInWon = 0;
-
-            if (isCombined) {
-                combinedSelections.forEach(accId => {
-                    let accAssets = portfolios[accId] || [];
-                    let accTotalWon = 0;
-                    accAssets.forEach(a => {
-                        let price = livePrices[a.ticker] || 0;
-                        const isWon = a.ticker.indexOf('.KS') !== -1 || a.ticker.indexOf('.KQ') !== -1 || a.ticker.indexOf('_KRW') !== -1;
-                        let assetWonValue = isWon ? (price * (parseFloat(a.quantity) || 0)) : (price * (parseFloat(a.quantity) || 0) * currentFxRate);
-                        accTotalWon += assetWonValue;
-                    });
-                    totalCombinedValueInWon += accTotalWon;
-
-                    accAssets.forEach(a => {
-                        if(!combinedTargetValuesInWon[a.ticker]) combinedTargetValuesInWon[a.ticker] = 0;
-                        combinedTargetValuesInWon[a.ticker] += accTotalWon * ((parseFloat(a.targetWeight) || 0) / 100);
-                    });
-                });
-            }
-
-            list.forEach(asset => {
-                let price = livePrices[asset.ticker] || 0;
-                const isWon = asset.ticker.indexOf('.KS') !== -1 || asset.ticker.indexOf('.KQ') !== -1 || asset.ticker.indexOf('_KRW') !== -1;
-                
-                asset.evalValueWon = isWon ? (price * (asset.quantity || 0)) : (price * (asset.quantity || 0) * currentFxRate);
-                totalAccountValueInWon += asset.evalValueWon;
+            if(currentView === 'macro' || currentView === 'portfolio_hub') return;
+            try {
+                let list = getActiveArray(); let isCombined = (currentView === 'combined');
+                let totalAccountValueInWon = 0; let totalPrincipal = 0;
+                let chartLabels = []; let actualData = []; let targetData = [];
+                const currentFxRate = livePrices['KRW=X'] || 1350; 
 
                 if (isCombined) {
-                    let targetValWon = combinedTargetValuesInWon[asset.ticker] || 0;
-                    asset.targetWeight = totalCombinedValueInWon > 0 ? (targetValWon / totalCombinedValueInWon) * 100 : 0;
-                }
-            });
-
-            let sgovAsset = list.find(a => a.ticker === 'SGOV');
-            let currentCashValWon = sgovAsset ? sgovAsset.evalValueWon : 0;
-            
-            let simulationBonusCashWon = parseFloat(document.getElementById('cash-simulation-val').value) || 0;
-            let finalTotalAccountValueWon = totalAccountValueInWon + simulationBonusCashWon;
-
-            document.getElementById('sum-total-value').innerText = Math.round(finalTotalAccountValueWon).toLocaleString('ko-KR') + "원";
-            document.getElementById('sum-stock-value').innerText = Math.round(totalAccountValueInWon - currentCashValWon).toLocaleString('ko-KR') + "원";
-            document.getElementById('sum-cash-value').innerText = Math.round(currentCashValWon).toLocaleString('ko-KR') + "원";
-
-            list.forEach(asset => {
-                const cardId = 'card-' + asset.ticker.replace(/[^a-zA-Z0-9]/g, '');
-                const mddEl = document.getElementById(`mdd-${cardId}`);
-                const extraEl = document.getElementById(`extra-info-line-${cardId}`);
-                const statusEl = document.getElementById(`status-${cardId}`);
-                const sigEl = document.getElementById(`signal-${cardId}`);
-                const twDisplay = document.getElementById(`target-weight-display-${cardId}`);
-                
-                let actualWeight = finalTotalAccountValueWon > 0 ? (asset.evalValueWon / finalTotalAccountValueWon) * 100 : 0;
-                let targetWeight = asset.targetWeight || 0;
-                let weightGap = actualWeight - targetWeight;
-
-                chartLabels.push(asset.name || asset.ticker);
-                actualData.push(actualWeight.toFixed(1));
-                targetData.push(targetWeight.toFixed(1));
-
-                if (!mddEl || !extraEl) return;
-
-                mddEl.innerText = actualWeight.toFixed(1) + "%";
-                if(twDisplay) twDisplay.innerText = `[목표 ${targetWeight.toFixed(1)}%]`;
-                
-                extraEl.innerHTML = `평가액: <span class='price-current'>${Math.round(asset.evalValueWon).toLocaleString('ko-KR')}원</span><br>괴리율: <span style="color:${weightGap >= 0 ? '#1abc9c' : '#e74c3c'}; font-weight:bold;">${weightGap >= 0 ? '+' : ''}${weightGap.toFixed(1)}%</span>`;
-                
-                let optimalTargetValueWon = finalTotalAccountValueWon * (targetWeight / 100);
-                let tradeRequiredWon = optimalTargetValueWon - asset.evalValueWon;
-                
-                sigEl.style.display = "inline-block";
-                if (Math.abs(tradeRequiredWon) < 15000) {
-                    statusEl.innerText = "☕ 유지"; statusEl.className = "status-badge status-normal";
-                    sigEl.innerText = "HOLD"; sigEl.className = "rebalance-signal sig-hold";
-                } else if (tradeRequiredWon > 0) {
-                    statusEl.innerText = "🎯 과소비중"; statusEl.className = "status-badge status-warning";
-                    sigEl.innerText = `+${Math.round(tradeRequiredWon).toLocaleString('ko-KR')}원 매수`; sigEl.className = "rebalance-signal sig-buy";
+                    (combinedSelections || []).forEach(accId => {
+                        let accAssets = portfolios[accId] || [];
+                        let tabInfo = portfolioTabs.find(t => t.id === accId);
+                        totalPrincipal += tabInfo ? (tabInfo.principal || 0) : 0; 
+                        accAssets.forEach(a => {
+                            let tickerStr = (a.ticker || '').toUpperCase(); let price = livePrices[a.ticker] || 1;
+                            if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
+                            const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
+                            totalAccountValueInWon += isWon ? (price * (parseFloat(a.quantity) || 0)) : (price * (parseFloat(a.quantity) || 0) * currentFxRate);
+                        });
+                    });
+                    const pValEl = document.getElementById('principal-val'); if(pValEl) pValEl.value = Math.round(totalPrincipal);
                 } else {
-                    statusEl.innerText = "⚠️ 과대비중"; statusEl.className = "status-badge status-danger";
-                    sigEl.innerText = `${Math.round(tradeRequiredWon).toLocaleString('ko-KR')}원 매도`; sigEl.className = "rebalance-signal sig-sell";
+                    let tabInfo = portfolioTabs.find(t => t.id === currentView);
+                    totalPrincipal = tabInfo ? (tabInfo.principal || 0) : 0;
+                    list.forEach(asset => {
+                        let tickerStr = (asset.ticker || '').toUpperCase(); let price = livePrices[asset.ticker] || 1;
+                        if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
+                        const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
+                        asset.evalValueWon = isWon ? (price * (asset.quantity || 0)) : (price * (asset.quantity || 0) * currentFxRate);
+                        totalAccountValueInWon += asset.evalValueWon;
+                    });
                 }
-            });
 
-            const canvas = document.getElementById('portfolio-summary-chart');
-            if (canvas && chartLabels.length > 0) {
-                const ctx = canvas.getContext('2d'); const isDark = document.body.classList.contains("dark-mode"); const textColor = isDark ? '#a0a0a0' : '#7f8c8d';
-                if (summaryChartInstance) summaryChartInstance.destroy();
-                let datasets = [
-                    { label: '현재 실제 비중 (%)', data: actualData, backgroundColor: '#3498db', borderRadius: 4, barPercentage: 0.7, categoryPercentage: 0.8 },
-                    { label: '목표 비중 (%)', data: targetData, backgroundColor: 'rgba(231, 76, 60, 0.6)', borderRadius: 4, barPercentage: 0.7, categoryPercentage: 0.8 }
-                ];
-                summaryChartInstance = new Chart(ctx, {
-                    type: 'bar', data: { labels: chartLabels, datasets: datasets }, plugins: [barValuePlugin],
-                    options: {
-                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'top', labels: { color: textColor, font: { size: 11, family: 'Malgun Gothic' } } },
-                            tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': ' + context.raw + '%'; } } }
-                        },
-                        scales: {
-                            x: { max: 100, ticks: { color: textColor, callback: function(value) { return value + "%"; } }, grid: { color: isDark ? '#333' : '#eee' } },
-                            y: { ticks: { color: textColor, font: { size: 11, family: 'Malgun Gothic' } }, grid: { display: false } }
-                        },
-                        layout: { padding: { right: 35 } }
+                let simulationBonusCashWon = parseFloat(document.getElementById('cash-simulation-val') ? document.getElementById('cash-simulation-val').value : 0) || 0;
+                let finalTotalAccountValueWon = totalAccountValueInWon + simulationBonusCashWon;
+                let profit = totalAccountValueInWon - totalPrincipal;
+                let roi = totalPrincipal > 0 ? (profit / totalPrincipal) * 100 : 0;
+
+                const sTotalEl = document.getElementById('sum-total-value'); const sProfitEl = document.getElementById('sum-profit-value');
+                if(sTotalEl) sTotalEl.innerText = Math.round(finalTotalAccountValueWon).toLocaleString() + "원";
+                if(sProfitEl) sProfitEl.innerHTML = `<span class="${profit>=0?'profit-plus':'profit-minus'}">${profit>=0?'+':''}${Math.round(profit).toLocaleString()}원 (${roi.toFixed(1)}%)</span>`;
+
+                list.forEach(asset => {
+                    const rowId = 'row-' + asset.ticker.replace(/[^a-zA-Z0-9]/g, '');
+                    const evalEl = document.getElementById(`eval-${rowId}`);
+                    const actWtEl = document.getElementById(`actual-weight-${rowId}`);
+                    const sigEl = document.getElementById(`signal-${rowId}`);
+                    const tgtDisplay = document.getElementById(`target-weight-display-${rowId}`);
+                    
+                    let actualWeight = finalTotalAccountValueWon > 0 ? (asset.evalValueWon / finalTotalAccountValueWon) * 100 : 0;
+                    chartLabels.push(asset.name || asset.ticker); actualData.push(actualWeight.toFixed(1)); targetData.push(asset.targetWeight || 0);
+
+                    if(evalEl) evalEl.innerText = Math.round(asset.evalValueWon).toLocaleString() + '원';
+                    if(actWtEl) actWtEl.innerText = actualWeight.toFixed(1) + "%";
+                    if(tgtDisplay) tgtDisplay.innerText = (asset.targetWeight||0) + "%";
+                    
+                    let tradeRequiredWon = (finalTotalAccountValueWon * ((asset.targetWeight||0) / 100)) - asset.evalValueWon;
+                    if(sigEl) {
+                        if (Math.abs(tradeRequiredWon) < 15000) { sigEl.innerHTML = `<span class="badge badge-hold">HOLD</span>`; }
+                        else if (tradeRequiredWon > 0) { sigEl.innerHTML = `<span class="badge badge-buy">+${Math.round(tradeRequiredWon).toLocaleString()} 매수</span>`; }
+                        else { sigEl.innerHTML = `<span class="badge badge-sell">${Math.round(Math.abs(tradeRequiredWon)).toLocaleString()} 매도</span>`; }
                     }
                 });
-            }
+
+                let rawHistory = [];
+                if (isCombined) {
+                    let combinedMap = {};
+                    (combinedSelections || []).forEach(accId => {
+                        let h = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId) ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId)) : [];
+                        h.forEach(snap => {
+                            if(!combinedMap[snap.date]) combinedMap[snap.date] = { principal: 0, evalValue: 0, date: snap.date };
+                            combinedMap[snap.date].principal += snap.principal; combinedMap[snap.date].evalValue += snap.evalValue;
+                        });
+                    });
+                    rawHistory = Object.values(combinedMap).sort((a,b) => a.date.localeCompare(b.date));
+                } else {
+                    rawHistory = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + currentView) ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + currentView)) : [];
+                }
+
+                const currentYM = `${new Date().getFullYear()}-${("0" + (new Date().getMonth() + 1)).slice(-2)}-28`;
+                let currentMonthIdx = rawHistory.findIndex(r => r.date === currentYM);
+                let currentMonthData = { principal: totalPrincipal, evalValue: totalAccountValueInWon, date: currentYM, isCurrent: true };
+                if(currentMonthIdx > -1) rawHistory[currentMonthIdx] = currentMonthData; else rawHistory.push(currentMonthData);
+
+                let startEl = document.getElementById('trend-start'); let endEl = document.getElementById('trend-end');
+                let sYM = startEl ? startEl.value : trendStartDateStr; let eYM = endEl ? endEl.value : trendEndDateStr;
+                const safeFilteredHistory = rawHistory.filter(h => h.date.substring(0,7) >= sYM && h.date.substring(0,7) <= eYM);
+
+                let trendLabels = safeFilteredHistory.map(h => h.isCurrent ? '현재' : h.date.substring(2,7).replace('-','/')); 
+                let trendAmtData = safeFilteredHistory.map(h => h.evalValue - h.principal);
+                let trendRateData = safeFilteredHistory.map(h => { let p = h.evalValue - h.principal; return h.principal > 0 ? ((p / h.principal) * 100).toFixed(1) : 0; });
+                
+                let barColors = trendAmtData.map(val => val >= 0 ? 'rgba(231, 76, 60, 0.5)' : 'rgba(41, 128, 185, 0.5)');
+                let barBorders = trendAmtData.map(val => val >= 0 ? '#e74c3c' : '#2980b9');
+
+                const barCanvas = document.getElementById('portfolio-summary-chart');
+                if (barCanvas && chartLabels.length > 0) {
+                    if (summaryChartInstance) summaryChartInstance.destroy();
+                    summaryChartInstance = new Chart(barCanvas.getContext('2d'), {
+                        type: 'bar', data: { labels: chartLabels, datasets: [
+                            { label: '실제', data: actualData, backgroundColor: '#3498db', borderRadius: 4 },
+                            { label: '목표', data: targetData, backgroundColor: 'rgba(231, 76, 60, 0.5)', borderRadius: 4 }
+                        ] }, plugins: [{
+                            id: 'barValuePlugin',
+                            afterDatasetsDraw(chart) {
+                                const ctx = chart.ctx; ctx.font = 'bold 11px "Malgun Gothic"'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = document.body.classList.contains("dark-mode") ? '#e0e0e0' : '#2c3e50';
+                                chart.data.datasets.forEach((dataset, i) => { const meta = chart.getDatasetMeta(i); if (meta.hidden) return; meta.data.forEach((bar, idx) => { if (dataset.data[idx] > 0) ctx.fillText(dataset.data[idx] + '%', bar.x + 5, bar.y); }); });
+                            }
+                        }],
+                        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, max: 100, ticks: { font:{size:9} } }, y: { stacked: true, ticks: { font:{size:10} } } }, layout: { padding: { right: 35 } } }
+                    });
+                }
+
+                const trendCanvas = document.getElementById('performance-trend-chart');
+                if (trendCanvas && safeFilteredHistory.length > 0) {
+                    if (trendChartInstance) trendChartInstance.destroy();
+                    const isDark = document.body.classList.contains("dark-mode");
+                    const textColor = isDark ? '#a0a0a0' : '#7f8c8d';
+
+                    trendChartInstance = new Chart(trendCanvas.getContext('2d'), {
+                        data: {
+                            labels: trendLabels,
+                            datasets: [
+                                { type: 'bar', label: '수익금 (원)', data: trendAmtData, backgroundColor: barColors, borderColor: barBorders, borderWidth: 1, yAxisID: 'y' },
+                                { type: 'line', label: '수익률 (%)', data: trendRateData, borderColor: '#f39c12', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f39c12', yAxisID: 'y1', tension: 0.1 }
+                            ]
+                        },
+                        // 💡 차트 충돌 방지 라벨 엔진 적용 완료
+                        plugins: [{
+                            id: 'trendLabelPlugin',
+                            afterDatasetsDraw(chart) {
+                                const ctx = chart.ctx;
+                                ctx.font = 'bold 10px "Malgun Gothic"';
+                                ctx.textAlign = 'center';
+
+                                const barMeta = chart.getDatasetMeta(0); 
+                                const lineMeta = chart.getDatasetMeta(1); 
+                                if (barMeta.hidden && lineMeta.hidden) return;
+
+                                for (let idx = 0; idx < chart.data.labels.length; idx++) {
+                                    const barEl = barMeta.data[idx]; const lineEl = lineMeta.data[idx];
+                                    const barVal = chart.data.datasets[0].data[idx]; const lineVal = chart.data.datasets[1].data[idx];
+
+                                    let barLabelY = 0; let barAlign = 'middle';
+                                    if (barEl && !barMeta.hidden && barVal !== 0) {
+                                        barLabelY = barVal >= 0 ? barEl.y - 5 : barEl.y + 5;
+                                        barAlign = barVal >= 0 ? 'bottom' : 'top';
+                                    }
+
+                                    let lineLabelY = 0; let lineAlign = 'middle';
+                                    if (lineEl && !lineMeta.hidden) {
+                                        lineLabelY = lineVal >= 0 ? lineEl.y - 12 : lineEl.y + 12;
+                                        lineAlign = lineVal >= 0 ? 'bottom' : 'top';
+                                    }
+
+                                    if (barEl && lineEl && !barMeta.hidden && !lineMeta.hidden && barVal !== 0) {
+                                        if (Math.abs(barLabelY - lineLabelY) < 18) {
+                                            if (lineLabelY <= barLabelY) { lineLabelY -= 8; barLabelY += 8; barAlign = 'top'; lineAlign = 'bottom'; } 
+                                            else { lineLabelY += 8; barLabelY -= 8; barAlign = 'bottom'; lineAlign = 'top'; }
+                                        }
+                                    }
+
+                                    ctx.strokeStyle = isDark ? 'rgba(30,30,30,0.8)' : 'rgba(255,255,255,0.8)';
+                                    ctx.lineWidth = 4;
+
+                                    if (barEl && !barMeta.hidden && barVal !== 0) {
+                                        ctx.fillStyle = isDark ? '#e0e0e0' : '#2c3e50';
+                                        ctx.textBaseline = barAlign;
+                                        const manwon = Math.round(barVal / 10000);
+                                        const text = manwon.toLocaleString() + '만';
+                                        ctx.strokeText(text, barEl.x, barLabelY);
+                                        ctx.fillText(text, barEl.x, barLabelY);
+                                    }
+
+                                    if (lineEl && !lineMeta.hidden) {
+                                        ctx.fillStyle = '#f39c12';
+                                        ctx.textBaseline = lineAlign;
+                                        const text = lineVal + '%';
+                                        ctx.strokeText(text, lineEl.x, lineLabelY);
+                                        ctx.fillText(text, lineEl.x, lineLabelY);
+                                    }
+                                }
+                            }
+                        }],
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            layout: { padding: { top: 25, bottom: 0, left: 10, right: 10 } },
+                            onClick: (e, activeEls) => {
+                                if (activeEls.length > 0) {
+                                    if(currentView === 'combined') { alert("전체 합산 화면에서는 과거 데이터를 직접 수정할 수 없습니다."); return; }
+                                    const idx = activeEls[0].index;
+                                    const rawData = safeFilteredHistory[idx];
+                                    if(!rawData) return;
+                                    if(rawData.isCurrent) { alert("이번 달(현재 실시간) 데이터는 우측 상단의 '이번 달 누적 투자 원금' 입력칸에서 바로 수정하세요."); return; }
+                                    const ym = rawData.date.substring(0,7);
+                                    
+                                    document.getElementById('edit-modal-ym').value = ym;
+                                    document.getElementById('edit-modal-title').innerText = `[ ${ym} ] 성과 데이터 직접 수정`;
+                                    document.getElementById('edit-modal-principal').value = Math.round(rawData.principal);
+                                    document.getElementById('edit-modal-eval').value = Math.round(rawData.evalValue);
+                                    document.getElementById('edit-modal').style.display = 'flex';
+                                }
+                            },
+                            plugins: { 
+                                legend: { display: true, position: 'top', labels: { boxWidth: 12, font: {size: 10}, color: textColor } },
+                                tooltip: {
+                                    mode: 'index', intersect: false,
+                                    callbacks: {
+                                        title: function(context) { return context[0].label === '현재' ? '현재 실시간' : '20' + context[0].label + ' 기준'; },
+                                        beforeBody: function(context) {
+                                            let rawData = safeFilteredHistory[context[0].dataIndex]; if(!rawData) return '';
+                                            return `▶ 누적 원금: ${Math.round(rawData.principal).toLocaleString()}원\n▶ 총 평가액: ${Math.round(rawData.evalValue).toLocaleString()}원\n`;
+                                        },
+                                        label: function(context) {
+                                            if (context.datasetIndex === 0) { return `수익금: ${context.raw > 0 ? '+' : ''}${Math.round(context.raw).toLocaleString()}원`; } 
+                                            else { return `수익률: ${context.raw > 0 ? '+' : ''}${context.raw}%`; }
+                                        }
+                                    }
+                                }
+                            },
+                            scales: { 
+                                x: { ticks: { color: textColor, font:{size:9} }, grid: { display: false } }, 
+                                y: { type: 'linear', display: true, position: 'left', ticks: { color: textColor, font:{size:9}, callback: function(val){return val.toLocaleString(); } }, grid: { color: isDark ? '#333' : '#eee' } },
+                                y1: { type: 'linear', display: true, position: 'right', ticks: { color: textColor, font:{size:9}, callback: function(val){return val + '%'; } }, grid: { drawOnChartArea: false } }
+                            }
+                        }
+                    });
+                }
+            } catch(e) { console.error("Rebalancing Engine Error:", e); }
         }
 
         function drawChart(cardId, labels, data, isDanger) {
-            const canvasId = `canvas-${cardId}`; const canvas = document.getElementById(canvasId); if (!canvas) return; const ctx = canvas.getContext('2d');
-            const lineColor = isDanger ? '#e74c3c' : '#3498db'; const bgColor = isDanger ? 'rgba(231, 76, 60, 0.05)' : 'rgba(52, 152, 219, 0.05)';
+            const canvas = document.getElementById(`canvas-${cardId}`); if (!canvas) return;
+            const lineColor = isDanger ? '#e74c3c' : '#3498db'; 
+            let pointRadii = new Array(data.length).fill(0); let pointColors = new Array(data.length).fill('transparent'); 
             let maxVal = -Infinity; let maxIdx = -1; for (let i = 0; i < data.length; i++) { if (data[i] > maxVal) { maxVal = data[i]; maxIdx = i; } }
-            let pointRadii = new Array(data.length).fill(0); let pointColors = new Array(data.length).fill('transparent'); if (maxIdx !== -1) { pointRadii[maxIdx] = 4; pointColors[maxIdx] = '#e74c3c'; }
+            if (maxIdx !== -1) { pointRadii[maxIdx] = 4; pointColors[maxIdx] = '#e74c3c'; }
             if (chartInstances[cardId]) chartInstances[cardId].destroy();
-            chartInstances[cardId] = new Chart(ctx, {
-                type: 'line', data: { labels: labels, datasets: [{ data: data, borderColor: lineColor, backgroundColor: bgColor, borderWidth: 1.5, fill: true, pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors, pointHoverRadius: 6, tension: 0.08 }] },
-                options: {
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                    scales: { x: { display: true, ticks: { maxTicksLimit: 4, font: { size: 9 }, color: '#95a5a6' }, grid: { display: false } }, y: { display: false } },
-                    layout: { padding: { top: 5, bottom: 0 } }
-                }
+            chartInstances[cardId] = new Chart(canvas.getContext('2d'), {
+                type: 'line', data: { labels: labels, datasets: [{ data: data, borderColor: lineColor, backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors, pointHoverRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } }, layout: { padding: { top: 5, bottom: 0 } } }
             });
         }
 
-        // 💡 새 모듈 추가 시 종목명(Name)도 함께 받아 저장하도록 구조 개편
-        function gridAddModule() {
-            const type = document.getElementById('add-type').value; 
+        function gridAddModule(viewType) {
+            const type = document.getElementById('add-type') ? document.getElementById('add-type').value : 'asset';
             let ticker = document.getElementById('add-ticker').value.trim().toUpperCase();
-            let customName = document.getElementById('add-name').value.trim(); 
-            
-            if (!ticker) { alert("코드를 입력해 주세요."); return; }
-            let list = getActiveArray(); if (list.length >= MAX_CARDS) { alert("한 화면당 최대 12개 모듈로 제한됩니다."); return; }
-            if (list.some(a => a.ticker === ticker)) { alert("이미 등록된 기호입니다."); return; }
+            let customName = document.getElementById('add-name').value.trim();
+            let qtyInput = document.getElementById('add-qty');
+            let initialQty = qtyInput ? (parseFloat(qtyInput.value) || 0) : 0;
 
-            if (type === 'portfolio') list.push({ type: 'portfolio', ticker: ticker, name: customName, quantity: 0, targetWeight: 0 });
-            else list.push({ type: 'asset', ticker: type === 'fx-linked' ? ticker + "_KRW" : ticker, name: customName });
-
+            if(type === 'cash') { ticker = 'CASH'; if(!customName) customName = '원화 예수금'; }
+            if (!ticker) return;
+            let list = getActiveArray();
+            list.push({ type: viewType === 'macro' ? 'asset' : 'portfolio', ticker: ticker, name: customName, quantity: initialQty, targetWeight: 0 });
             saveCurrentState(); renderDashboard();
         }
 
         function removeAsset(ticker) {
-            let list = getActiveArray(); let updatedList = list.filter(a => a.ticker !== ticker);
-            if (currentView === 'macro') macroAssets = updatedList; else portfolios[currentView] = updatedList;
+            if(currentView === 'macro') { macroAssets = macroAssets.filter(a => a.ticker !== ticker); }
+            else { portfolios[currentView] = portfolios[currentView].filter(a => a.ticker !== ticker); }
             saveCurrentState(); renderDashboard();
         }
 
-        renderTabs(); switchView(currentView);
+        switchView(currentView);
     </script>
 </body>
 </html>
