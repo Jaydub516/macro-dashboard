@@ -46,11 +46,14 @@
         .combined-selector-box { background: var(--bg-card); padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-dash); display: none; flex-wrap: wrap; gap: 10px; align-items: center; }
         .acc-checkbox-label { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; cursor: pointer; background: var(--tab-bg); padding: 4px 10px; border-radius: 15px; }
 
+        /* 요약 영역 구조 개선: 반응형 클래스로 위젯 찢어짐 해결 */
         .account-summary-box { background: var(--account-summary-bg); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; transition: background 0.3s; }
-        .summary-item { display: flex; flex-direction: column; min-width: 140px; }
+        .summary-half { display: flex; flex-direction: column; gap: 10px; width: 48%; box-sizing: border-box; }
+        .summary-half.right-align { align-items: flex-end; }
+        .summary-item { display: flex; flex-direction: column; min-width: 140px; width: 100%; }
         .summary-item .label { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 4px; font-weight: bold; }
         .summary-item .value { font-size: 1.25rem; font-weight: bold; }
-        .cash-sim-input { padding: 6px; border: 1px solid var(--tab-active); border-radius: 6px; width: 130px; text-align: right; background: var(--bg-card); color: var(--text-main); font-weight: bold; font-size: 1rem; }
+        .cash-sim-input { padding: 6px; border: 1px solid var(--tab-active); border-radius: 6px; width: 140px; text-align: right; background: var(--bg-card); color: var(--text-main); font-weight: bold; font-size: 1rem; }
         .profit-plus { color: var(--profit-red); }
         .profit-minus { color: var(--loss-blue); }
 
@@ -112,22 +115,46 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--bg-card); width: 100%; max-width: 700px; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-content h2 { margin-top: 0; font-size: 1.3rem; border-bottom: 2px solid var(--border-dash); padding-bottom: 10px; }
-        .modal-textarea { width: 100%; padding: 10px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--bg-body); color: var(--text-main); font-size: 0.85rem; box-sizing: border-box; resize: vertical; margin-bottom: 15px; font-family: monospace; }
+        .modal-textarea { width: 100%; padding: 10px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--bg-body); color: var(--text-main); font-size: 0.85rem; box-sizing: border-box; resize: vertical; margin-bottom: 15px; }
 
         .drag-handle { cursor: grab; color: #bdc3c7; font-size: 1.2rem; flex-shrink: 0; line-height: 1.2; margin-top: 1px; }
         .drag-handle:active { cursor: grabbing; color: var(--tab-active); }
 
-        @media (max-width: 900px) { #cards-container { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 900px) { #cards-container:not(.mobile-3col) { grid-template-columns: repeat(2, 1fr); } }
+        
+        /* 모바일 환경 레이아웃 최적화 미디어 쿼리 */
         @media (max-width: 600px) { 
             body { padding: 0; } .dashboard-container { padding: 10px; }
             .sticky-nav-wrapper { padding: 15px 10px 10px 10px; margin: -10px -10px 15px -10px; }
             .header-wrap h1 { font-size: 1.15rem; }
             .main-tab-btn { font-size: 0.85rem; padding: 10px 5px; }
-            #cards-container { grid-template-columns: 1fr; }
+            
+            /* 요약정보 찢어짐 버그 해결: 세로 형변환 및 가로폭 확보 */
+            .summary-half { width: 100% !important; align-items: flex-start !important; }
+            .summary-half.right-align { align-items: flex-start !important; }
             .account-summary-box { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .summary-item { width: 100%; flex-direction: row; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; margin-bottom: 8px; }
+            .summary-item { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; margin-bottom: 2px; }
             .summary-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+            .summary-item .label { margin-bottom: 0; }
             .portfolio-table { min-width: 600px; }
+            
+            /* 💡 요구사항 3: 모바일 기본 거시경제 1열 모드 */
+            #cards-container:not(.mobile-3col) { grid-template-columns: 1fr; gap: 15px; }
+            
+            /* 💡 요구사항 4: 모바일 거시경제 3열 정밀 다운스케일러 컴포넌트 */
+            #cards-container.mobile-3col { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+            #cards-container.mobile-3col .card { padding: 8px; min-height: 105px; justify-content: flex-start; gap: 4px; }
+            #cards-container.mobile-3col .card h2 { font-size: 0.75rem; }
+            #cards-container.mobile-3col .card p { font-size: 0.6rem; }
+            #cards-container.mobile-3col .card .chart-container { display: none !important; } /* 가로폭 보존을 위해 그래프 임시 숨김 */
+            #cards-container.mobile-3col .card .data-section { flex-direction: column; align-items: flex-start; gap: 2px; font-size: 0.65rem; width: 100%; }
+            #cards-container.mobile-3col .card .mdd-wrapper { width: 100%; }
+            #cards-container.mobile-3col .card .price-current { font-size: 0.75rem; }
+            #cards-container.mobile-3col .card .price-high { display: none !important; }
+            #cards-container.mobile-3col .card .right-display-wrapper { width: 100%; align-items: flex-start; text-align: left; }
+            #cards-container.mobile-3col .card .mdd-value { font-size: 0.8rem; text-align: left; }
+            #cards-container.mobile-3col .card .status-badge { padding: 1px 4px; font-size: 0.6rem; border-radius: 4px; }
+            #cards-container.mobile-3col .delete-btn { top: 4px; right: 4px; font-size: 1rem; }
         }
         
         .chart-container { flex-grow: 1; position: relative; margin: 5px 0; min-height: 50px; }
@@ -135,35 +162,16 @@
 </head>
 <body>
 
-    <!-- 💡 1. 신규 추가: 모바일-PC 기기 동기화 백업/복원 모달 -->
-    <div id="sync-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 500px;">
-            <h2>🔄 PC ↔ 모바일 데이터 동기화</h2>
-            <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; line-height: 1.5;">
-                현재 기기에 저장된 종목, 수량, 계좌 등의 모든 데이터를 텍스트로 추출하여 다른 기기로 복사할 수 있습니다.<br>
-                (카카오톡 '내게 쓰기' 등을 활용하여 모바일로 옮겨보세요!)
-            </p>
-            <textarea id="sync-data-area" class="modal-textarea" rows="6" placeholder="여기에 백업 데이터를 붙여넣고 복원 버튼을 누르세요..."></textarea>
-            
-            <div style="display:flex; gap:10px; justify-content:space-between; margin-top:10px;">
-                <button class="header-btn" style="background:#34495e; color:white; border:none;" onclick="exportData()">📤 데이터 추출 (복사)</button>
-                <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none;" onclick="importData()">📥 붙여넣고 복원하기</button>
-            </div>
-            <div style="text-align:right; margin-top:15px;">
-                <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='none'">닫기</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 엑셀 일괄 복사 연동 모달 -->
     <div id="data-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>⚙️ 엑셀 과거 자산 연동 (최신화 덮어쓰기)</h2>
             <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; line-height: 1.4;">
                 가지고 계신 <b>[과거 자산 종합.xlsx]</b> 파일을 열고,<br>
                 데이터 영역(기간, 계좌명, 투자원금, 평가금액)을 복사해서 붙여넣어 주세요.<br>
+                (엑셀 쉼표, 원화 기호 등을 완벽하게 자체 필터링하여 반영합니다.)
             </p>
             <textarea id="csv-history-data" class="modal-textarea" rows="10" placeholder="26년 1월   한투AIM(재원)   62,400,000   85,434,964..."></textarea>
+            
             <div style="display:flex; gap:10px; justify-content:flex-end;">
                 <button class="header-btn" onclick="document.getElementById('data-modal').style.display='none'">닫기</button>
                 <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none;" onclick="parseAndSaveHistoryCSV()">💾 즉시 데이터 반영</button>
@@ -171,7 +179,6 @@
         </div>
     </div>
 
-    <!-- 차트 클릭 시 뜨는 개별 월 수정 모달 -->
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 400px; text-align: left;">
             <h2 id="edit-modal-title" style="margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid var(--border-dash); padding-bottom: 10px;">데이터 수정</h2>
@@ -197,9 +204,7 @@
             <div class="header-wrap">
                 <h1>📊 매크로 & 자산 배분 시스템</h1>
                 <div class="header-controls">
-                    <!-- 💡 신규 동기화 버튼 추가 -->
-                    <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='flex'">🔄 기기 동기화</button>
-                    <button class="header-btn btn-highlight" onclick="document.getElementById('data-modal').style.display='flex'">⚙️ 과거 데이터 연동</button>
+                    <button class="header-btn" onclick="toggleLayout()" id="layout-btn">📱 1열/3열</button>
                     <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 모드</button>
                 </div>
             </div>
@@ -222,40 +227,43 @@
         </div>
 
         <div class="account-summary-box" id="summary-widget" style="display:none;">
-            <div style="display:flex; flex-direction:column; gap:10px; width:48%;">
+            <div class="summary-half">
                 <div class="summary-item"><span class="label">총 자산 평가액</span><span class="value" id="sum-total-value">0원</span></div>
                 <div class="summary-item"><span class="label" id="profit-label">총 실시간 수익금</span><span class="value" id="sum-profit-value">0원 (0.0%)</span></div>
             </div>
             
-            <div style="display:flex; flex-direction:column; gap:10px; width:48%; align-items: flex-end;">
-                <div class="summary-item" style="align-items:flex-end;">
+            <div class="summary-half right-align">
+                <div class="summary-item">
                     <span class="label">💡 이번 달 누적 투자 원금</span>
                     <div style="display:flex; align-items:center; gap:4px;">
-                        <input type="number" class="cash-sim-input" id="principal-val" value="0" step="10000" onchange="updatePrincipal(this.value)"> <span>원</span>
+                        <input type="text" class="cash-sim-input" id="principal-masked-val" value="0" oninput="handleLiveCommaMasking(this, 'principal')"> <span>원</span>
                     </div>
                 </div>
-                <div class="summary-item" style="align-items:flex-end;" id="sim-input-wrapper">
+                <div class="summary-item">
                     <span class="label">현금 추가 시뮬레이션</span>
                     <div style="display:flex; align-items:center; gap:4px;">
-                        <input type="number" class="cash-sim-input" style="border-color:var(--input-border);" id="cash-simulation-val" value="0" step="100000" oninput="calculateRebalancingEngine()"> <span>원</span>
+                        <input type="text" class="cash-sim-input" style="border-color:var(--input-border);" id="simulation-masked-val" value="0" oninput="handleLiveCommaMasking(this, 'simulation')"> <span>원</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 동적 렌더링 컨테이너 -->
         <div id="dynamic-content-area"></div>
     </div>
 
     <script>
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         
-        // 💡 1. 영구 보존 키 고정 (V27 버전 업그레이드)
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV27_";
+        // 💡 5. 요구사항: 사용자 영구 핵심 키값 고정 브릿지 가동
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV25_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
         let trendEndDateStr = '2026-07'; 
+
+        // 내부 수치 저장을 위한 가상 내부 노출 버퍼 엔진 상태값
+        let rawNumericPrincipal = 0;
+        let rawNumericSimulation = 0;
 
         const DEFAULT_MACRO_ASSETS = [
             { type: 'asset', ticker: 'MAGS', name: 'MAGS ETF (빅테크7)' },
@@ -268,77 +276,24 @@
 
         function getAccIdByName(name) { return 'acc_' + name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9가-힣]/g, ''); }
 
-        // ============================================================================
-        // 💡 2. 강력한 마이그레이션 엔진 (과거 모든 버전 훑어서 데이터 끌어오기)
-        // ============================================================================
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
-            const oldPrefixes = ['macroDashboard_MasterV26_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV22_', 'macroDashboard_Master_'];
-            let found = false;
-            for (let prefix of oldPrefixes) {
-                if (localStorage.getItem(prefix + 'tabs')) {
-                    for (let i = 0; i < localStorage.length; i++) {
-                        let key = localStorage.key(i);
-                        if (key.startsWith(prefix)) {
-                            let newKey = key.replace(prefix, STORAGE_KEY_PREFIX);
-                            localStorage.setItem(newKey, localStorage.getItem(key));
-                            found = true;
-                        }
-                    }
-                    if (found) break; // 가장 최근 데이터 복원 후 중단
-                }
-            }
-        }
-
-        // ============================================================================
-        // 💡 3. 기기 간 동기화 백업 / 복원 로직 (PC <-> 모바일)
-        // ============================================================================
-        function exportData() {
-            let backup = {};
-            for(let i=0; i<localStorage.length; i++) {
-                let key = localStorage.key(i);
-                if(key.startsWith(STORAGE_KEY_PREFIX)) {
-                    backup[key] = localStorage.getItem(key);
-                }
-            }
-            // base64로 인코딩하여 전송 중 텍스트 깨짐 방지
-            let dataStr = btoa(encodeURIComponent(JSON.stringify(backup)));
-            let textArea = document.getElementById('sync-data-area');
-            textArea.value = dataStr;
+        // 💡 요구사항 1: 실시간 마스킹 제어 핸들러 함수 엔진
+        function handleLiveCommaMasking(el, targetType) {
+            let numericString = el.value.replace(/[^\d]/g, '');
+            if(!numericString) numericString = '0';
+            let parsedNumber = parseFloat(numericString);
             
-            // 클립보드 자동 복사
-            navigator.clipboard.writeText(dataStr).then(() => {
-                alert('데이터가 성공적으로 복사되었습니다!\n카카오톡 "내게 쓰기" 등에 붙여넣고 모바일 기기로 전송하세요.');
-            }).catch(err => {
-                textArea.select();
-                document.execCommand('copy');
-                alert('데이터가 성공적으로 복사되었습니다!\n카카오톡 "내게 쓰기" 등에 붙여넣고 모바일 기기로 전송하세요.');
-            });
-        }
-
-        function importData() {
-            let dataStr = document.getElementById('sync-data-area').value.trim();
-            if(!dataStr) { alert("백업 데이터를 빈칸에 붙여넣어주세요."); return; }
-            try {
-                let backup = JSON.parse(decodeURIComponent(atob(dataStr)));
-                let count = 0;
-                for(let key in backup) {
-                    if(key.startsWith(STORAGE_KEY_PREFIX)) {
-                        localStorage.setItem(key, backup[key]);
-                        count++;
-                    }
-                }
-                if(count > 0) {
-                    alert("데이터 복원이 완벽하게 완료되었습니다!");
-                    location.reload();
-                } else {
-                    alert("유효한 백업 데이터 구조가 아닙니다.");
-                }
-            } catch(e) {
-                alert("데이터 복원 중 오류가 발생했습니다. 카카오톡 등에서 전체 텍스트가 빠짐없이 정확히 복사되었는지 확인해 주세요.");
+            el.value = parsedNumber.toLocaleString('ko-KR');
+            
+            if(targetType === 'principal') {
+                rawNumericPrincipal = parsedNumber;
+                updatePrincipal(parsedNumber);
+            } else {
+                rawNumericSimulation = parsedNumber;
+                calculateRebalancingEngine();
             }
         }
 
-        // CSV 라인 파싱 (쉼표 완벽 방어)
+        // CSV 라인 파싱 
         function parseRow(line) {
             let s = line.trim();
             if (s.includes('\t')) return s.split('\t').map(v => v.trim());
@@ -353,7 +308,6 @@
             return res.map(v => v.replace(/"/g, ''));
         }
 
-        // 새로고침 없는 엑셀 데이터 다이나믹 업데이트
         function parseAndSaveHistoryCSV() {
             const text = document.getElementById('csv-history-data').value.trim();
             if(!text) { alert("입력된 데이터가 없습니다."); return; }
@@ -406,26 +360,13 @@
                 localStorage.setItem(STORAGE_KEY_PREFIX + 'combinedSelections', JSON.stringify(currentTabs.map(t=>t.id)));
             }
 
-            alert(count + '건의 과거 성과 데이터가 성공적으로 병합되었습니다!');
-            
+            alert(count + '건의 과거 성과 데이터가 반영되었습니다!');
             document.getElementById('data-modal').style.display = 'none';
             document.getElementById('csv-history-data').value = '';
-            
-            // 전역 변수 갱신 후 즉각 뷰 렌더링 (No-Reload)
             portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
             combinedSelections = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) || [];
-            portfolios = {}; 
             portfolioTabs.forEach(tab => { portfolios[tab.id] = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + tab.id)) || []; });
-            
             switchView(currentView);
-        }
-
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v27')) {
-            let tabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
-            if(tabs.length === 0) {
-                alert("초기화된 환경입니다. [과거 데이터 연동] 또는 [기기 동기화] 기능을 이용해 데이터를 불러오세요!");
-            }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v27', 'true');
         }
 
         let portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
@@ -448,6 +389,7 @@
             if (container) {
                 if (container.classList.contains('mobile-3col')) { container.classList.remove('mobile-3col'); localStorage.setItem('mobileLayout_Master', '1col'); }
                 else { container.classList.add('mobile-3col'); localStorage.setItem('mobileLayout_Master', '3col'); }
+                renderDashboard();
             }
         }
 
@@ -477,41 +419,6 @@
             return portfolios[currentView] || [];
         }
 
-        function updateAccountName(newName) {
-            if (currentView === 'macro' || currentView === 'combined' || currentView === 'portfolio_hub') return;
-            let tab = portfolioTabs.find(t => t.id === currentView);
-            if (tab && newName.trim() !== "") { tab.name = newName.trim(); saveTabs(); }
-        }
-
-        function updatePrincipal(val) {
-            let newPrincipal = parseFloat(val) || 0;
-            if (currentView === 'combined') {
-                alert("합산 화면에서는 개별 계좌의 원금 합계가 자동 정산됩니다.");
-                calculateRebalancingEngine();
-            } else {
-                let tab = portfolioTabs.find(t => t.id === currentView);
-                if(tab) { tab.principal = newPrincipal; saveTabs(); calculateRebalancingEngine(); }
-            }
-        }
-
-        function saveChartEdit() {
-            const ym = document.getElementById('edit-modal-ym').value;
-            const p = parseFloat(document.getElementById('edit-modal-principal').value) || 0;
-            const e = parseFloat(document.getElementById('edit-modal-eval').value) || 0;
-            
-            document.getElementById('edit-modal').style.display = 'none';
-            
-            let hKey = STORAGE_KEY_PREFIX + 'history_' + currentView;
-            let history = JSON.parse(localStorage.getItem(hKey)) || [];
-            let match = history.find(h => h.date.substring(0,7) === ym);
-            if (match) { match.principal = p; match.evalValue = e; } 
-            else { history.push({ date: ym + '-28', principal: p, evalValue: e }); }
-            history.sort((a,b) => a.date.localeCompare(b.date));
-            localStorage.setItem(hKey, JSON.stringify(history));
-            
-            calculateRebalancingEngine();
-        }
-
         function switchView(viewMode) {
             currentView = viewMode;
             document.querySelectorAll('.main-tab-btn').forEach(btn => btn.className = 'main-tab-btn');
@@ -522,7 +429,7 @@
             const summaryWidget = document.getElementById('summary-widget');
             const combinedBox = document.getElementById('combined-selector');
             const backBtn = document.getElementById('back-btn-wrap');
-            const principalInput = document.getElementById('principal-val');
+            const principalInput = document.getElementById('principal-masked-val');
 
             summaryWidget.style.display = 'none'; combinedBox.style.display = 'none'; backBtn.style.display = 'none';
 
@@ -533,61 +440,46 @@
             } else if (viewMode === 'combined') {
                 summaryWidget.style.display = 'flex'; combinedBox.style.display = 'flex';
                 principalInput.disabled = true;
-                let cbHtml = '';
-                (portfolioTabs || []).forEach(tab => {
-                    let isChecked = (combinedSelections || []).includes(tab.id) ? 'checked' : '';
-                    cbHtml += `<label class="acc-checkbox-label"><input type="checkbox" value="${tab.id}" ${isChecked} onchange="updateCombinedSelection()"> ${tab.name}</label>`;
-                });
-                document.getElementById('checkbox-container').innerHTML = cbHtml; 
                 renderDashboard();
             } else {
                 summaryWidget.style.display = 'flex'; backBtn.style.display = 'block';
                 principalInput.disabled = false;
                 let tab = portfolioTabs.find(t => t.id === currentView);
-                if(tab) { document.getElementById('detail-account-name').innerText = tab.name; principalInput.value = Math.round(tab.principal || 0); }
+                if(tab) { 
+                    document.getElementById('detail-account-name').innerText = tab.name; 
+                    rawNumericPrincipal = Math.round(tab.principal || 0);
+                    principalInput.value = rawNumericPrincipal.toLocaleString('ko-KR'); 
+                }
                 renderDashboard();
             }
         }
 
-        function updateCombinedSelection() {
-            let checkboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]');
-            combinedSelections = []; checkboxes.forEach(cb => { if(cb.checked) combinedSelections.push(cb.value); });
-            saveCombinedSelections(); renderDashboard(); 
+        function updateAccountName(newName) {
+            if (currentView === 'macro' || currentView === 'combined' || currentView === 'portfolio_hub') return;
+            let tab = portfolioTabs.find(t => t.id === currentView);
+            if (tab && newName.trim() !== "") { tab.name = newName.trim(); saveTabs(); }
         }
 
-        function addNewAccount() {
-            let name = prompt("새로운 계좌 이름을 입력하세요"); if (!name) return;
-            let newId = 'acc_' + Date.now(); portfolioTabs.push({ id: newId, name: "💼 " + name.trim(), principal: 0 });
-            portfolios[newId] = []; combinedSelections.push(newId); saveCombinedSelections(); saveTabs(); switchView(newId);
+        function updatePrincipal(parsedNumber) {
+            if (currentView === 'combined') return;
+            let tab = portfolioTabs.find(t => t.id === currentView);
+            if(tab) { tab.principal = parsedNumber; saveTabs(); calculateRebalancingEngine(); }
         }
 
-        function bulkTakeSnapshot() {
-            let dateStr = new Date().toISOString().split('T')[0];
-            let ym = dateStr.substring(0,7);
-            if(!confirm(`현재 실시간 주가와 원금을 기준으로 모든 계좌의 [${ym}] 마감 기록을 저장하시겠습니까?\n(이미 이번 달 기록이 있다면 새 값으로 덮어씁니다.)`)) return;
-
-            let fxRate = livePrices['KRW=X'] || 1350;
+        function saveChartEdit() {
+            const ym = document.getElementById('edit-modal-ym').value;
+            const p = parseFloat(document.getElementById('edit-modal-principal').value) || 0;
+            const e = parseFloat(document.getElementById('edit-modal-eval').value) || 0;
+            document.getElementById('edit-modal').style.display = 'none';
             
-            portfolioTabs.forEach(tab => {
-                let accAssets = portfolios[tab.id] || [];
-                let totalVal = 0;
-                accAssets.forEach(a => {
-                    let t = (a.ticker || '').toUpperCase();
-                    let p = livePrices[a.ticker] || 1;
-                    if(['CASH','예수금','현금'].includes(t)) p = 1;
-                    const isWon = t.indexOf('.KS') !== -1 || t.indexOf('.KQ') !== -1 || t === 'CASH';
-                    totalVal += isWon ? (p * (parseFloat(a.quantity)||0)) : (p * (parseFloat(a.quantity)||0) * fxRate);
-                });
-                
-                let hKey = STORAGE_KEY_PREFIX + 'history_' + tab.id;
-                let history = JSON.parse(localStorage.getItem(hKey)) || [];
-                history = history.filter(h => h.date.substring(0,7) !== ym);
-                history.push({ date: ym + '-28', principal: tab.principal || 0, evalValue: totalVal });
-                history.sort((a,b) => a.date.localeCompare(b.date));
-                localStorage.setItem(hKey, JSON.stringify(history));
-            });
-            alert('✅ 모든 계좌의 이번 달 실적 마감이 완료되어 차트에 영구 반영되었습니다.');
-            renderHubView();
+            let hKey = STORAGE_KEY_PREFIX + 'history_' + currentView;
+            let history = JSON.parse(localStorage.getItem(hKey)) || [];
+            let match = history.find(h => h.date.substring(0,7) === ym);
+            if (match) { match.principal = p; match.evalValue = e; } 
+            else { history.push({ date: ym + '-28', principal: p, evalValue: e }); }
+            history.sort((a,b) => a.date.localeCompare(b.date));
+            localStorage.setItem(hKey, JSON.stringify(history));
+            calculateRebalancingEngine();
         }
 
         async function renderHubView() {
@@ -608,10 +500,6 @@
                 <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none; padding:8px 15px;" onclick="bulkTakeSnapshot()">📸 현재 상태로 전체 일괄 마감</button>
             </div>
             <div id="cards-container">`;
-            
-            if(portfolioTabs.length === 0) {
-                htmlStr += `<div style="width:100%; padding:30px; text-align:center; color:var(--text-sub);">등록된 계좌가 없습니다. 상단 [과거 데이터 연동] 버튼을 통해 데이터를 가져오세요.</div>`;
-            }
 
             (portfolioTabs || []).forEach(tab => {
                 let accAssets = portfolios[tab.id] || []; let evalWon = 0;
@@ -644,7 +532,6 @@
                 let activeList = getActiveArray() || []; let isCombined = (currentView === 'combined');
                 let htmlStr = '';
 
-                // 공통 요약 차트
                 if (currentView !== 'macro' && activeList.length > 0) {
                     htmlStr += `
                         <div class="summary-chart-card" style="margin-bottom: 20px;">
@@ -670,34 +557,29 @@
                 }
 
                 if (currentView === 'macro') {
-                    htmlStr += `<div id="cards-container">`;
+                    // 기기 연동 레이아웃 속성 추출
+                    let layoutClass = localStorage.getItem('mobileLayout_Master') === '3col' ? 'mobile-3col' : '';
+                    htmlStr += `<div id="cards-container" class="${layoutClass}">`;
                     for (let i = 0; i < 12; i++) {
                         if (i < activeList.length) {
                             let asset = activeList[i]; const cardId = 'card-' + (asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, ''); 
-                            if (asset.type === 'scheduler') {
-                                htmlStr += `
-                                    <div class="card scheduler-card non-draggable" id="${cardId}">
-                                        <div class="asset-info"><h2>${asset.name}</h2><p>재무부 정책 집중 일정</p></div>
-                                        <ul class="scheduler-list"><li><span>국채 발행 계획 (QRA)</span><span class="sched-date">2026-07-29</span></li><li><span>의회 예산국 적자 점검</span><span class="sched-date">2026-09-30</span></li></ul>
-                                    </div>`;
-                            } else {
-                                htmlStr += `
-                                    <div class="card asset-card" id="${cardId}" data-ticker="${asset.ticker}">
-                                        <button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>
-                                        <div class="asset-info">
-                                            <h2><span class="editable-name" contenteditable="true" onblur="updateInlineAsset('${asset.ticker}', 'name', this.innerText.trim())">${asset.name || '동기화 중...'}</span></h2>
-                                            <p>${asset.ticker}</p>
+                            htmlStr += `
+                                <div class="card asset-card" id="${cardId}" data-ticker="${asset.ticker}">
+                                    <button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>
+                                    <div class="asset-info">
+                                        <h2><span class="editable-name" contenteditable="true" onblur="updateInlineAsset('${asset.ticker}', 'name', this.innerText.trim())">${asset.name || '동기화 중...'}</span></h2>
+                                        <p>${asset.ticker}</p>
+                                    </div>
+                                    <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
+                                    <div class="data-section">
+                                        <div class="mdd-wrapper">
+                                            <div class="price-line">현재: <span id="price-${cardId}" class="price-current">-</span></div>
+                                            <div class="price-high" id="high-wrapper-${cardId}" style="display:inline-block; font-size:0.75rem; color:var(--text-sub);">(<span style="color:#e74c3c;">🔴</span> 고점: <span id="high-${cardId}" style="color:#e74c3c; font-weight:bold;">-</span>)</div>
                                         </div>
-                                        <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
-                                        <div class="data-section">
-                                            <div class="mdd-wrapper">
-                                                <div class="price-line">현재: <span id="price-${cardId}" class="price-current">-</span></div>
-                                                <div class="price-high" id="high-wrapper-${cardId}" style="display:inline-block; font-size:0.75rem; color:var(--text-sub);">(<span style="color:#e74c3c;">🔴</span> 고점: <span id="high-${cardId}" style="color:#e74c3c; font-weight:bold;">-</span>)</div>
-                                            </div>
-                                            <div class="right-display-wrapper"><div id="mdd-${cardId}" class="mdd-value">-</div><div id="status-${cardId}" class="status-badge status-loading">조회 중⏳</div></div>
-                                        </div>
-                                    </div>`;
-                            }
+                                        <div class="right-display-wrapper"><div id="mdd-${cardId}" class="mdd-value">-</div><div id="status-${cardId}" class="status-badge status-loading">조회 중⏳</div></div>
+                                    </div>
+                                </div>
+                            `;
                         } else if (i === activeList.length) {
                             htmlStr += `<div class="card empty-card non-draggable"><div class="add-form"><h3>➕ 모듈 추가</h3><input type="text" id="add-ticker" placeholder="티커 코드"><input type="text" id="add-name" placeholder="표시 이름"><button onclick="gridAddModule('macro')">추가하기</button></div></div>`;
                         }
@@ -764,7 +646,7 @@
                 container.innerHTML = htmlStr;
                 initDragAndDrop();
 
-                // 💡 초고속 비동기 병렬 통신 엔진 (Staggered Parallel Fetching)
+                // 초고속 비동기 병렬 통신 엔진 (Staggered Parallel Fetching)
                 let fetchPromises = [];
                 let delay = 0;
                 for (let asset of activeList) {
@@ -783,7 +665,7 @@
                             await fetchData(asset, cardId);
                             resolve();
                         }));
-                        delay += 100; // 0.1초씩 부하 분산하며 동시 로딩
+                        delay += 80; // 0.08초 간격 스태거링 분산 (속도 대폭 상향)
                     }
                 }
                 
@@ -793,27 +675,33 @@
             } catch(e) { console.error("Dashboard Render Error:", e); }
         }
 
-        function updateInlineAsset(ticker, field, value) {
-            let list = getActiveArray(); let asset = list.find(a => a.ticker === ticker);
-            if (asset) { asset[field] = (field==='name')? value: parseFloat(value)||0; saveCurrentState(); if (currentView !== 'macro') calculateRebalancingEngine(); }
-        }
-
+        // 💡 요구사항 3: 터치 지연 딜레이 부여를 통한 모달/그리드 스크롤 Freeze 문제 해결
         function initDragAndDrop() {
             if (currentView === 'macro') {
                 const el = document.getElementById('cards-container');
                 if(el) {
-                    new Sortable(el, { animation: 200, filter: '.non-draggable', onEnd: function (evt) {
-                        let list = getActiveArray(); let movedItem = list.splice(evt.oldIndex, 1)[0]; list.splice(evt.newIndex, 0, movedItem); 
-                        saveCurrentState(); renderDashboard();
-                    }});
+                    new Sortable(el, { 
+                        animation: 200, 
+                        filter: '.non-draggable', 
+                        delay: 350, // 💡 0.35초간 누르고 있어야 드래그 활성화 (모바일 스크롤 완벽 보장)
+                        delayOnTouchOnly: true, 
+                        onEnd: function (evt) {
+                            let list = getActiveArray(); let movedItem = list.splice(evt.oldIndex, 1)[0]; list.splice(evt.newIndex, 0, movedItem); 
+                            saveCurrentState(); renderDashboard();
+                        }
+                    });
                 }
             } else if (currentView !== 'combined') {
                 const el = document.getElementById('portfolio-tbody');
                 if(el) {
-                    new Sortable(el, { animation: 200, handle: '.drag-handle', onEnd: function (evt) {
-                        let list = getActiveArray(); let movedItem = list.splice(evt.oldIndex, 1)[0]; list.splice(evt.newIndex, 0, movedItem); 
-                        saveCurrentState(); renderDashboard();
-                    }});
+                    new Sortable(el, { 
+                        animation: 200, 
+                        handle: '.drag-handle', 
+                        onEnd: function (evt) {
+                            let list = getActiveArray(); let movedItem = list.splice(evt.oldIndex, 1)[0]; list.splice(evt.newIndex, 0, movedItem); 
+                            saveCurrentState(); renderDashboard();
+                        }
+                    });
                 }
             }
         }
@@ -899,8 +787,7 @@
                     });
                 }
 
-                let simulationBonusCashWon = parseFloat(document.getElementById('cash-simulation-val') ? document.getElementById('cash-simulation-val').value : 0) || 0;
-                let finalTotalAccountValueWon = totalAccountValueInWon + simulationBonusCashWon;
+                let finalTotalAccountValueWon = totalAccountValueInWon + rawNumericSimulation;
                 let profit = totalAccountValueInWon - totalPrincipal;
                 let roi = totalPrincipal > 0 ? (profit / totalPrincipal) * 100 : 0;
 
@@ -1011,55 +898,39 @@
                         plugins: [{
                             id: 'trendLabelPlugin',
                             afterDatasetsDraw(chart) {
-                                const ctx = chart.ctx;
-                                ctx.font = 'bold 10px "Malgun Gothic"';
-                                ctx.textAlign = 'center';
-
-                                const barMeta = chart.getDatasetMeta(0); 
-                                const lineMeta = chart.getDatasetMeta(1); 
+                                const ctx = chart.ctx; ctx.font = 'bold 10px "Malgun Gothic"'; ctx.textAlign = 'center';
+                                const barMeta = chart.getDatasetMeta(0); const lineMeta = chart.getDatasetMeta(1); 
                                 if (barMeta.hidden && lineMeta.hidden) return;
 
                                 for (let idx = 0; idx < chart.data.labels.length; idx++) {
                                     const barEl = barMeta.data[idx]; const lineEl = lineMeta.data[idx];
                                     const barVal = chart.data.datasets[0].data[idx]; const lineVal = chart.data.datasets[1].data[idx];
-
                                     let barLabelY = 0; let barAlign = 'middle';
                                     if (barEl && !barMeta.hidden && barVal !== 0) {
                                         barLabelY = barVal >= 0 ? barEl.y - 5 : barEl.y + 5;
                                         barAlign = barVal >= 0 ? 'bottom' : 'top';
                                     }
-
                                     let lineLabelY = 0; let lineAlign = 'middle';
                                     if (lineEl && !lineMeta.hidden) {
                                         lineLabelY = lineVal >= 0 ? lineEl.y - 12 : lineEl.y + 12;
                                         lineAlign = lineVal >= 0 ? 'bottom' : 'top';
                                     }
-
                                     if (barEl && lineEl && !barMeta.hidden && !lineMeta.hidden && barVal !== 0) {
                                         if (Math.abs(barLabelY - lineLabelY) < 18) {
                                             if (lineLabelY <= barLabelY) { lineLabelY -= 8; barLabelY += 8; barAlign = 'top'; lineAlign = 'bottom'; } 
                                             else { lineLabelY += 8; barLabelY -= 8; barAlign = 'bottom'; lineAlign = 'top'; }
                                         }
                                     }
-
-                                    ctx.strokeStyle = isDark ? 'rgba(30,30,30,0.8)' : 'rgba(255,255,255,0.8)';
-                                    ctx.lineWidth = 4;
-
+                                    ctx.strokeStyle = isDark ? 'rgba(30,30,30,0.8)' : 'rgba(255,255,255,0.8)'; ctx.lineWidth = 4;
                                     if (barEl && !barMeta.hidden && barVal !== 0) {
-                                        ctx.fillStyle = isDark ? '#e0e0e0' : '#2c3e50';
-                                        ctx.textBaseline = barAlign;
-                                        const manwon = Math.round(barVal / 10000);
-                                        const text = manwon.toLocaleString() + '만';
-                                        ctx.strokeText(text, barEl.x, barLabelY);
-                                        ctx.fillText(text, barEl.x, barLabelY);
+                                        ctx.fillStyle = isDark ? '#e0e0e0' : '#2c3e50'; ctx.textBaseline = barAlign;
+                                        const text = Math.round(barVal / 10000).toLocaleString() + '만';
+                                        ctx.strokeText(text, barEl.x, barLabelY); ctx.fillText(text, barEl.x, barLabelY);
                                     }
-
                                     if (lineEl && !lineMeta.hidden) {
-                                        ctx.fillStyle = '#f39c12';
-                                        ctx.textBaseline = lineAlign;
+                                        ctx.fillStyle = '#f39c12'; ctx.textBaseline = lineAlign;
                                         const text = lineVal + '%';
-                                        ctx.strokeText(text, lineEl.x, lineLabelY);
-                                        ctx.fillText(text, lineEl.x, lineLabelY);
+                                        ctx.strokeText(text, lineEl.x, lineLabelY); ctx.fillText(text, lineEl.x, lineLabelY);
                                     }
                                 }
                             }
@@ -1070,12 +941,9 @@
                             onClick: (e, activeEls) => {
                                 if (activeEls.length > 0) {
                                     if(currentView === 'combined') { alert("전체 합산 화면에서는 과거 데이터를 직접 수정할 수 없습니다."); return; }
-                                    const idx = activeEls[0].index;
-                                    const rawData = safeFilteredHistory[idx];
-                                    if(!rawData) return;
-                                    if(rawData.isCurrent) { alert("이번 달(현재 실시간) 데이터는 우측 상단의 '이번 달 누적 투자 원금' 입력칸에서 바로 수정하세요."); return; }
+                                    const idx = activeEls[0].index; const rawData = safeFilteredHistory[idx]; if(!rawData) return;
+                                    if(rawData.isCurrent) { alert("이번 달 데이터는 우측 원금 입력칸에서 바로 수정하세요."); return; }
                                     const ym = rawData.date.substring(0,7);
-                                    
                                     document.getElementById('edit-modal-ym').value = ym;
                                     document.getElementById('edit-modal-title').innerText = `[ ${ym} ] 성과 데이터 직접 수정`;
                                     document.getElementById('edit-modal-principal').value = Math.round(rawData.principal);
@@ -1130,7 +998,6 @@
             let customName = document.getElementById('add-name').value.trim();
             let qtyInput = document.getElementById('add-qty');
             let initialQty = qtyInput ? (parseFloat(qtyInput.value) || 0) : 0;
-
             if(type === 'cash') { ticker = 'CASH'; if(!customName) customName = '원화 예수금'; }
             if (!ticker) return;
             let list = getActiveArray();
