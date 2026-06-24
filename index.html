@@ -77,10 +77,13 @@
         .mdd-value { font-size: 1.15rem; font-weight: bold; text-align: right; }
         .status-badge { padding: 3px 8px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
 
-        /* ── 로딩 스피너 (신규) ── */
+        /* 로딩 스피너 및 새로고침 애니메이션 */
         .fetch-loading { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-sub); }
         .spinner { width: 14px; height: 14px; border: 2px solid var(--border-dash); border-top-color: var(--tab-active); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @keyframes spin-once { 0% { transform: rotate(0deg); } 100% { transform: rotate(720deg); } }
+        .spin-once { animation: spin-once 1.5s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; }
         
         .lower-chart-card { width: 100%; background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; }
         .lower-charts-flex { display: flex; gap: 20px; width: 100%; flex-wrap: wrap; }
@@ -90,15 +93,21 @@
         .date-picker-wrap { display: flex; gap: 5px; align-items: center; }
         .date-picker-wrap input[type="month"] { padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 0.75rem; background: var(--bg-card); color: var(--text-main); font-family: inherit; }
 
+        /* 💡 추가: 허브 카드 테두리 ROI 연동을 위한 전용 클래스 */
         .hub-card { background: var(--bg-card); border-radius: 12px; padding: 20px; border: 2px solid transparent; box-shadow: 0 4px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s, border-color 0.2s; height: 160px; position: relative; box-sizing: border-box; }
-        .hub-card:hover { transform: translateY(-5px); border-color: var(--tab-portfolio); }
+        .hub-card.border-dg { border-color: #27ae60; } /* 진초록 */
+        .hub-card.border-lg { border-color: #2ecc71; } /* 연초록 */
+        .hub-card.border-lb { border-color: #3498db; } /* 연파랑 */
+        .hub-card.border-db { border-color: #2980b9; } /* 진파랑 */
+        .hub-card:hover { transform: translateY(-5px); border-color: var(--tab-portfolio) !important; }
         .hub-card h2 { margin: 0 0 10px 0; font-size: 1.2rem; }
         .hub-val { font-size: 1.35rem; font-weight: bold; margin-bottom: 5px; }
         .hub-roi { font-size: 1.05rem; font-weight: bold; }
         .hub-add-card { border: 2px dashed var(--border-dash); background: transparent; box-shadow: none; color: var(--text-sub); }
 
         .table-container { width: 100%; overflow-x: auto; background: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; margin-bottom: 20px; }
-        .portfolio-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 900px; }
+        /* 테이블 열이 늘어나 모바일 스크롤 확보를 위해 최소 너비 소폭 연장 */
+        .portfolio-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 950px; }
         .portfolio-table th, .portfolio-table td { padding: 12px 8px; border-bottom: 1px solid var(--border-dash); text-align: right; vertical-align: middle; }
         .portfolio-table th { background: var(--bg-body); color: var(--text-sub); font-weight: bold; text-align: right; }
         .portfolio-table th:first-child, .portfolio-table td:first-child { text-align: left; }
@@ -149,7 +158,6 @@
             .summary-item { flex-direction: row; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; margin-bottom: 2px; }
             .summary-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
             .summary-item .label { margin-bottom: 0; }
-            .portfolio-table { min-width: 900px; }
             
             #cards-container:not(.mobile-3col) { grid-template-columns: 1fr; gap: 15px; }
             #cards-container.mobile-3col { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
@@ -226,9 +234,10 @@
             <div class="header-wrap">
                 <h1>📊 매크로 & 자산 배분 시스템</h1>
                 <div class="header-controls">
+                    <button class="header-btn" onclick="forceRefresh()"><span id="refresh-btn-icon" style="display:inline-block;">🔄</span> 새로고침</button>
                     <button class="header-btn" onclick="toggleLayout()" id="layout-btn">📱 1열/3열</button>
-                    <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='flex'">🔄 기기 동기화</button>
-                    <button class="header-btn btn-highlight" onclick="document.getElementById('data-modal').style.display='flex'">⚙️ 과거 데이터 연동</button>
+                    <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='flex'">🔄 동기화</button>
+                    <button class="header-btn btn-highlight" onclick="document.getElementById('data-modal').style.display='flex'">⚙️ 엑셀 연동</button>
                     <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 모드</button>
                 </div>
             </div>
@@ -289,8 +298,8 @@
 
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
 
-        // ★ 데이터 키는 V34 그대로 유지 → 기존 모든 계좌/마감/비중 데이터 자동 승계
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV34_";
+        // 💡 마이그레이션 키 V35 전환
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV35_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
@@ -322,9 +331,9 @@
 
         function getAccIdByName(name) { return 'acc_' + name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9가-힣]/g, ''); }
 
-        // 마이그레이션 모듈 (V22~V33 → V34 승계, 기존 로직 완전 보존)
+        // 마이그레이션 모듈 (V22~V34 완벽 승계)
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
-            const oldPrefixes = ['macroDashboard_MasterV33_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV22_', 'macroDashboard_Master_'];
+            const oldPrefixes = ['macroDashboard_MasterV34_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV22_', 'macroDashboard_Master_'];
             let found = false;
             for (let prefix of oldPrefixes) {
                 if (localStorage.getItem(prefix + 'tabs')) {
@@ -339,6 +348,19 @@
                     if (found) break; 
                 }
             }
+        }
+
+        // 💡 기능 1: 수동 새로고침 처리 로직
+        function forceRefresh() {
+            const icon = document.getElementById('refresh-btn-icon');
+            if(icon) {
+                icon.classList.remove('spin-once');
+                void icon.offsetWidth; // DOM Reflow
+                icon.classList.add('spin-once');
+            }
+            livePrices = {};          // 실시간 가격 파기
+            window.rawChartData = {}; // 백그라운드 스파크라인 캐시 파기
+            switchView(currentView);  // UI 재요청 트리거
         }
 
         function exportData() {
@@ -431,8 +453,7 @@
             switchView(currentView);
         }
 
-        // 초기화 로직 및 TGA 잔고 자동 복원
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v34')) {
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v35')) {
             let macroCheck = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'macro')) || DEFAULT_MACRO_ASSETS;
             let hasTGA = macroCheck.some(a => a.ticker === 'FRED:WTREGEN');
             if(!hasTGA) macroCheck.push({ type: 'asset', ticker: 'FRED:WTREGEN', name: '미 재무부 TGA 잔고' });
@@ -442,7 +463,7 @@
             
             let tabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
             if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v34', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v35', 'true');
         }
 
         let portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
@@ -452,9 +473,6 @@
         let macroAssets = localStorage.getItem(STORAGE_KEY_PREFIX + 'macro') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'macro')) : DEFAULT_MACRO_ASSETS;
 
         let livePrices = {}; let chartInstances = {}; let summaryChartInstance = null; let trendChartInstance = null; let assetClassChartInstance = null;
-
-        // ★ 최적화 1: 요청 중복 방지용 진행 중 Promise 캐시
-        // 같은 ticker를 동시에 여러 곳에서 요청해도 실제 fetch는 1번만 발생
         const _fetchingPromises = {};
 
         if(localStorage.getItem("theme_Master") === "dark") document.body.classList.add("dark-mode");
@@ -599,20 +617,22 @@
             alert('✅ 모든 계좌의 이번 달 실적 마감이 완료되어 차트에 영구 반영되었습니다.'); renderHubView();
         }
 
+        function fetchOnce(ticker) {
+            if (_fetchingPromises[ticker]) return _fetchingPromises[ticker];
+            const p = fetch(`${MY_PROXY_URL}?ticker=${encodeURIComponent(ticker)}`).then(r => r.json()).finally(() => { delete _fetchingPromises[ticker]; });
+            _fetchingPromises[ticker] = p; return p;
+        }
+
         async function renderHubView() {
             const container = document.getElementById('dynamic-content-area');
             Object.values(chartInstances).forEach(c => c.destroy()); chartInstances = {};
             
             let fxRate = livePrices['KRW=X'] || 1350;
-            // KRW=X 환율 fetch: 가격과 함께 chartData도 미리 캐싱해두어 거시경제 탭 차트에 즉시 활용
             if(!livePrices['KRW=X']) {
                 try {
                     const data = await fetchOnce('KRW=X');
                     if(data && data.success) {
-                        livePrices['KRW=X'] = data.price;
-                        livePrices['KRW=X_h'] = data.high52;
-                        fxRate = data.price;
-                        // ★ 차트 데이터도 미리 저장 → 거시경제 탭 전환 시 재요청 없이 즉시 차트 표시
+                        livePrices['KRW=X'] = data.price; livePrices['KRW=X_h'] = data.high52; fxRate = data.price;
                         if(data.chartData && data.chartLabels) {
                             if(!window.rawChartData) window.rawChartData = {};
                             window.rawChartData['KRW=X'] = { prices: data.chartData, labels: data.chartLabels };
@@ -637,8 +657,18 @@
                     evalWon += isWon ? (price * (parseFloat(a.quantity)||0)) : (price * (parseFloat(a.quantity)||0) * fxRate);
                 });
                 let principal = tab.principal || 0; let profit = evalWon - principal; let roi = principal > 0 ? (profit / principal) * 100 : 0;
+                
+                // 💡 기능 4: 허브 카드 테두리에 ROI 기반 클래스 부여
+                let borderClass = '';
+                if(principal > 0) {
+                    if (roi >= 5) borderClass = 'border-dg';
+                    else if (roi >= 0) borderClass = 'border-lg';
+                    else if (roi >= -5) borderClass = 'border-lb';
+                    else borderClass = 'border-db';
+                }
+
                 htmlStr += `
-                    <div class="card hub-card" onclick="switchView('${tab.id}')">
+                    <div class="card hub-card ${borderClass}" onclick="switchView('${tab.id}')">
                         <button class="hub-delete-btn" onclick="event.stopPropagation(); if(confirm('이 계좌를 영구 삭제하시겠습니까?')){ portfolioTabs = portfolioTabs.filter(t=>t.id!=='${tab.id}'); saveTabs(); switchView('portfolio_hub'); }">&times;</button>
                         <div><h2 style="margin:0; font-size:1.15rem;">${tab.name}</h2><p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-sub);">누적 원금: ${Math.round(principal).toLocaleString()}원</p></div>
                         <div style="margin-top:10px;"><div class="hub-val" style="color:var(--tab-active);">${Math.round(evalWon).toLocaleString()}원</div><div class="hub-roi ${profit>=0?'profit-plus':'profit-minus'}">${profit>=0?'+':''}${Math.round(profit).toLocaleString()}원 (${roi.toFixed(1)}%)</div></div>
@@ -646,16 +676,6 @@
             });
             htmlStr += `<div class="card hub-card hub-add-card" onclick="addNewAccount()"><h2>➕ 빈 계좌 생성</h2></div></div>`;
             container.innerHTML = htmlStr;
-        }
-
-        // ★ 최적화 핵심: 진행 중인 fetch를 Promise로 캐싱하여 중복 요청 원천 차단
-        function fetchOnce(ticker) {
-            if (_fetchingPromises[ticker]) return _fetchingPromises[ticker]; // 이미 진행 중이면 동일 Promise 반환
-            const p = fetch(`${MY_PROXY_URL}?ticker=${encodeURIComponent(ticker)}`)
-                .then(r => r.json())
-                .finally(() => { delete _fetchingPromises[ticker]; }); // 완료 후 캐시에서 제거
-            _fetchingPromises[ticker] = p;
-            return p;
         }
 
         async function renderDashboard() {
@@ -701,7 +721,7 @@
                                         <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
                                         <div class="data-section">
                                             <div class="mdd-wrapper">
-                                                <div class="price-line">현재: <span id="price-${cardId}" class="price-current"><span class="fetch-loading"><span class="spinner"></span>조회 중</span></span></div>
+                                                <div class="price-line">현재: <span id="price-${cardId}" class="price-current"><span class="fetch-loading"><span class="spinner"></span>로딩 중</span></span></div>
                                                 <div class="price-high" id="high-wrapper-${cardId}" style="display:inline-block; font-size:0.75rem; color:var(--text-sub);">(<span style="color:#e74c3c;">🔴</span> 고점: <span id="high-${cardId}" style="color:#e74c3c; font-weight:bold;">-</span>)</div>
                                             </div>
                                             <div class="right-display-wrapper"><div id="mdd-${cardId}" class="mdd-value">-</div><div id="status-${cardId}" class="status-badge status-loading">⏳</div></div>
@@ -715,12 +735,13 @@
                     htmlStr += `</div>`;
                 } 
                 else {
+                    // 💡 기능 2: 표에 '트렌드' 열 추가
                     htmlStr += `
                     <div class="table-container">
                         <table class="portfolio-table">
                             <thead>
                                 <tr>
-                                    <th>자산군 / 종목명 (클릭 수정)</th><th>티커</th><th>현재가</th><th>보유 수량</th><th>평가금액</th><th>목표(%)</th><th>실제(%)</th><th>리밸런싱 신호</th>${!isCombined ? `<th>관리</th>` : ''}
+                                    <th>자산군 / 종목명 (클릭 수정)</th><th>티커</th><th>현재가</th><th>트렌드</th><th>보유 수량</th><th>평가금액</th><th>목표(%)</th><th>실제(%)</th><th>리밸런싱 신호</th>${!isCombined ? `<th>관리</th>` : ''}
                                 </tr>
                             </thead><tbody id="portfolio-tbody">`;
                     
@@ -730,6 +751,7 @@
                         ASSET_CLASSES.forEach(cls => { selectHTML += `<option value="${cls}" ${asset.assetClass === cls ? 'selected' : ''}>${cls}</option>`; });
                         selectHTML += `</select>`;
 
+                        // 트렌드 td 추가
                         htmlStr += `
                             <tr id="${cardId}" data-ticker="${asset.ticker}">
                                 <td style="text-align:left; vertical-align: top;">
@@ -741,6 +763,7 @@
                                 </td>
                                 <td style="text-align:center;"><span class="ticker-badge">${asset.ticker}</span></td>
                                 <td id="price-${cardId}"><span class="fetch-loading"><span class="spinner"></span></span></td>
+                                <td id="spark-${cardId}"><span style="color:var(--border-dash); font-size:0.6rem;">-</span></td>
                                 <td>${isCombined ? asset.quantity : `<input type="number" class="table-input" id="edit-qty-${cardId}" value="${asset.quantity}" oninput="updateInlineAsset('${asset.ticker}', 'quantity', this.value)">`}</td>
                                 <td id="eval-${cardId}" style="font-weight:bold; color:var(--text-main);">-</td>
                                 <td>${isCombined ? `<span id="target-weight-display-${cardId}">-</span>` : `<input type="number" class="table-input" id="edit-weight-${cardId}" value="${asset.targetWeight}" oninput="updateInlineAsset('${asset.ticker}', 'targetWeight', this.value)">`}</td>
@@ -766,44 +789,19 @@
                 container.innerHTML = htmlStr;
                 initDragAndDrop();
 
-                // ★ 최적화 3: 직렬 await → 병렬 Promise.all()
-                // 기존: for(asset of list) { await fetchData(asset) } → 8개 × 500ms = 4,000ms
-                // 변경: Promise.all([fetch1, fetch2, ...fetch8]) → 모두 동시 → 약 500ms
                 setTimeout(() => {
-                    const fetchTasks = activeList
-                        .filter(asset => asset.type !== 'scheduler')
-                        .map(asset => {
-                            const cardId = currentView === 'macro'
-                                ? 'card-' + (asset.ticker||'').replace(/[^a-zA-Z0-9]/g, '')
-                                : 'row-'  + (asset.ticker||'').replace(/[^a-zA-Z0-9]/g, '');
-
-                            // 이미 캐시된 가격은 즉시 UI 반영, fetch 불필요
-                            if (livePrices[asset.ticker]) {
-                                updateCardUI(asset, cardId, livePrices[asset.ticker], livePrices[asset.ticker+'_h'] || 1);
-                                if (currentView === 'macro' && window.rawChartData && window.rawChartData[asset.ticker]) {
-                                    drawChart(cardId, window.rawChartData[asset.ticker].labels, window.rawChartData[asset.ticker].prices, false);
-                                }
-                                return Promise.resolve(); // 이미 완료
-                            }
-                            return fetchData(asset, cardId); // 실제 fetch
-                        });
-
-                    // 모든 fetch를 동시에 발사 후, 전부 완료되면 리밸런싱 엔진 1회 실행
-                    Promise.allSettled(fetchTasks).then(() => {
-                        if (currentView !== 'macro') calculateRebalancingEngine();
+                    const fetchTasks = activeList.filter(asset => asset.type !== 'scheduler').map(asset => {
+                        const cardId = currentView === 'macro' ? 'card-' + (asset.ticker||'').replace(/[^a-zA-Z0-9]/g, '') : 'row-' + (asset.ticker||'').replace(/[^a-zA-Z0-9]/g, '');
+                        if (livePrices[asset.ticker]) {
+                            updateCardUI(asset, cardId, livePrices[asset.ticker], livePrices[asset.ticker+'_h'] || 1);
+                            if (currentView === 'macro' && window.rawChartData && window.rawChartData[asset.ticker]) drawChart(cardId, window.rawChartData[asset.ticker].labels, window.rawChartData[asset.ticker].prices, false);
+                            return Promise.resolve(); 
+                        }
+                        return fetchData(asset, cardId); 
                     });
 
-                    // ★ 최적화 4: 빠른 중간 업데이트
-                    // 각 fetch가 완료될 때마다 즉시 리밸런싱 재계산 (전체 완료를 기다리지 않음)
-                    // → 먼저 응답한 종목부터 평가금액이 채워지는 점진적 렌더링 효과
-                    if (currentView !== 'macro') {
-                        fetchTasks.forEach(p => {
-                            if (p && typeof p.then === 'function') {
-                                p.then(() => calculateRebalancingEngine()).catch(() => {});
-                            }
-                        });
-                    }
-
+                    Promise.allSettled(fetchTasks).then(() => { if (currentView !== 'macro') calculateRebalancingEngine(); });
+                    if (currentView !== 'macro') { fetchTasks.forEach(p => { if (p && typeof p.then === 'function') p.then(() => calculateRebalancingEngine()).catch(() => {}); }); }
                 }, 50);
 
             } catch(e) { console.error("Dashboard Render Error:", e); }
@@ -833,38 +831,65 @@
             }
         }
 
-        // ★ fetchData: viewAtCall로 호출 시점의 뷰를 고정 캡처
-        // → await 완료 후 currentView가 바뀌어 있어도 올바르게 차트를 그림
         async function fetchData(asset, cardId) {
             const tickerStr = (asset.ticker || '').toUpperCase();
-            if(['CASH','예수금','현금'].includes(tickerStr)) {
-                livePrices[asset.ticker] = 1; livePrices[asset.ticker+'_h'] = 1; updateCardUI(asset, cardId, 1, 1); return;
-            }
-            // ★ 핵심 수정: fetch를 시작하는 시점의 뷰를 변수에 고정
+            if(['CASH','예수금','현금'].includes(tickerStr)) { livePrices[asset.ticker] = 1; livePrices[asset.ticker+'_h'] = 1; updateCardUI(asset, cardId, 1, 1); return; }
+            
             const viewAtCall = currentView;
             try {
                 const data = await fetchOnce(asset.ticker);
                 if (!data.success) throw new Error();
                 livePrices[asset.ticker] = data.price; livePrices[asset.ticker+'_h'] = data.high52;
 
-                // ★ currentView 대신 viewAtCall 사용 → 탭 전환 후에도 차트 데이터 정상 저장
-                if(viewAtCall === 'macro') {
-                    if(!window.rawChartData) window.rawChartData = {};
-                    // chartData / chartLabels가 없는 응답(renderHubView 선행 fetch)이면 차트 건너뜀
-                    if(data.chartData && data.chartLabels) {
-                        window.rawChartData[asset.ticker] = { prices: data.chartData, labels: data.chartLabels };
-                        drawChart(cardId, data.chartLabels, data.chartData, false);
-                    }
-                }
-                // ★ 카드 UI도 호출 시점 뷰 기준으로 업데이트 (currentView가 바뀌어 있으면 DOM 없으므로 무해)
-                if(viewAtCall === currentView) {
-                    updateCardUI(asset, cardId, data.price, data.high52);
-                }
+                // 백그라운드 캐시 상시 저장 (스파크라인용)
+                if(!window.rawChartData) window.rawChartData = {};
+                if(data.chartData && data.chartLabels) { window.rawChartData[asset.ticker] = { prices: data.chartData, labels: data.chartLabels }; }
+
+                if(viewAtCall === 'macro') { if(data.chartData && data.chartLabels) { drawChart(cardId, data.chartLabels, data.chartData, false); } }
+                if(viewAtCall === currentView) { updateCardUI(asset, cardId, data.price, data.high52); }
             } catch (error) { 
                 if(viewAtCall === currentView) {
                     const pEl = document.getElementById(`price-${cardId}`); if (pEl) pEl.innerText = "조회 실패"; 
                     const sEl = document.getElementById(`status-${cardId}`); if (sEl) { sEl.innerText = "통신 에러"; sEl.className = "status-badge status-warning"; sEl.style.display = 'inline-block'; }
                 }
+            }
+        }
+
+        function updateCardUI(asset, cardId, currentPrice, high52) {
+            const tickerStr = (asset.ticker || '').toUpperCase();
+            const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
+            let cp = parseFloat(currentPrice) || 0; let hp = parseFloat(high52) || 0;
+            let displayPrice = isWon ? Math.round(cp).toLocaleString() + "원" : "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            let displayHigh = isWon ? Math.round(hp).toLocaleString() + "원" : "$" + hp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            const pEl = document.getElementById(`price-${cardId}`); if (pEl) pEl.innerText = displayPrice;
+
+            // 💡 기능 2: 순수 SVG 스파크라인 드로잉 처리 (DOM 부하 Zero)
+            const sparkEl = document.getElementById(`spark-${cardId}`);
+            if(sparkEl && window.rawChartData && window.rawChartData[asset.ticker]) {
+                const prices = window.rawChartData[asset.ticker].prices;
+                if(prices && prices.length > 1) {
+                    let min = Math.min(...prices), max = Math.max(...prices);
+                    let range = max - min || 1;
+                    let w = 60, h = 25; 
+                    let pts = prices.map((p, i) => `${(i/(prices.length-1))*w},${h - ((p-min)/range)*h}`).join(' ');
+                    let color = prices[prices.length-1] >= prices[0] ? '#2ecc71' : '#e74c3c'; // 상승 초록, 하락 빨강
+                    sparkEl.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 -5 ${w} ${h+10}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.5" points="${pts}" /></svg>`;
+                } else { sparkEl.innerHTML = '-'; }
+            }
+            
+            if (currentView === 'macro') {
+                const hEl = document.getElementById(`high-${cardId}`); if(hEl) hEl.innerText = displayHigh;
+                let mdd = hp > 0 ? (cp / hp) - 1 : 0; let mddPercentage = (mdd * 100).toFixed(2) + "%";
+                let statusMsg = "✅ 관망"; let statusClass = "status-normal";
+                if (tickerStr.indexOf('FRED:') === 0) { displayPrice = "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 1 }) + "B"; mddPercentage = "유동성"; statusMsg = "💵 TGA"; if(pEl) pEl.innerText = displayPrice; }
+                else if (tickerStr === 'KRW=X') { mddPercentage = "환율"; statusMsg = "💵 외환"; } 
+                else if (tickerStr === '^TNX') { displayPrice = cp.toFixed(2) + "%"; mddPercentage = "금리"; if (cp >= 4.5) { statusMsg = "⚠️ 발작 대기"; statusClass = "status-warning"; } if(pEl) pEl.innerText = displayPrice; } 
+                else if (tickerStr === '^VIX') { displayPrice = cp.toFixed(2) + "pt"; mddPercentage = "공포지수"; if (cp >= 25) { statusMsg = "⚠️ 변동성 확대"; statusClass = "status-warning"; } if(pEl) pEl.innerText = displayPrice; } 
+                else { if (mdd <= -0.15) { statusMsg = "🎯 1차 매수"; statusClass = "status-warning"; } }
+                
+                const mEl = document.getElementById(`mdd-${cardId}`); if (mEl) mEl.innerText = mddPercentage;
+                const sEl = document.getElementById(`status-${cardId}`); if (sEl) { sEl.style.display = 'inline-block'; sEl.innerText = statusMsg; sEl.className = "status-badge " + statusClass; }
             }
         }
 
@@ -920,10 +945,25 @@
                     if(actWtEl) actWtEl.innerText = actualWeight.toFixed(1) + "%";
                     
                     let tradeRequiredWon = (finalTotalAccountValueWon * ((asset.targetWeight||0) / 100)) - asset.evalValueWon;
+                    
+                    // 💡 기능 3: 실시간 필요 매수/매도 주수 정밀 자동 계산기
+                    let tradeSharesText = '';
                     if(sigEl) {
+                        let tickerStr = (asset.ticker || '').toUpperCase();
+                        let cachedPrice = livePrices[asset.ticker];
+                        
+                        if(cachedPrice && tickerStr !== 'CASH') {
+                            const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1;
+                            let unitPriceWon = isWon ? cachedPrice : cachedPrice * currentFxRate;
+                            if(unitPriceWon > 0) {
+                                let shares = Math.abs(tradeRequiredWon) / unitPriceWon;
+                                tradeSharesText = ` <span style="font-size:0.75rem; color:var(--text-sub);">(≈ ${shares.toFixed(1)}주)</span>`;
+                            }
+                        }
+
                         if (Math.abs(tradeRequiredWon) < 15000) { sigEl.innerHTML = `<span class="badge badge-hold">HOLD</span>`; }
-                        else if (tradeRequiredWon > 0) { sigEl.innerHTML = `<span class="badge badge-buy">+${Math.round(tradeRequiredWon).toLocaleString()} 매수</span>`; }
-                        else { sigEl.innerHTML = `<span class="badge badge-sell">${Math.round(Math.abs(tradeRequiredWon)).toLocaleString()} 매도</span>`; }
+                        else if (tradeRequiredWon > 0) { sigEl.innerHTML = `<span class="badge badge-buy">+${Math.round(tradeRequiredWon).toLocaleString()} 매수${tradeSharesText}</span>`; }
+                        else { sigEl.innerHTML = `<span class="badge badge-sell">${Math.round(Math.abs(tradeRequiredWon)).toLocaleString()} 매도${tradeSharesText}</span>`; }
                     }
                 });
 
@@ -991,10 +1031,7 @@
                             plugins: { 
                                 legend: { display: false }, 
                                 tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.raw + '%' } },
-                                datalabels: {
-                                    color: '#ffffff', font: { weight: 'bold', size: 10 },
-                                    formatter: (value) => value > 5 ? value + '%' : '' 
-                                }
+                                datalabels: { color: '#ffffff', font: { weight: 'bold', size: 10 }, formatter: (value) => value > 5 ? value + '%' : '' }
                             }, 
                             scales: { x: { stacked: true, max: 100, ticks: { color: textColor, font:{size:10} }, grid: { color: gridColor } }, y: { stacked: true, ticks: { color: textColor, font:{size:11, weight:'bold'} }, grid: { display: false } } } 
                         }
@@ -1035,14 +1072,12 @@
                                     if (barEl && !barMeta.hidden && barVal !== 0) {
                                         ctx.fillStyle = isDark ? '#e0e0e0' : '#2c3e50';
                                         ctx.textBaseline = barVal >= 0 ? 'bottom' : 'top';
-                                        const text = Math.round(barVal / 10000).toLocaleString() + '만';
-                                        ctx.strokeText(text, barEl.x, barLabelY); ctx.fillText(text, barEl.x, barLabelY);
+                                        ctx.strokeText(Math.round(barVal / 10000).toLocaleString() + '만', barEl.x, barLabelY); ctx.fillText(Math.round(barVal / 10000).toLocaleString() + '만', barEl.x, barLabelY);
                                     }
                                     if (lineEl && !lineMeta.hidden) {
                                         ctx.fillStyle = '#f39c12';
                                         ctx.textBaseline = lineVal >= 0 ? 'bottom' : 'top';
-                                        const text = lineVal + '%';
-                                        ctx.strokeText(text, lineEl.x, lineLabelY); ctx.fillText(text, lineEl.x, lineLabelY);
+                                        ctx.strokeText(lineVal + '%', lineEl.x, lineLabelY); ctx.fillText(lineVal + '%', lineEl.x, lineLabelY);
                                     }
                                 }
                             }
@@ -1084,30 +1119,6 @@
                     });
                 }
             } catch(e) { console.error("Engine Error:", e); }
-        }
-
-        function updateCardUI(asset, cardId, currentPrice, high52) {
-            const tickerStr = (asset.ticker || '').toUpperCase();
-            const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
-            let cp = parseFloat(currentPrice) || 0; let hp = parseFloat(high52) || 0;
-            let displayPrice = isWon ? Math.round(cp).toLocaleString() + "원" : "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            let displayHigh = isWon ? Math.round(hp).toLocaleString() + "원" : "$" + hp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            
-            const pEl = document.getElementById(`price-${cardId}`); if (pEl) pEl.innerText = displayPrice;
-            
-            if (currentView === 'macro') {
-                const hEl = document.getElementById(`high-${cardId}`); if(hEl) hEl.innerText = displayHigh;
-                let mdd = hp > 0 ? (cp / hp) - 1 : 0; let mddPercentage = (mdd * 100).toFixed(2) + "%";
-                let statusMsg = "✅ 관망"; let statusClass = "status-normal";
-                if (tickerStr.indexOf('FRED:') === 0) { displayPrice = "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 1 }) + "B"; mddPercentage = "유동성"; statusMsg = "💵 TGA"; if(pEl) pEl.innerText = displayPrice; }
-                else if (tickerStr === 'KRW=X') { mddPercentage = "환율"; statusMsg = "💵 외환"; } 
-                else if (tickerStr === '^TNX') { displayPrice = cp.toFixed(2) + "%"; mddPercentage = "금리"; if (cp >= 4.5) { statusMsg = "⚠️ 발작 대기"; statusClass = "status-warning"; } if(pEl) pEl.innerText = displayPrice; } 
-                else if (tickerStr === '^VIX') { displayPrice = cp.toFixed(2) + "pt"; mddPercentage = "공포지수"; if (cp >= 25) { statusMsg = "⚠️ 변동성 확대"; statusClass = "status-warning"; } if(pEl) pEl.innerText = displayPrice; } 
-                else { if (mdd <= -0.15) { statusMsg = "🎯 1차 매수"; statusClass = "status-warning"; } }
-                
-                const mEl = document.getElementById(`mdd-${cardId}`); if (mEl) mEl.innerText = mddPercentage;
-                const sEl = document.getElementById(`status-${cardId}`); if (sEl) { sEl.style.display = 'inline-block'; sEl.innerText = statusMsg; sEl.className = "status-badge " + statusClass; }
-            }
         }
 
         function drawChart(cardId, labels, data, isDanger) {
