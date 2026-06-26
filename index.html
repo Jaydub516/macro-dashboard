@@ -77,14 +77,19 @@
         .mdd-value { font-size: 1.15rem; font-weight: bold; text-align: right; }
         .status-badge { padding: 3px 8px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
 
-        /* 로딩 스피너 및 새로고침 애니메이션 */
         .fetch-loading { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-sub); }
         .spinner { width: 14px; height: 14px; border: 2px solid var(--border-dash); border-top-color: var(--tab-active); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
         @keyframes spin-once { 0% { transform: rotate(0deg); } 100% { transform: rotate(720deg); } }
         .spin-once { animation: spin-once 1.5s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; }
         
+        .sparkline-cell { width: 72px; padding: 4px 8px !important; vertical-align: middle !important; text-align: center !important; }
+
+        .hub-card.roi-plus-strong  { border-color: #2ecc71 !important; }
+        .hub-card.roi-plus-mild    { border-color: #a8e6c1 !important; }
+        .hub-card.roi-minus-mild   { border-color: #a8c8e8 !important; }
+        .hub-card.roi-minus-strong { border-color: #2980b9 !important; }
+
         .lower-chart-card { width: 100%; background: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; }
         .lower-charts-flex { display: flex; gap: 20px; width: 100%; flex-wrap: wrap; }
         .chart-box-third { flex: 1; min-width: 280px; position: relative; display: flex; flex-direction: column; }
@@ -93,26 +98,22 @@
         .date-picker-wrap { display: flex; gap: 5px; align-items: center; }
         .date-picker-wrap input[type="month"] { padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 0.75rem; background: var(--bg-card); color: var(--text-main); font-family: inherit; }
 
-        /* 💡 추가: 허브 카드 테두리 ROI 연동을 위한 전용 클래스 */
         .hub-card { background: var(--bg-card); border-radius: 12px; padding: 20px; border: 2px solid transparent; box-shadow: 0 4px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s, border-color 0.2s; height: 160px; position: relative; box-sizing: border-box; }
-        .hub-card.border-dg { border-color: #27ae60; } /* 진초록 */
-        .hub-card.border-lg { border-color: #2ecc71; } /* 연초록 */
-        .hub-card.border-lb { border-color: #3498db; } /* 연파랑 */
-        .hub-card.border-db { border-color: #2980b9; } /* 진파랑 */
         .hub-card:hover { transform: translateY(-5px); border-color: var(--tab-portfolio) !important; }
         .hub-card h2 { margin: 0 0 10px 0; font-size: 1.2rem; }
         .hub-val { font-size: 1.35rem; font-weight: bold; margin-bottom: 5px; }
         .hub-roi { font-size: 1.05rem; font-weight: bold; }
         .hub-add-card { border: 2px dashed var(--border-dash); background: transparent; box-shadow: none; color: var(--text-sub); }
+        .hub-delete-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.2rem; color: #bdc3c7; cursor: pointer; padding: 0; line-height: 1; z-index: 10; }
+        .hub-delete-btn:hover { color: #e74c3c; }
 
         .table-container { width: 100%; overflow-x: auto; background: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; margin-bottom: 20px; }
-        /* 테이블 열이 늘어나 모바일 스크롤 확보를 위해 최소 너비 소폭 연장 */
-        .portfolio-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 950px; }
+        .portfolio-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; min-width: 900px; }
         .portfolio-table th, .portfolio-table td { padding: 12px 8px; border-bottom: 1px solid var(--border-dash); text-align: right; vertical-align: middle; }
         .portfolio-table th { background: var(--bg-body); color: var(--text-sub); font-weight: bold; text-align: right; }
         .portfolio-table th:first-child, .portfolio-table td:first-child { text-align: left; }
         .portfolio-table th:nth-child(3), .portfolio-table td:nth-child(3) { text-align: center; }
-        .portfolio-table tbody tr:hover { background: rgba(0,0,0,0.02); }
+        .portfolio-table tbody tr:hover td { background: rgba(0,0,0,0.02); }
         
         .ticker-badge { background: var(--tab-bg); padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight:bold; }
         .table-input { width: 75px; padding: 6px; border: 1px solid var(--input-border); border-radius: 6px; text-align: right; background: var(--bg-body); color: var(--text-main); font-size: 0.85rem; font-weight:bold; transition: border-color 0.2s; }
@@ -161,6 +162,16 @@
             
             #cards-container:not(.mobile-3col) { grid-template-columns: 1fr; gap: 15px; }
             #cards-container.mobile-3col { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+            
+            #cards-container.mobile-3col .scheduler-card { grid-column: 1 / -1; }
+            
+            #cards-container.mobile-3col .hub-card { padding: 6px; height: auto; min-height: 90px; justify-content: center; }
+            #cards-container.mobile-3col .hub-card h2 { font-size: 0.75rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+            #cards-container.mobile-3col .hub-card p { font-size: 0.55rem; margin-bottom: 4px; }
+            #cards-container.mobile-3col .hub-card .hub-val { font-size: 0.8rem; margin-bottom: 2px; }
+            #cards-container.mobile-3col .hub-card .hub-roi { font-size: 0.65rem; }
+            #cards-container.mobile-3col .hub-card .hub-delete-btn { font-size: 0.9rem; top: 3px; right: 3px; padding: 2px; }
+
             #cards-container.mobile-3col .card { padding: 8px; min-height: 105px; justify-content: flex-start; gap: 4px; }
             #cards-container.mobile-3col .card h2 { font-size: 0.75rem; }
             #cards-container.mobile-3col .card p { font-size: 0.6rem; }
@@ -173,6 +184,19 @@
             #cards-container.mobile-3col .card .mdd-value { font-size: 0.8rem; text-align: left; }
             #cards-container.mobile-3col .card .status-badge { padding: 1px 4px; font-size: 0.6rem; border-radius: 4px; }
             #cards-container.mobile-3col .delete-btn { top: 4px; right: 4px; font-size: 1rem; }
+
+            .table-container { padding: 0; border-radius: 0; box-shadow: none; border-top: 1px solid var(--border-dash); border-bottom: 1px solid var(--border-dash); overflow-x: auto; }
+            .portfolio-table { min-width: 800px; }
+            .portfolio-table th:first-child, .portfolio-table td:first-child {
+                position: sticky; left: 0; background-color: var(--bg-card); z-index: 2;
+                border-right: 1px solid var(--border-dash); padding: 8px 4px; box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+                width: 85px; min-width: 85px; max-width: 85px;
+            }
+            .portfolio-table th:first-child { z-index: 3; }
+            .portfolio-table td:first-child > div { flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; overflow: hidden; }
+            .portfolio-table td:first-child .class-select { width: 100%; margin: 0; padding: 2px; font-size: 0.65rem; }
+            .portfolio-table td:first-child .editable-name { width: 100%; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.75rem; }
+            .drag-handle { display: none; }
         }
     </style>
 </head>
@@ -254,9 +278,12 @@
             <h2 class="account-detail-title"><span id="detail-account-name" class="editable-name" contenteditable="true" onblur="updateAccountName(this.innerText)">계좌명</span></h2>
         </div>
 
-        <div class="combined-selector-box" id="combined-selector">
-            <span style="width:100%;">합산할 계좌 선택:</span>
-            <div id="checkbox-container" style="display:flex; gap:8px; flex-wrap:wrap; width:100%;"></div>
+        <div class="combined-selector-box" id="combined-selector" style="display:none; flex-direction:column; align-items: stretch; padding: 0; border: 1px solid var(--border-dash); border-radius: 8px; margin-bottom: 15px; background: var(--bg-card); overflow: hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 15px; cursor:pointer; background: var(--account-summary-bg);" onclick="toggleCombinedSelector()">
+                <span style="font-weight:bold; font-size:0.95rem; color: var(--text-main);">⚙️ 합산할 계좌 선택</span>
+                <span id="combined-selector-arrow" style="color: var(--text-sub); font-size: 0.8rem;">▼</span>
+            </div>
+            <div id="checkbox-container" style="display:none; gap:8px; flex-wrap:wrap; padding: 12px 15px;"></div>
         </div>
 
         <div class="account-summary-box" id="summary-widget" style="display:none;">
@@ -294,12 +321,12 @@
     </div>
 
     <script>
-        Chart.register(ChartDataLabels);
+        if (typeof ChartDataLabels !== 'undefined') { Chart.register(ChartDataLabels); }
 
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
 
-        // 💡 마이그레이션 키 V35 전환
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV35_";
+        // 💡 마이그레이션 키 V42 (최종 에러 철벽 방어 & 계좌 복구)
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV42_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
@@ -329,38 +356,62 @@
             { type: 'scheduler', ticker: 'BESSENT_QRA', name: '📅 Scott Bessent 재무부 정책 일정' }
         ];
 
-        function getAccIdByName(name) { return 'acc_' + name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9가-힣]/g, ''); }
+        function getAccIdByName(name) { return 'acc_' + String(name || '').replace(/\s+/g, '').replace(/[^a-zA-Z0-9가-힣]/g, ''); }
 
-        // 마이그레이션 모듈 (V22~V34 완벽 승계)
+        // 💡 1. 오염 데이터(문자열 "undefined") 파싱 충돌 원천 차단 함수
+        function safeParse(key, defaultVal) {
+            let val = localStorage.getItem(key);
+            if (!val || val === "undefined" || val === "null") return defaultVal;
+            try { return JSON.parse(val) || defaultVal; } catch (e) { return defaultVal; }
+        }
+
+        // 💡 2. 딥 마이그레이션 모듈 (V22~V41 유실 계좌 강제 병합 복구)
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
-            const oldPrefixes = ['macroDashboard_MasterV34_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV22_', 'macroDashboard_Master_'];
-            let found = false;
-            for (let prefix of oldPrefixes) {
-                if (localStorage.getItem(prefix + 'tabs')) {
-                    for (let i = 0; i < localStorage.length; i++) {
-                        let key = localStorage.key(i);
-                        if (key.startsWith(prefix)) {
-                            let newKey = key.replace(prefix, STORAGE_KEY_PREFIX);
-                            localStorage.setItem(newKey, localStorage.getItem(key));
-                            found = true;
+            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_'];
+            let mergedTabsMap = {};
+
+            oldPrefixes.forEach(prefix => {
+                let tabsStr = localStorage.getItem(prefix + 'tabs');
+                if (tabsStr && tabsStr !== "undefined" && tabsStr !== "null") {
+                    try {
+                        let parsed = JSON.parse(tabsStr);
+                        if (Array.isArray(parsed)) {
+                            parsed.forEach(t => { if (t && t.id) mergedTabsMap[t.id] = t; });
+                        }
+                    } catch(e) {}
+                }
+                for (let i = 0; i < localStorage.length; i++) {
+                    let key = localStorage.key(i);
+                    if (key && key.startsWith(prefix) && !key.endsWith('tabs')) {
+                        let newKey = key.replace(prefix, STORAGE_KEY_PREFIX);
+                        let val = localStorage.getItem(key);
+                        if(val !== "undefined" && val !== "null") {
+                            localStorage.setItem(newKey, val);
                         }
                     }
-                    if (found) break; 
                 }
+            });
+
+            let mergedTabsArr = Object.values(mergedTabsMap);
+            if (mergedTabsArr.length > 0) {
+                localStorage.setItem(STORAGE_KEY_PREFIX + 'tabs', JSON.stringify(mergedTabsArr));
             }
         }
 
-        // 💡 기능 1: 수동 새로고침 처리 로직
         function forceRefresh() {
             const icon = document.getElementById('refresh-btn-icon');
-            if(icon) {
-                icon.classList.remove('spin-once');
-                void icon.offsetWidth; // DOM Reflow
-                icon.classList.add('spin-once');
+            if(icon) { icon.classList.remove('spin-once'); void icon.offsetWidth; icon.classList.add('spin-once'); }
+            livePrices = {}; window.rawChartData = {}; switchView(currentView);
+        }
+
+        function toggleCombinedSelector() {
+            const container = document.getElementById('checkbox-container');
+            const arrow = document.getElementById('combined-selector-arrow');
+            if(container.style.display === 'none' || container.style.display === '') {
+                container.style.display = 'flex'; arrow.innerText = '▲';
+            } else {
+                container.style.display = 'none'; arrow.innerText = '▼';
             }
-            livePrices = {};          // 실시간 가격 파기
-            window.rawChartData = {}; // 백그라운드 스파크라인 캐시 파기
-            switchView(currentView);  // UI 재요청 트리거
         }
 
         function exportData() {
@@ -388,7 +439,7 @@
         }
 
         function handleLiveCommaMasking(el, targetType) {
-            let numericString = el.value.replace(/[^\d]/g, '');
+            let numericString = String(el.value).replace(/[^\d]/g, '');
             if(!numericString) numericString = '0';
             let parsedNumber = parseFloat(numericString);
             el.value = parsedNumber.toLocaleString('ko-KR');
@@ -397,13 +448,13 @@
         }
 
         function parseRow(line) {
-            let s = line.trim();
-            if (s.includes('\t')) return s.split('\t').map(v => v.trim().replace(/,/g, '').replace(/"/g, ''));
+            let s = String(line || '').trim();
+            if (s.includes('\t')) return s.split('\t').map(v => String(v).trim().replace(/,/g, '').replace(/"/g, ''));
             let res = []; let inQ = false; let cur = '';
             for(let i=0; i<s.length; i++){
                 let c = s[i]; if(c === '"') inQ = !inQ; else if(c === ',' && !inQ) { res.push(cur.trim()); cur=''; } else cur += c;
             }
-            res.push(cur.trim()); return res.map(v => v.replace(/,/g, '').replace(/"/g, ''));
+            res.push(cur.trim()); return res.map(v => String(v).replace(/,/g, '').replace(/"/g, ''));
         }
 
         function parseAndSaveHistoryCSV() {
@@ -413,15 +464,15 @@
             let historyMap = {}; let tabsMap = {}; let count = 0;
             
             lines.forEach(line => {
-                if(!line.trim()) return;
+                if(!String(line).trim()) return;
                 const cols = parseRow(line);
-                if(cols.length >= 4 && !cols[0].includes('기간')) {
-                    let period = cols[0].trim(); let match = period.match(/(\d{2})년\s*(\d+)월/);
+                if(cols.length >= 4 && !String(cols[0]).includes('기간')) {
+                    let period = String(cols[0]).trim(); let match = period.match(/(\d{2})년\s*(\d+)월/);
                     let ym = period; if(match) ym = `20${match[1]}-${match[2].padStart(2, '0')}`; 
-                    let accName = cols[1].trim(); let accId = getAccIdByName(accName);
+                    let accName = String(cols[1]).trim(); let accId = getAccIdByName(accName);
                     tabsMap[accId] = accName;
-                    let principal = parseFloat(cols[2].replace(/[^\d.-]/g, '')) || 0; 
-                    let evalVal = parseFloat(cols[3].replace(/[^\d.-]/g, '')) || 0;
+                    let principal = parseFloat(String(cols[2]).replace(/[^\d.-]/g, '')) || 0; 
+                    let evalVal = parseFloat(String(cols[3]).replace(/[^\d.-]/g, '')) || 0;
                     if(!historyMap[accId]) historyMap[accId] = [];
                     historyMap[accId].push({ date: ym + '-28', principal: principal, evalValue: evalVal }); count++;
                 }
@@ -429,13 +480,13 @@
 
             if(count === 0) { alert("데이터를 인식하지 못했습니다."); return; }
 
-            let currentTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
+            let currentTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
             Object.keys(historyMap).forEach(accId => {
-                let existingHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId) || '[]');
+                let existingHistory = safeParse(STORAGE_KEY_PREFIX + 'history_' + accId, []);
                 let newHistoryDict = {};
                 existingHistory.forEach(h => newHistoryDict[h.date.substring(0,7)] = h);
                 historyMap[accId].forEach(nh => newHistoryDict[nh.date.substring(0,7)] = nh); 
-                let sortedHistory = Object.values(newHistoryDict).sort((a,b) => a.date.localeCompare(b.date));
+                let sortedHistory = Object.values(newHistoryDict).sort((a,b) => String(a.date).localeCompare(String(b.date)));
                 localStorage.setItem(STORAGE_KEY_PREFIX + 'history_' + accId, JSON.stringify(sortedHistory));
                 let tab = currentTabs.find(t => t.id === accId);
                 let latestP = sortedHistory[sortedHistory.length-1].principal;
@@ -447,32 +498,33 @@
 
             alert(count + '건의 과거 성과 데이터가 성공적으로 반영되었습니다!');
             document.getElementById('data-modal').style.display = 'none'; document.getElementById('csv-history-data').value = '';
-            portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
-            combinedSelections = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) || [];
-            portfolios = {}; portfolioTabs.forEach(tab => { portfolios[tab.id] = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + tab.id)) || []; });
+            portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
+            combinedSelections = safeParse(STORAGE_KEY_PREFIX + 'combinedSelections', []);
+            portfolios = {}; portfolioTabs.forEach(tab => { portfolios[tab.id] = safeParse(STORAGE_KEY_PREFIX + tab.id, []); });
             switchView(currentView);
         }
 
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v35')) {
-            let macroCheck = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'macro')) || DEFAULT_MACRO_ASSETS;
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v42')) {
+            let macroCheck = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
             let hasTGA = macroCheck.some(a => a.ticker === 'FRED:WTREGEN');
             if(!hasTGA) macroCheck.push({ type: 'asset', ticker: 'FRED:WTREGEN', name: '미 재무부 TGA 잔고' });
             let hasSched = macroCheck.some(a => a.ticker === 'BESSENT_QRA');
             if(!hasSched) macroCheck.push({ type: 'scheduler', ticker: 'BESSENT_QRA', name: '📅 Scott Bessent 재무부 정책 일정' });
             localStorage.setItem(STORAGE_KEY_PREFIX + 'macro', JSON.stringify(macroCheck));
             
-            let tabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
+            let tabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
             if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v35', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v42', 'true');
         }
 
-        let portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
-        let combinedSelections = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) || [];
+        let portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
+        let combinedSelections = safeParse(STORAGE_KEY_PREFIX + 'combinedSelections', []);
         let portfolios = {}; 
-        portfolioTabs.forEach(tab => { portfolios[tab.id] = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + tab.id)) || []; });
-        let macroAssets = localStorage.getItem(STORAGE_KEY_PREFIX + 'macro') ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'macro')) : DEFAULT_MACRO_ASSETS;
+        portfolioTabs.forEach(tab => { portfolios[tab.id] = safeParse(STORAGE_KEY_PREFIX + tab.id, []); });
+        let macroAssets = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
 
         let livePrices = {}; let chartInstances = {}; let summaryChartInstance = null; let trendChartInstance = null; let assetClassChartInstance = null;
+        
         const _fetchingPromises = {};
 
         if(localStorage.getItem("theme_Master") === "dark") document.body.classList.add("dark-mode");
@@ -503,8 +555,9 @@
             (combinedSelections || []).forEach(accId => {
                 let accAssets = portfolios[accId] || [];
                 accAssets.forEach(a => {
-                    if (!aggregatedMap[a.ticker]) { aggregatedMap[a.ticker] = { type: 'portfolio', ticker: a.ticker, name: a.name, quantity: 0, targetWeight: 0, assetClass: a.assetClass || "📈 주식(성장)" }; }
-                    aggregatedMap[a.ticker].quantity += parseFloat(a.quantity) || 0;
+                    const safeTicker = String(a.ticker || 'unknown');
+                    if (!aggregatedMap[safeTicker]) { aggregatedMap[safeTicker] = { type: 'portfolio', ticker: safeTicker, name: String(a.name || safeTicker), quantity: 0, targetWeight: 0, assetClass: String(a.assetClass || "📈 주식(성장)") }; }
+                    aggregatedMap[safeTicker].quantity += parseFloat(a.quantity) || 0;
                 });
             });
             return Object.values(aggregatedMap);
@@ -529,8 +582,8 @@
 
             summaryWidget.style.display = 'none'; combinedBox.style.display = 'none'; backBtn.style.display = 'none';
 
-            portfolioTabs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) || [];
-            combinedSelections = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'combinedSelections')) || [];
+            portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
+            combinedSelections = safeParse(STORAGE_KEY_PREFIX + 'combinedSelections', []);
 
             if (viewMode === 'macro') {
                 renderDashboard();
@@ -540,16 +593,19 @@
                 summaryWidget.style.display = 'flex';
                 if(viewMode === 'combined') { 
                     combinedBox.style.display = 'flex'; principalInput.disabled = true; 
+                    
+                    document.getElementById('checkbox-container').style.display = 'none';
+                    document.getElementById('combined-selector-arrow').innerText = '▼';
                     let cbHtml = '';
                     portfolioTabs.forEach(tab => {
                         let isChecked = combinedSelections.includes(tab.id) ? 'checked' : '';
-                        cbHtml += `<label class="acc-checkbox-label"><input type="checkbox" value="${tab.id}" ${isChecked} onchange="updateCombinedSelection()"> ${tab.name}</label>`;
+                        cbHtml += `<label class="acc-checkbox-label"><input type="checkbox" value="${tab.id}" ${isChecked} onchange="updateCombinedSelection()"> ${String(tab.name)}</label>`;
                     });
                     document.getElementById('checkbox-container').innerHTML = cbHtml; 
                 } else {
                     backBtn.style.display = 'block'; principalInput.disabled = false;
                     let tab = portfolioTabs.find(t => t.id === currentView);
-                    if(tab) { document.getElementById('detail-account-name').innerText = tab.name; rawNumericPrincipal = Math.round(tab.principal || 0); principalInput.value = rawNumericPrincipal.toLocaleString('ko-KR'); }
+                    if(tab) { document.getElementById('detail-account-name').innerText = String(tab.name); rawNumericPrincipal = Math.round(parseFloat(tab.principal) || 0); principalInput.value = rawNumericPrincipal.toLocaleString('ko-KR'); }
                 }
                 renderDashboard();
             }
@@ -558,7 +614,7 @@
         function updateAccountName(newName) {
             if (currentView === 'macro' || currentView === 'combined' || currentView === 'portfolio_hub') return;
             let tab = portfolioTabs.find(t => t.id === currentView);
-            if (tab && newName.trim() !== "") { tab.name = newName.trim(); saveTabs(); }
+            if (tab && String(newName).trim() !== "") { tab.name = String(newName).trim(); saveTabs(); }
         }
 
         function updatePrincipal(parsedNumber) {
@@ -573,11 +629,11 @@
             const e = parseFloat(document.getElementById('edit-modal-eval').value) || 0;
             document.getElementById('edit-modal').style.display = 'none';
             let hKey = STORAGE_KEY_PREFIX + 'history_' + currentView;
-            let history = JSON.parse(localStorage.getItem(hKey)) || [];
-            let match = history.find(h => h.date.substring(0,7) === ym);
+            let history = safeParse(hKey, []);
+            let match = history.find(h => String(h.date).substring(0,7) === ym);
             if (match) { match.principal = p; match.evalValue = e; } 
             else { history.push({ date: ym + '-28', principal: p, evalValue: e }); }
-            history.sort((a,b) => a.date.localeCompare(b.date));
+            history.sort((a,b) => String(a.date).localeCompare(String(b.date)));
             localStorage.setItem(hKey, JSON.stringify(history));
             calculateRebalancingEngine();
         }
@@ -590,7 +646,7 @@
 
         function addNewAccount() {
             let name = prompt("새로운 계좌 이름을 입력하세요"); if (!name) return;
-            let newId = 'acc_' + Date.now(); portfolioTabs.push({ id: newId, name: "💼 " + name.trim(), principal: 0 });
+            let newId = 'acc_' + Date.now(); portfolioTabs.push({ id: newId, name: "💼 " + String(name).trim(), principal: 0 });
             portfolios[newId] = []; combinedSelections.push(newId); saveCombinedSelections(); saveTabs(); switchView(newId);
         }
 
@@ -598,41 +654,63 @@
             let dateStr = new Date().toISOString().split('T')[0]; let ym = dateStr.substring(0,7);
             if(!confirm(`현재 실시간 주가와 원금을 기준으로 모든 계좌의 [${ym}] 마감 기록을 저장하시겠습니까?\n(이미 이번 달 기록이 있다면 새 값으로 덮어씁니다.)`)) return;
 
-            let fxRate = livePrices['KRW=X'] || 1350;
+            let fxRate = parseFloat(livePrices['KRW=X']) || 1350;
             portfolioTabs.forEach(tab => {
                 let accAssets = portfolios[tab.id] || []; let totalVal = 0;
                 accAssets.forEach(a => {
-                    let t = (a.ticker || '').toUpperCase(); let p = livePrices[a.ticker] || 1;
+                    let t = String(a.ticker || '').toUpperCase(); let p = parseFloat(livePrices[a.ticker]) || 1;
                     if(['CASH','예수금','현금'].includes(t)) p = 1;
                     const isWon = t.indexOf('.KS') !== -1 || t.indexOf('.KQ') !== -1 || t === 'CASH';
                     totalVal += isWon ? (p * (parseFloat(a.quantity)||0)) : (p * (parseFloat(a.quantity)||0) * fxRate);
                 });
                 let hKey = STORAGE_KEY_PREFIX + 'history_' + tab.id;
-                let history = JSON.parse(localStorage.getItem(hKey)) || [];
-                history = history.filter(h => h.date.substring(0,7) !== ym);
-                history.push({ date: ym + '-28', principal: tab.principal || 0, evalValue: totalVal });
-                history.sort((a,b) => a.date.localeCompare(b.date));
+                let history = safeParse(hKey, []);
+                history = history.filter(h => String(h.date).substring(0,7) !== ym);
+                history.push({ date: ym + '-28', principal: parseFloat(tab.principal) || 0, evalValue: totalVal });
+                history.sort((a,b) => String(a.date).localeCompare(String(b.date)));
                 localStorage.setItem(hKey, JSON.stringify(history));
             });
             alert('✅ 모든 계좌의 이번 달 실적 마감이 완료되어 차트에 영구 반영되었습니다.'); renderHubView();
         }
 
+        function drawSparkline(cellId, prices) {
+            const cell = document.getElementById(cellId);
+            if (!cell || !Array.isArray(prices) || prices.length < 2) return;
+            const W = 64, H = 28, pad = 2;
+            const min = Math.min(...prices), max = Math.max(...prices);
+            const range = max - min || 1;
+            const pts = prices.map((p, i) => {
+                const x = pad + (i / (prices.length - 1)) * (W - pad * 2);
+                const y = H - pad - ((p - min) / range) * (H - pad * 2);
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+            }).join(' ');
+            const last = prices[prices.length - 1]; const first = prices[0];
+            const color = last >= first ? '#2ecc71' : '#e74c3c';
+            const lx = (pad + (W - pad * 2)).toFixed(1);
+            const ly = (H - pad - ((last - min) / range) * (H - pad * 2)).toFixed(1);
+            cell.innerHTML = `<svg width="${W}" height="${H}" style="display:block;margin:auto;overflow:visible"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${lx}" cy="${ly}" r="2.5" fill="${color}"/></svg>`;
+        }
+
         function fetchOnce(ticker) {
-            if (_fetchingPromises[ticker]) return _fetchingPromises[ticker];
-            const p = fetch(`${MY_PROXY_URL}?ticker=${encodeURIComponent(ticker)}`).then(r => r.json()).finally(() => { delete _fetchingPromises[ticker]; });
-            _fetchingPromises[ticker] = p; return p;
+            const safeTicker = String(ticker);
+            if (_fetchingPromises[safeTicker]) return _fetchingPromises[safeTicker];
+            const p = fetch(`${MY_PROXY_URL}?ticker=${encodeURIComponent(safeTicker)}`).then(r => {
+                if(!r.ok) throw new Error("HTTP error " + r.status);
+                return r.json();
+            }).finally(() => { delete _fetchingPromises[safeTicker]; });
+            _fetchingPromises[safeTicker] = p; return p;
         }
 
         async function renderHubView() {
             const container = document.getElementById('dynamic-content-area');
-            Object.values(chartInstances).forEach(c => c.destroy()); chartInstances = {};
+            Object.values(chartInstances).forEach(c => { if(c && typeof c.destroy === 'function') c.destroy(); }); chartInstances = {};
             
-            let fxRate = livePrices['KRW=X'] || 1350;
+            let fxRate = parseFloat(livePrices['KRW=X']) || 1350;
             if(!livePrices['KRW=X']) {
                 try {
                     const data = await fetchOnce('KRW=X');
                     if(data && data.success) {
-                        livePrices['KRW=X'] = data.price; livePrices['KRW=X_h'] = data.high52; fxRate = data.price;
+                        livePrices['KRW=X'] = data.price; livePrices['KRW=X_h'] = data.high52; fxRate = parseFloat(data.price)||1350;
                         if(data.chartData && data.chartLabels) {
                             if(!window.rawChartData) window.rawChartData = {};
                             window.rawChartData['KRW=X'] = { prices: data.chartData, labels: data.chartLabels };
@@ -645,32 +723,34 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <h2 style="margin:0; font-size:1.3rem; color:var(--text-main);">전체 포트폴리오 요약</h2>
                 <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none; padding:8px 15px;" onclick="bulkTakeSnapshot()">📸 현재 상태로 전체 일괄 마감</button>
-            </div><div id="cards-container">`;
+            </div>`;
+            
+            let layoutClass = localStorage.getItem('mobileLayout_Master') === '3col' ? 'mobile-3col' : '';
+            htmlStr += `<div id="cards-container" class="${layoutClass}">`;
             
             if(portfolioTabs.length === 0) htmlStr += `<div style="width:100%; padding:30px; text-align:center; color:var(--text-sub);">등록된 계좌가 없습니다. 상단 [엑셀 연동]을 이용해 데이터를 가져오세요.</div>`;
 
             (portfolioTabs || []).forEach(tab => {
                 let accAssets = portfolios[tab.id] || []; let evalWon = 0;
                 accAssets.forEach(a => {
-                    let tickerStr = (a.ticker || '').toUpperCase(); let price = livePrices[a.ticker] || 1; if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
+                    let tickerStr = String(a.ticker || '').toUpperCase(); let price = parseFloat(livePrices[a.ticker]) || 1; if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
                     const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
                     evalWon += isWon ? (price * (parseFloat(a.quantity)||0)) : (price * (parseFloat(a.quantity)||0) * fxRate);
                 });
-                let principal = tab.principal || 0; let profit = evalWon - principal; let roi = principal > 0 ? (profit / principal) * 100 : 0;
+                let principal = parseFloat(tab.principal) || 0; let profit = evalWon - principal; let roi = principal > 0 ? (profit / principal) * 100 : 0;
                 
-                // 💡 기능 4: 허브 카드 테두리에 ROI 기반 클래스 부여
                 let borderClass = '';
                 if(principal > 0) {
-                    if (roi >= 5) borderClass = 'border-dg';
-                    else if (roi >= 0) borderClass = 'border-lg';
-                    else if (roi >= -5) borderClass = 'border-lb';
-                    else borderClass = 'border-db';
+                    if (roi >= 5) borderClass = 'roi-plus-strong';
+                    else if (roi >= 0) borderClass = 'roi-plus-mild';
+                    else if (roi >= -5) borderClass = 'roi-minus-mild';
+                    else borderClass = 'roi-minus-strong';
                 }
 
                 htmlStr += `
                     <div class="card hub-card ${borderClass}" onclick="switchView('${tab.id}')">
                         <button class="hub-delete-btn" onclick="event.stopPropagation(); if(confirm('이 계좌를 영구 삭제하시겠습니까?')){ portfolioTabs = portfolioTabs.filter(t=>t.id!=='${tab.id}'); saveTabs(); switchView('portfolio_hub'); }">&times;</button>
-                        <div><h2 style="margin:0; font-size:1.15rem;">${tab.name}</h2><p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-sub);">누적 원금: ${Math.round(principal).toLocaleString()}원</p></div>
+                        <div><h2 style="margin:0; font-size:1.15rem;">${String(tab.name)}</h2><p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-sub);">누적 원금: ${Math.round(principal).toLocaleString()}원</p></div>
                         <div style="margin-top:10px;"><div class="hub-val" style="color:var(--tab-active);">${Math.round(evalWon).toLocaleString()}원</div><div class="hub-roi ${profit>=0?'profit-plus':'profit-minus'}">${profit>=0?'+':''}${Math.round(profit).toLocaleString()}원 (${roi.toFixed(1)}%)</div></div>
                     </div>`;
             });
@@ -682,7 +762,7 @@
             try {
                 if(currentView === 'portfolio_hub') return;
                 const container = document.getElementById('dynamic-content-area');
-                Object.values(chartInstances).forEach(c => c.destroy()); chartInstances = {};
+                Object.values(chartInstances).forEach(c => { if(c && typeof c.destroy === 'function') c.destroy(); }); chartInstances = {};
                 let activeList = getActiveArray() || []; let isCombined = (currentView === 'combined');
                 let htmlStr = '';
 
@@ -707,16 +787,16 @@
                     htmlStr += `<div id="cards-container" class="${layoutClass}">`;
                     for (let i = 0; i < 12; i++) {
                         if (i < activeList.length) {
-                            let asset = activeList[i]; const cardId = 'card-' + (asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, ''); 
+                            let asset = activeList[i]; const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, ''); const cardId = 'card-' + safeTicker; 
                             if (asset.type === 'scheduler') {
-                                htmlStr += `<div class="card scheduler-card non-draggable" id="${cardId}"><div class="asset-info"><h2>${asset.name}</h2><p>재무부 정책 집중 일정</p></div><ul class="scheduler-list"><li><span>국채 발행 계획 (QRA)</span><span class="sched-date">2026-07-29</span></li><li><span>의회 예산국 적자 점검</span><span class="sched-date">2026-09-30</span></li></ul></div>`;
+                                htmlStr += `<div class="card scheduler-card non-draggable" id="${cardId}"><div class="asset-info"><h2>${String(asset.name)}</h2><p>재무부 정책 집중 일정</p></div><ul class="scheduler-list"><li><span>국채 발행 계획 (QRA)</span><span class="sched-date">2026-07-29</span></li><li><span>의회 예산국 적자 점검</span><span class="sched-date">2026-09-30</span></li></ul></div>`;
                             } else {
                                 htmlStr += `
-                                    <div class="card asset-card" id="${cardId}" data-ticker="${asset.ticker}">
-                                        <button class="delete-btn" onclick="removeAsset('${asset.ticker}')" title="삭제">&times;</button>
+                                    <div class="card asset-card" id="${cardId}" data-ticker="${String(asset.ticker)}">
+                                        <button class="delete-btn" onclick="removeAsset('${String(asset.ticker)}')" title="삭제">&times;</button>
                                         <div class="asset-info">
-                                            <h2><span class="editable-name" contenteditable="true" onblur="updateInlineAsset('${asset.ticker}', 'name', this.innerText.trim())">${asset.name || '동기화 중...'}</span></h2>
-                                            <p>${asset.ticker}</p>
+                                            <h2><span class="editable-name" contenteditable="true" onblur="updateInlineAsset('${String(asset.ticker)}', 'name', this.innerText.trim())">${String(asset.name || asset.ticker)}</span></h2>
+                                            <p>${String(asset.ticker)}</p>
                                         </div>
                                         <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
                                         <div class="data-section">
@@ -735,41 +815,40 @@
                     htmlStr += `</div>`;
                 } 
                 else {
-                    // 💡 기능 2: 표에 '트렌드' 열 추가
                     htmlStr += `
                     <div class="table-container">
                         <table class="portfolio-table">
                             <thead>
                                 <tr>
-                                    <th>자산군 / 종목명 (클릭 수정)</th><th>티커</th><th>현재가</th><th>트렌드</th><th>보유 수량</th><th>평가금액</th><th>목표(%)</th><th>실제(%)</th><th>리밸런싱 신호</th>${!isCombined ? `<th>관리</th>` : ''}
+                                    <th>자산군 / 종목명 (클릭 수정)</th><th>티커</th><th>차트</th><th>현재가</th><th>보유 수량</th><th>평가금액</th><th>목표(%)</th><th>실제(%)</th><th>리밸런싱 신호</th>${!isCombined ? `<th>관리</th>` : ''}
                                 </tr>
                             </thead><tbody id="portfolio-tbody">`;
                     
                     activeList.forEach(asset => {
-                        const cardId = 'row-' + (asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
-                        let selectHTML = `<select class="class-select" onchange="updateInlineAsset('${asset.ticker}', 'assetClass', this.value)" ${isCombined ? 'disabled' : ''}>`;
-                        ASSET_CLASSES.forEach(cls => { selectHTML += `<option value="${cls}" ${asset.assetClass === cls ? 'selected' : ''}>${cls}</option>`; });
+                        const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
+                        const cardId = 'row-' + safeTicker;
+                        let selectHTML = `<select class="class-select" onchange="updateInlineAsset('${String(asset.ticker)}', 'assetClass', this.value)" ${isCombined ? 'disabled' : ''}>`;
+                        ASSET_CLASSES.forEach(cls => { selectHTML += `<option value="${cls}" ${String(asset.assetClass) === cls ? 'selected' : ''}>${cls}</option>`; });
                         selectHTML += `</select>`;
 
-                        // 트렌드 td 추가
                         htmlStr += `
-                            <tr id="${cardId}" data-ticker="${asset.ticker}">
+                            <tr id="${cardId}" data-ticker="${String(asset.ticker)}">
                                 <td style="text-align:left; vertical-align: top;">
                                     <div style="display: flex; align-items: flex-start; gap: 6px;">
                                         ${!isCombined ? `<span class="drag-handle" title="순서 변경">☰</span>` : ''}
                                         ${selectHTML}
-                                        <span class="editable-name" contenteditable="${!isCombined}" style="flex: 1; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.4;" onblur="updateInlineAsset('${asset.ticker}', 'name', this.innerText.trim())">${asset.name || asset.ticker}</span>
+                                        <span class="editable-name" contenteditable="${!isCombined}" style="flex: 1; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.4;" onblur="updateInlineAsset('${String(asset.ticker)}', 'name', this.innerText.trim())">${String(asset.name || asset.ticker)}</span>
                                     </div>
                                 </td>
-                                <td style="text-align:center;"><span class="ticker-badge">${asset.ticker}</span></td>
+                                <td style="text-align:center;"><span class="ticker-badge">${String(asset.ticker)}</span></td>
+                                <td class="sparkline-cell" id="spark-${cardId}"><span style="font-size:0.7rem;color:var(--text-sub);">-</span></td>
                                 <td id="price-${cardId}"><span class="fetch-loading"><span class="spinner"></span></span></td>
-                                <td id="spark-${cardId}"><span style="color:var(--border-dash); font-size:0.6rem;">-</span></td>
-                                <td>${isCombined ? asset.quantity : `<input type="number" class="table-input" id="edit-qty-${cardId}" value="${asset.quantity}" oninput="updateInlineAsset('${asset.ticker}', 'quantity', this.value)">`}</td>
+                                <td>${isCombined ? parseFloat(asset.quantity)||0 : `<input type="number" class="table-input" id="edit-qty-${cardId}" value="${parseFloat(asset.quantity)||0}" oninput="updateInlineAsset('${String(asset.ticker)}', 'quantity', this.value)">`}</td>
                                 <td id="eval-${cardId}" style="font-weight:bold; color:var(--text-main);">-</td>
-                                <td>${isCombined ? `<span id="target-weight-display-${cardId}">-</span>` : `<input type="number" class="table-input" id="edit-weight-${cardId}" value="${asset.targetWeight}" oninput="updateInlineAsset('${asset.ticker}', 'targetWeight', this.value)">`}</td>
+                                <td>${isCombined ? `<span id="target-weight-display-${cardId}">-</span>` : `<input type="number" class="table-input" id="edit-weight-${cardId}" value="${parseFloat(asset.targetWeight)||0}" oninput="updateInlineAsset('${String(asset.ticker)}', 'targetWeight', this.value)">`}</td>
                                 <td id="actual-weight-${cardId}" style="color:var(--tab-active); font-weight:bold;">-</td>
                                 <td id="signal-${cardId}">-</td>
-                                ${!isCombined ? `<td><button class="btn-delete-sm" onclick="removeAsset('${asset.ticker}')">삭제</button></td>` : ''}
+                                ${!isCombined ? `<td><button class="btn-delete-sm" onclick="removeAsset('${String(asset.ticker)}')">삭제</button></td>` : ''}
                             </tr>`;
                     });
                     htmlStr += `</tbody></table></div>`;
@@ -791,17 +870,28 @@
 
                 setTimeout(() => {
                     const fetchTasks = activeList.filter(asset => asset.type !== 'scheduler').map(asset => {
-                        const cardId = currentView === 'macro' ? 'card-' + (asset.ticker||'').replace(/[^a-zA-Z0-9]/g, '') : 'row-' + (asset.ticker||'').replace(/[^a-zA-Z0-9]/g, '');
+                        const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
+                        const cardId = currentView === 'macro' ? 'card-' + safeTicker : 'row-' + safeTicker;
                         if (livePrices[asset.ticker]) {
                             updateCardUI(asset, cardId, livePrices[asset.ticker], livePrices[asset.ticker+'_h'] || 1);
                             if (currentView === 'macro' && window.rawChartData && window.rawChartData[asset.ticker]) drawChart(cardId, window.rawChartData[asset.ticker].labels, window.rawChartData[asset.ticker].prices, false);
+                            if (currentView !== 'macro' && currentView !== 'portfolio_hub' && window.rawChartData && window.rawChartData[asset.ticker]) {
+                                drawSparkline('spark-' + cardId, window.rawChartData[asset.ticker].prices);
+                            }
                             return Promise.resolve(); 
                         }
                         return fetchData(asset, cardId); 
                     });
 
                     Promise.allSettled(fetchTasks).then(() => { if (currentView !== 'macro') calculateRebalancingEngine(); });
-                    if (currentView !== 'macro') { fetchTasks.forEach(p => { if (p && typeof p.then === 'function') p.then(() => calculateRebalancingEngine()).catch(() => {}); }); }
+                    
+                    if (currentView !== 'macro') { 
+                        fetchTasks.forEach(p => { 
+                            if (p && typeof p.then === 'function') {
+                                p.then(() => calculateRebalancingEngine()).catch(() => {}); 
+                            }
+                        }); 
+                    }
                 }, 50);
 
             } catch(e) { console.error("Dashboard Render Error:", e); }
@@ -832,20 +922,22 @@
         }
 
         async function fetchData(asset, cardId) {
-            const tickerStr = (asset.ticker || '').toUpperCase();
+            const tickerStr = String(asset.ticker || '').toUpperCase();
             if(['CASH','예수금','현금'].includes(tickerStr)) { livePrices[asset.ticker] = 1; livePrices[asset.ticker+'_h'] = 1; updateCardUI(asset, cardId, 1, 1); return; }
             
             const viewAtCall = currentView;
             try {
                 const data = await fetchOnce(asset.ticker);
-                if (!data.success) throw new Error();
+                if (!data.success) throw new Error("API Return Fail");
                 livePrices[asset.ticker] = data.price; livePrices[asset.ticker+'_h'] = data.high52;
 
-                // 백그라운드 캐시 상시 저장 (스파크라인용)
                 if(!window.rawChartData) window.rawChartData = {};
                 if(data.chartData && data.chartLabels) { window.rawChartData[asset.ticker] = { prices: data.chartData, labels: data.chartLabels }; }
 
                 if(viewAtCall === 'macro') { if(data.chartData && data.chartLabels) { drawChart(cardId, data.chartLabels, data.chartData, false); } }
+                if(viewAtCall !== 'macro' && viewAtCall !== 'portfolio_hub') {
+                    if(data.chartData) drawSparkline('spark-' + cardId, data.chartData);
+                }
                 if(viewAtCall === currentView) { updateCardUI(asset, cardId, data.price, data.high52); }
             } catch (error) { 
                 if(viewAtCall === currentView) {
@@ -856,7 +948,7 @@
         }
 
         function updateCardUI(asset, cardId, currentPrice, high52) {
-            const tickerStr = (asset.ticker || '').toUpperCase();
+            const tickerStr = String(asset.ticker || '').toUpperCase();
             const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
             let cp = parseFloat(currentPrice) || 0; let hp = parseFloat(high52) || 0;
             let displayPrice = isWon ? Math.round(cp).toLocaleString() + "원" : "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -864,7 +956,6 @@
             
             const pEl = document.getElementById(`price-${cardId}`); if (pEl) pEl.innerText = displayPrice;
 
-            // 💡 기능 2: 순수 SVG 스파크라인 드로잉 처리 (DOM 부하 Zero)
             const sparkEl = document.getElementById(`spark-${cardId}`);
             if(sparkEl && window.rawChartData && window.rawChartData[asset.ticker]) {
                 const prices = window.rawChartData[asset.ticker].prices;
@@ -873,8 +964,8 @@
                     let range = max - min || 1;
                     let w = 60, h = 25; 
                     let pts = prices.map((p, i) => `${(i/(prices.length-1))*w},${h - ((p-min)/range)*h}`).join(' ');
-                    let color = prices[prices.length-1] >= prices[0] ? '#2ecc71' : '#e74c3c'; // 상승 초록, 하락 빨강
-                    sparkEl.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 -5 ${w} ${h+10}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.5" points="${pts}" /></svg>`;
+                    let color = prices[prices.length-1] >= prices[0] ? '#2ecc71' : '#e74c3c'; 
+                    sparkEl.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 -5 ${w} ${h+10}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
                 } else { sparkEl.innerHTML = '-'; }
             }
             
@@ -893,24 +984,66 @@
             }
         }
 
-        function updateInlineAsset(ticker, field, value) {
-            let list = getActiveArray(); let asset = list.find(a => a.ticker === ticker);
-            if (asset) { asset[field] = (field==='name'||field==='assetClass')? value: parseFloat(value)||0; saveCurrentState(); if (currentView !== 'macro') calculateRebalancingEngine(); }
+        function drawChart(cardId, labels, data, isDanger) {
+            const canvas = document.getElementById(`canvas-${cardId}`); if (!canvas) return;
+            const lineColor = isDanger ? '#e74c3c' : '#3498db'; 
+            let pointRadii = new Array(data.length).fill(0); let pointColors = new Array(data.length).fill('transparent'); 
+            let maxVal = -Infinity; let maxIdx = -1; for (let i = 0; i < data.length; i++) { if (data[i] > maxVal) { maxVal = data[i]; maxIdx = i; } }
+            if (maxIdx !== -1) { pointRadii[maxIdx] = 3; pointColors[maxIdx] = '#e74c3c'; }
+            if (chartInstances[cardId]) { if(typeof chartInstances[cardId].destroy === 'function') chartInstances[cardId].destroy(); }
+            chartInstances[cardId] = new Chart(canvas.getContext('2d'), {
+                type: 'line', data: { labels: labels, datasets: [{ data: data, borderColor: lineColor, backgroundColor: 'transparent', borderWidth: 1.2, pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { display: false }, y: { display: false } }, layout: { padding: { top: 4, bottom: 2 } } }
+            });
         }
 
+        function updateInlineAsset(ticker, field, value) {
+            let list = getActiveArray(); let asset = list.find(a => a.ticker === ticker);
+            if (asset) { asset[field] = (field==='name'||field==='assetClass')? String(value): parseFloat(value)||0; saveCurrentState(); if (currentView !== 'macro') calculateRebalancingEngine(); }
+        }
+
+        function gridAddModule(viewType) {
+            const type = document.getElementById('add-type') ? document.getElementById('add-type').value : 'asset';
+            let ticker = String(document.getElementById('add-ticker').value || '').trim().toUpperCase();
+            let customName = String(document.getElementById('add-name').value || '').trim();
+            let qtyInput = document.getElementById('add-qty'); let initialQty = qtyInput ? (parseFloat(qtyInput.value) || 0) : 0;
+            if(type === 'cash') { ticker = 'CASH'; if(!customName) customName = '원화 예수금'; } if (!ticker) return;
+            
+            let list = getActiveArray();
+            let defaultClass = "📈 주식(성장)";
+            if(ticker === 'CASH') defaultClass = "💵 현금(유동성)";
+
+            list.push({ type: viewType === 'macro' ? 'asset' : 'portfolio', ticker: ticker, name: customName, quantity: initialQty, targetWeight: 0, assetClass: defaultClass });
+            saveCurrentState(); renderDashboard();
+        }
+
+        function removeAsset(ticker) {
+            if(currentView === 'macro') macroAssets = macroAssets.filter(a => a.ticker !== ticker);
+            else portfolios[currentView] = portfolios[currentView].filter(a => a.ticker !== ticker);
+            saveCurrentState(); renderDashboard();
+        }
+
+        // 💡 1. 계산 엔진 0원 버그 전면 방어 (데이터 증발/오류 차단)
         function calculateRebalancingEngine() {
             if(currentView === 'macro' || currentView === 'portfolio_hub') return;
             try {
                 let list = getActiveArray(); let isCombined = (currentView === 'combined');
                 let totalAccountValueInWon = 0; let totalPrincipal = 0;
                 let chartLabels = []; let actualDataArr = []; let targetDataArr = []; let assetClassSums = {};
-                const currentFxRate = livePrices['KRW=X'] || 1350; 
+                
+                const currentFxRate = parseFloat(livePrices['KRW=X']) || 1350; 
 
                 list.forEach(asset => {
-                    let tickerStr = (asset.ticker || '').toUpperCase(); let price = livePrices[asset.ticker] || 1; 
+                    let tickerStr = String(asset.ticker || '').toUpperCase(); 
+                    let price = parseFloat(livePrices[asset.ticker]) || 1; 
                     if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
+                    
                     const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
-                    asset.evalValueWon = isWon ? (price * (parseFloat(asset.quantity) || 0)) : (price * (parseFloat(asset.quantity) || 0) * currentFxRate);
+                    let qty = parseFloat(String(asset.quantity).replace(/,/g, '')) || 0;
+                    
+                    asset.evalValueWon = isWon ? (price * qty) : (price * qty * currentFxRate);
+                    if(isNaN(asset.evalValueWon)) asset.evalValueWon = 0;
+                    
                     totalAccountValueInWon += asset.evalValueWon;
                 });
 
@@ -919,76 +1052,85 @@
                         let tabInfo = portfolioTabs.find(t => t.id === accId);
                         totalPrincipal += tabInfo ? (parseFloat(tabInfo.principal) || 0) : 0; 
                     });
-                    const pValEl = document.getElementById('principal-masked-val'); if(pValEl && document.activeElement !== pValEl) pValEl.value = Math.round(totalPrincipal).toLocaleString('ko-KR');
+                    const pValEl = document.getElementById('principal-masked-val'); 
+                    if(pValEl && document.activeElement !== pValEl) pValEl.value = Math.round(totalPrincipal).toLocaleString('ko-KR');
                 } else {
-                    let tabInfo = portfolioTabs.find(t => t.id === currentView); totalPrincipal = tabInfo ? (parseFloat(tabInfo.principal) || 0) : 0;
+                    let tabInfo = portfolioTabs.find(t => t.id === currentView); 
+                    totalPrincipal = tabInfo ? (parseFloat(tabInfo.principal) || 0) : 0;
                 }
 
                 let finalTotalAccountValueWon = totalAccountValueInWon + rawNumericSimulation;
-                let profit = totalAccountValueInWon - totalPrincipal; let roi = totalPrincipal > 0 ? (profit / totalPrincipal) * 100 : 0;
+                let profit = totalAccountValueInWon - totalPrincipal; 
+                let roi = totalPrincipal > 0 ? (profit / totalPrincipal) * 100 : 0;
 
                 const sTotalEl = document.getElementById('sum-total-value'); const sProfitEl = document.getElementById('sum-profit-value');
                 if(sTotalEl) sTotalEl.innerText = Math.round(finalTotalAccountValueWon).toLocaleString() + "원";
                 if(sProfitEl) sProfitEl.innerHTML = `<span class="${profit>=0?'profit-plus':'profit-minus'}">${profit>=0?'+':''}${Math.round(profit).toLocaleString()}원 (${roi.toFixed(1)}%)</span>`;
 
                 list.forEach(asset => {
-                    const rowId = 'row-' + asset.ticker.replace(/[^a-zA-Z0-9]/g, '');
+                    const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
+                    const rowId = 'row-' + safeTicker;
                     const evalEl = document.getElementById(`eval-${rowId}`); const actWtEl = document.getElementById(`actual-weight-${rowId}`); const sigEl = document.getElementById(`signal-${rowId}`);
                     
                     let actualWeight = finalTotalAccountValueWon > 0 ? (asset.evalValueWon / finalTotalAccountValueWon) * 100 : 0;
-                    chartLabels.push(asset.name || asset.ticker); actualDataArr.push(parseFloat(actualWeight.toFixed(1))); targetDataArr.push(parseFloat(asset.targetWeight || 0));
+                    chartLabels.push(String(asset.name || asset.ticker)); actualDataArr.push(parseFloat(actualWeight.toFixed(1))); targetDataArr.push(parseFloat(asset.targetWeight || 0));
 
-                    let aClass = asset.assetClass || "📈 주식(성장)";
+                    let aClass = String(asset.assetClass || "📈 주식(성장)");
                     if(!assetClassSums[aClass]) assetClassSums[aClass] = 0; assetClassSums[aClass] += actualWeight;
 
                     if(evalEl) evalEl.innerText = Math.round(asset.evalValueWon).toLocaleString() + '원';
                     if(actWtEl) actWtEl.innerText = actualWeight.toFixed(1) + "%";
                     
-                    let tradeRequiredWon = (finalTotalAccountValueWon * ((asset.targetWeight||0) / 100)) - asset.evalValueWon;
+                    let tradeRequiredWon = (finalTotalAccountValueWon * ((parseFloat(asset.targetWeight)||0) / 100)) - asset.evalValueWon;
                     
-                    // 💡 기능 3: 실시간 필요 매수/매도 주수 정밀 자동 계산기
-                    let tradeSharesText = '';
                     if(sigEl) {
-                        let tickerStr = (asset.ticker || '').toUpperCase();
-                        let cachedPrice = livePrices[asset.ticker];
-                        
-                        if(cachedPrice && tickerStr !== 'CASH') {
-                            const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1;
-                            let unitPriceWon = isWon ? cachedPrice : cachedPrice * currentFxRate;
-                            if(unitPriceWon > 0) {
-                                let shares = Math.abs(tradeRequiredWon) / unitPriceWon;
-                                tradeSharesText = ` <span style="font-size:0.75rem; color:var(--text-sub);">(≈ ${shares.toFixed(1)}주)</span>`;
-                            }
-                        }
+                        const curPrice = parseFloat(livePrices[asset.ticker]) || 0;
+                        let tickerUpper = String(asset.ticker || '').toUpperCase();
+                        const isWonAsset = tickerUpper.indexOf('.KS') !== -1 || tickerUpper.indexOf('.KQ') !== -1 || tickerUpper === 'CASH';
+                        const targetUnitPriceWon = isWonAsset ? curPrice : curPrice * currentFxRate;
 
-                        if (Math.abs(tradeRequiredWon) < 15000) { sigEl.innerHTML = `<span class="badge badge-hold">HOLD</span>`; }
-                        else if (tradeRequiredWon > 0) { sigEl.innerHTML = `<span class="badge badge-buy">+${Math.round(tradeRequiredWon).toLocaleString()} 매수${tradeSharesText}</span>`; }
-                        else { sigEl.innerHTML = `<span class="badge badge-sell">${Math.round(Math.abs(tradeRequiredWon)).toLocaleString()} 매도${tradeSharesText}</span>`; }
+                        if (Math.abs(tradeRequiredWon) < 15000) { 
+                            sigEl.innerHTML = `<span class="badge badge-hold">HOLD</span>`; 
+                        }
+                        else if (tradeRequiredWon > 0) { 
+                            const sharesTxt = targetUnitPriceWon > 0 ? `<br><span style="font-size:0.75rem; color:var(--text-sub); font-weight:bold;">(≈ ${(tradeRequiredWon / targetUnitPriceWon).toFixed(1)}주)</span>` : '';
+                            sigEl.innerHTML = `<span class="badge badge-buy">+${Math.round(tradeRequiredWon).toLocaleString()}원 매수</span>${sharesTxt}`; 
+                        }
+                        else { 
+                            const sharesTxt = targetUnitPriceWon > 0 ? `<br><span style="font-size:0.75rem; color:var(--text-sub); font-weight:bold;">(≈ ${(Math.abs(tradeRequiredWon) / targetUnitPriceWon).toFixed(1)}주)</span>` : '';
+                            sigEl.innerHTML = `<span class="badge badge-sell">${Math.round(Math.abs(tradeRequiredWon)).toLocaleString()}원 매도</span>${sharesTxt}`; 
+                        }
                     }
                 });
 
                 let rawHistory = [];
-                if (isCombined) {
-                    let combinedMap = {};
-                    (combinedSelections || []).forEach(accId => {
-                        let h = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId) ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId)) : [];
-                        h.forEach(snap => {
-                            if(!combinedMap[snap.date]) combinedMap[snap.date] = { principal: 0, evalValue: 0, date: snap.date };
-                            combinedMap[snap.date].principal += snap.principal; combinedMap[snap.date].evalValue += snap.evalValue;
+                try {
+                    if (isCombined) {
+                        let combinedMap = {};
+                        (combinedSelections || []).forEach(accId => {
+                            let h = safeParse(STORAGE_KEY_PREFIX + 'history_' + accId, []);
+                            if(Array.isArray(h)) {
+                                h.forEach(snap => {
+                                    if(!combinedMap[snap.date]) combinedMap[snap.date] = { principal: 0, evalValue: 0, date: snap.date };
+                                    combinedMap[snap.date].principal += (parseFloat(snap.principal)||0); 
+                                    combinedMap[snap.date].evalValue += (parseFloat(snap.evalValue)||0);
+                                });
+                            }
                         });
-                    });
-                    rawHistory = Object.values(combinedMap).sort((a,b) => a.date.localeCompare(b.date));
-                } else {
-                    rawHistory = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + currentView) ? JSON.parse(localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + currentView)) : [];
-                }
+                        rawHistory = Object.values(combinedMap).sort((a,b) => String(a.date).localeCompare(String(b.date)));
+                    } else {
+                        rawHistory = safeParse(STORAGE_KEY_PREFIX + 'history_' + currentView, []);
+                        if(!Array.isArray(rawHistory)) rawHistory = [];
+                    }
+                } catch(e) { rawHistory = []; }
 
                 const currentYM = `${new Date().getFullYear()}-${("0" + (new Date().getMonth() + 1)).slice(-2)}-28`;
                 let currentMonthIdx = rawHistory.findIndex(r => r.date === currentYM);
                 let currentMonthData = { principal: totalPrincipal, evalValue: totalAccountValueInWon, date: currentYM, isCurrent: true };
                 if(currentMonthIdx > -1) rawHistory[currentMonthIdx] = currentMonthData; else rawHistory.push(currentMonthData);
 
-                const safeFilteredHistory = rawHistory.filter(h => h.date.substring(0,7) >= trendStartDateStr && h.date.substring(0,7) <= trendEndDateStr);
-                let trendLabels = safeFilteredHistory.map(h => h.isCurrent ? '현재' : h.date.substring(2,7).replace('-','/')); 
+                const safeFilteredHistory = rawHistory.filter(h => String(h.date).substring(0,7) >= trendStartDateStr && String(h.date).substring(0,7) <= trendEndDateStr);
+                let trendLabels = safeFilteredHistory.map(h => h.isCurrent ? '현재' : String(h.date).substring(2,7).replace('-','/')); 
                 let trendAmtData = safeFilteredHistory.map(h => h.evalValue - h.principal);
                 let trendRateData = safeFilteredHistory.map(h => { let p = h.evalValue - h.principal; return h.principal > 0 ? ((p / h.principal) * 100).toFixed(1) : 0; });
                 let barColors = trendAmtData.map(val => val >= 0 ? 'rgba(231, 76, 60, 0.4)' : 'rgba(41, 128, 185, 0.4)');
@@ -1002,17 +1144,33 @@
                 const textColor = isDark ? '#a0a0a0' : '#7f8c8d'; const gridColor = isDark ? '#333' : '#eee';
 
                 const donutCanvas = document.getElementById('asset-class-donut-chart');
-                if (donutCanvas && Object.keys(assetClassSums).length > 0) {
-                    let donutLabels = Object.keys(assetClassSums); let donutData = Object.values(assetClassSums).map(v => parseFloat(v.toFixed(1)));
-                    let donutColors = donutLabels.map(l => ASSET_CLASS_COLORS[l] || '#95a5a6');
+                if (donutCanvas) {
+                    let originalLabels = Object.keys(assetClassSums); 
+                    let donutData = Object.values(assetClassSums).map(v => parseFloat(v.toFixed(1)));
+                    
+                    // 💡 3. 도넛 차트 0% 오류 (Divide by Zero) 강제 셧다운 방어 완료
+                    const totalWeightSum = donutData.reduce((a,b) => a+b, 0);
+                    let displayLabels, donutColors;
+
+                    if (totalWeightSum === 0) {
+                        displayLabels = ['데이터 없음']; donutData = [100]; donutColors = ['#e0e0e0'];
+                    } else {
+                        // 💡 기능 요청: 범례(Legend) 텍스트를 "자산군 00.0%" 형태로 강제 변환
+                        displayLabels = originalLabels.map((l, i) => `${l}  ${donutData[i]}%`);
+                        donutColors = originalLabels.map(l => ASSET_CLASS_COLORS[l] || '#95a5a6');
+                    }
+
                     assetClassChartInstance = new Chart(donutCanvas.getContext('2d'), {
-                        type: 'doughnut', data: { labels: donutLabels, datasets: [{ data: donutData, backgroundColor: donutColors, borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff' }] },
+                        type: 'doughnut', data: { labels: displayLabels, datasets: [{ data: donutData, backgroundColor: donutColors, borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff' }] },
                         options: {
                             responsive: true, maintainAspectRatio: false, cutout: '60%',
                             plugins: {
-                                legend: { display: true, position: 'right', labels: { boxWidth: 10, font: {size: 11, weight:'bold'}, color: textColor, padding: 12 } },
-                                datalabels: { color: isDark ? '#fff' : '#2c3e50', font: { weight: 'bold', size: 12 }, formatter: (value) => value > 4 ? value + '%' : '' },
-                                tooltip: { callbacks: { label: (ctx) => ' ' + ctx.raw + '%' } }
+                                legend: { display: totalWeightSum > 0, position: 'right', labels: { boxWidth: 10, font: {size: 11, weight:'bold'}, color: textColor, padding: 12 } },
+                                datalabels: { 
+                                    color: isDark ? '#fff' : '#2c3e50', font: { weight: 'bold', size: 12 }, 
+                                    formatter: (value) => (totalWeightSum > 0 && value > 4) ? value + '%' : '' 
+                                },
+                                tooltip: { callbacks: { label: (ctx) => totalWeightSum > 0 ? ' ' + ctx.raw + '%' : ' 데이터 없음' } }
                             }
                         }
                     });
@@ -1057,8 +1215,7 @@
 
                                 for (let idx = 0; idx < chart.data.labels.length; idx++) {
                                     const barEl = barMeta.data[idx]; const lineEl = lineMeta.data[idx];
-                                    const barVal = chart.data.datasets[0].data[idx]; const lineVal = chart.data.datasets[1].data[idx];
-
+                                    const barVal = parseFloat(chart.data.datasets[0].data[idx])||0; const lineVal = parseFloat(chart.data.datasets[1].data[idx])||0;
                                     let barLabelY = barEl ? (barVal >= 0 ? barEl.y - 4 : barEl.y + 4) : 0;
                                     let lineLabelY = lineEl ? (lineVal >= 0 ? lineEl.y - 12 : lineEl.y + 12) : 0;
 
@@ -1112,47 +1269,13 @@
                             },
                             scales: { 
                                 x: { ticks: { color: textColor, font:{size:10} }, grid: { display: false } }, 
-                                y: { type: 'linear', display: true, position: 'left', ticks: { color: textColor, font:{size:10}, callback: (v) => Math.round(v/10000).toLocaleString() + '만' }, grid: { color: gridColor } },
+                                y: { type: 'linear', display: true, position: 'left', ticks: { color: textColor, font:{size:10}, callback: (v) => Math.round((parseFloat(v)||0)/10000).toLocaleString() + '만' }, grid: { color: gridColor } },
                                 y1: { type: 'linear', display: true, position: 'right', ticks: { color: textColor, font:{size:10}, callback: (v) => v + '%' }, grid: { drawOnChartArea: false } }
                             }
                         }
                     });
                 }
             } catch(e) { console.error("Engine Error:", e); }
-        }
-
-        function drawChart(cardId, labels, data, isDanger) {
-            const canvas = document.getElementById(`canvas-${cardId}`); if (!canvas) return;
-            const lineColor = isDanger ? '#e74c3c' : '#3498db'; 
-            let pointRadii = new Array(data.length).fill(0); let pointColors = new Array(data.length).fill('transparent'); 
-            let maxVal = -Infinity; let maxIdx = -1; for (let i = 0; i < data.length; i++) { if (data[i] > maxVal) { maxVal = data[i]; maxIdx = i; } }
-            if (maxIdx !== -1) { pointRadii[maxIdx] = 3; pointColors[maxIdx] = '#e74c3c'; }
-            if (chartInstances[cardId]) chartInstances[cardId].destroy();
-            chartInstances[cardId] = new Chart(canvas.getContext('2d'), {
-                type: 'line', data: { labels: labels, datasets: [{ data: data, borderColor: lineColor, backgroundColor: 'transparent', borderWidth: 1.2, pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { display: false }, y: { display: false } }, layout: { padding: { top: 4, bottom: 2 } } }
-            });
-        }
-
-        function gridAddModule(viewType) {
-            const type = document.getElementById('add-type') ? document.getElementById('add-type').value : 'asset';
-            let ticker = document.getElementById('add-ticker').value.trim().toUpperCase();
-            let customName = document.getElementById('add-name').value.trim();
-            let qtyInput = document.getElementById('add-qty'); let initialQty = qtyInput ? (parseFloat(qtyInput.value) || 0) : 0;
-            if(type === 'cash') { ticker = 'CASH'; if(!customName) customName = '원화 예수금'; } if (!ticker) return;
-            
-            let list = getActiveArray();
-            let defaultClass = "📈 주식(성장)";
-            if(ticker === 'CASH') defaultClass = "💵 현금(유동성)";
-
-            list.push({ type: viewType === 'macro' ? 'asset' : 'portfolio', ticker: ticker, name: customName, quantity: initialQty, targetWeight: 0, assetClass: defaultClass });
-            saveCurrentState(); renderDashboard();
-        }
-
-        function removeAsset(ticker) {
-            if(currentView === 'macro') macroAssets = macroAssets.filter(a => a.ticker !== ticker);
-            else portfolios[currentView] = portfolios[currentView].filter(a => a.ticker !== ticker);
-            saveCurrentState(); renderDashboard();
         }
 
         switchView(currentView);
