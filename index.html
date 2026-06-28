@@ -28,8 +28,11 @@
         .sticky-nav-wrapper { position: sticky; top: 0; z-index: 1000; background-color: var(--bg-body); padding: 20px 20px 10px 20px; margin: -20px -20px 15px -20px; border-bottom: 1px solid var(--border-dash); box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .header-wrap { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; flex-wrap: wrap; gap: 10px; }
         .header-wrap h1 { margin: 0; font-size: 1.5rem; }
-        .header-controls { display: flex; gap: 8px; flex-wrap: wrap; }
-        .header-btn { background: var(--bg-card); border: 1px solid var(--text-sub); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
+        
+        /* 모바일 헤더 가로 스크롤 쾌적화 */
+        .header-controls { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .header-controls::-webkit-scrollbar { display: none; }
+        .header-btn { flex-shrink: 0; background: var(--bg-card); border: 1px solid var(--text-sub); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
         .header-btn:hover { background: var(--tab-bg); }
         .btn-highlight { border-color: var(--tab-portfolio); color: var(--tab-portfolio); }
 
@@ -77,6 +80,7 @@
         .mdd-value { font-size: 1.15rem; font-weight: bold; text-align: right; }
         .status-badge { padding: 3px 8px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
 
+        /* 빙글빙글 로딩 스피너 */
         .fetch-loading { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-sub); }
         .spinner { width: 14px; height: 14px; border: 2px solid var(--border-dash); border-top-color: var(--tab-active); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -110,7 +114,9 @@
         .table-container { width: 100%; overflow-x: auto; background: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; margin-bottom: 20px; }
         .portfolio-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; min-width: 900px; }
         .portfolio-table th, .portfolio-table td { padding: 12px 8px; border-bottom: 1px solid var(--border-dash); text-align: right; vertical-align: middle; }
-        .portfolio-table th { background: var(--bg-body); color: var(--text-sub); font-weight: bold; text-align: right; }
+        
+        /* 헤더 상단 고정 */
+        .portfolio-table thead th { background: var(--bg-body); color: var(--text-sub); font-weight: bold; position: sticky; top: 0; z-index: 4; }
         .portfolio-table th:first-child, .portfolio-table td:first-child { text-align: left; }
         .portfolio-table th:nth-child(3), .portfolio-table td:nth-child(3) { text-align: center; }
         .portfolio-table tbody tr:hover td { background: rgba(0,0,0,0.02); }
@@ -163,6 +169,7 @@
             #cards-container:not(.mobile-3col) { grid-template-columns: 1fr; gap: 15px; }
             #cards-container.mobile-3col { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
             
+            /* 거시경제 3열 모드 시 일정카드 가로 1열 전체 확장 유지 */
             #cards-container.mobile-3col .scheduler-card { grid-column: 1 / -1; }
             
             #cards-container.mobile-3col .hub-card { padding: 6px; height: auto; min-height: 90px; justify-content: center; }
@@ -185,6 +192,7 @@
             #cards-container.mobile-3col .card .status-badge { padding: 1px 4px; font-size: 0.6rem; border-radius: 4px; }
             #cards-container.mobile-3col .delete-btn { top: 4px; right: 4px; font-size: 1rem; }
 
+            /* 모바일 종목명 틀고정 & 압축 최적화 */
             .table-container { padding: 0; border-radius: 0; box-shadow: none; border-top: 1px solid var(--border-dash); border-bottom: 1px solid var(--border-dash); overflow-x: auto; }
             .portfolio-table { min-width: 800px; }
             .portfolio-table th:first-child, .portfolio-table td:first-child {
@@ -192,7 +200,7 @@
                 border-right: 1px solid var(--border-dash); padding: 8px 4px; box-shadow: 2px 0 5px rgba(0,0,0,0.05);
                 width: 85px; min-width: 85px; max-width: 85px;
             }
-            .portfolio-table th:first-child { z-index: 3; }
+            .portfolio-table thead th:first-child { z-index: 5; } /* 헤더 겹침 보정 */
             .portfolio-table td:first-child > div { flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; overflow: hidden; }
             .portfolio-table td:first-child .class-select { width: 100%; margin: 0; padding: 2px; font-size: 0.65rem; }
             .portfolio-table td:first-child .editable-name { width: 100%; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.75rem; }
@@ -325,8 +333,11 @@
 
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
 
-        // 💡 마이그레이션 키 V42 (최종 에러 철벽 방어 & 계좌 복구)
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV42_";
+        // 💡 중요: 리밸런싱 민감도 하드코딩 탈피 (사용자 수정 용이)
+        const REBALANCING_THRESHOLD = 15000;
+
+        // 💡 V44 최종 마이그레이션 키 지정
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV44_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
@@ -358,16 +369,18 @@
 
         function getAccIdByName(name) { return 'acc_' + String(name || '').replace(/\s+/g, '').replace(/[^a-zA-Z0-9가-힣]/g, ''); }
 
-        // 💡 1. 오염 데이터(문자열 "undefined") 파싱 충돌 원천 차단 함수
+        // 💡 안전 파싱 모듈: 브라우저 캐시 내의 쓰레기 데이터("undefined", "null", "[object Object]") 완벽 필터링
         function safeParse(key, defaultVal) {
             let val = localStorage.getItem(key);
-            if (!val || val === "undefined" || val === "null") return defaultVal;
+            if (!val || val === "undefined" || val === "null" || val === "[object Object]") return defaultVal;
             try { return JSON.parse(val) || defaultVal; } catch (e) { return defaultVal; }
         }
 
-        // 💡 2. 딥 마이그레이션 모듈 (V22~V41 유실 계좌 강제 병합 복구)
+        // 마이그레이션 모듈: V22~V43의 모든 데이터를 유실 없이 병합 승계
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
-            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_'];
+            const keysToMigrate = [];
+            for (let i = 0; i < localStorage.length; i++) { keysToMigrate.push(localStorage.key(i)); }
+            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_'];
             let mergedTabsMap = {};
 
             oldPrefixes.forEach(prefix => {
@@ -375,27 +388,20 @@
                 if (tabsStr && tabsStr !== "undefined" && tabsStr !== "null") {
                     try {
                         let parsed = JSON.parse(tabsStr);
-                        if (Array.isArray(parsed)) {
-                            parsed.forEach(t => { if (t && t.id) mergedTabsMap[t.id] = t; });
-                        }
+                        if (Array.isArray(parsed)) { parsed.forEach(t => { if (t && t.id) mergedTabsMap[t.id] = t; }); }
                     } catch(e) {}
                 }
-                for (let i = 0; i < localStorage.length; i++) {
-                    let key = localStorage.key(i);
+                keysToMigrate.forEach(key => {
                     if (key && key.startsWith(prefix) && !key.endsWith('tabs')) {
-                        let newKey = key.replace(prefix, STORAGE_KEY_PREFIX);
                         let val = localStorage.getItem(key);
                         if(val !== "undefined" && val !== "null") {
-                            localStorage.setItem(newKey, val);
+                            localStorage.setItem(key.replace(prefix, STORAGE_KEY_PREFIX), val);
                         }
                     }
-                }
+                });
             });
-
             let mergedTabsArr = Object.values(mergedTabsMap);
-            if (mergedTabsArr.length > 0) {
-                localStorage.setItem(STORAGE_KEY_PREFIX + 'tabs', JSON.stringify(mergedTabsArr));
-            }
+            if (mergedTabsArr.length > 0) { localStorage.setItem(STORAGE_KEY_PREFIX + 'tabs', JSON.stringify(mergedTabsArr)); }
         }
 
         function forceRefresh() {
@@ -407,18 +413,14 @@
         function toggleCombinedSelector() {
             const container = document.getElementById('checkbox-container');
             const arrow = document.getElementById('combined-selector-arrow');
-            if(container.style.display === 'none' || container.style.display === '') {
-                container.style.display = 'flex'; arrow.innerText = '▲';
-            } else {
-                container.style.display = 'none'; arrow.innerText = '▼';
-            }
+            if(container.style.display === 'none' || container.style.display === '') { container.style.display = 'flex'; arrow.innerText = '▲'; } 
+            else { container.style.display = 'none'; arrow.innerText = '▼'; }
         }
 
         function exportData() {
             let backup = {};
             for(let i=0; i<localStorage.length; i++) {
-                let key = localStorage.key(i);
-                if(key.startsWith(STORAGE_KEY_PREFIX)) backup[key] = localStorage.getItem(key);
+                let key = localStorage.key(i); if(key.startsWith(STORAGE_KEY_PREFIX)) backup[key] = localStorage.getItem(key);
             }
             let dataStr = btoa(encodeURIComponent(JSON.stringify(backup)));
             document.getElementById('sync-data-area').value = dataStr;
@@ -430,8 +432,7 @@
             let dataStr = document.getElementById('sync-data-area').value.trim();
             if(!dataStr) { alert("백업 데이터를 빈칸에 붙여넣어주세요."); return; }
             try {
-                let backup = JSON.parse(decodeURIComponent(atob(dataStr)));
-                let count = 0;
+                let backup = JSON.parse(decodeURIComponent(atob(dataStr))); let count = 0;
                 for(let key in backup) { if(key.startsWith(STORAGE_KEY_PREFIX)) { localStorage.setItem(key, backup[key]); count++; } }
                 if(count > 0) { alert("데이터 복원이 완벽하게 완료되었습니다!"); location.reload(); } 
                 else { alert("유효한 백업 데이터 구조가 아닙니다."); }
@@ -444,7 +445,7 @@
             let parsedNumber = parseFloat(numericString);
             el.value = parsedNumber.toLocaleString('ko-KR');
             if(targetType === 'principal') { rawNumericPrincipal = parsedNumber; updatePrincipal(parsedNumber); } 
-            else { rawNumericSimulation = parsedNumber; calculateRebalancingEngine(); }
+            else { rawNumericSimulation = parsedNumber; triggerRebalance(); }
         }
 
         function parseRow(line) {
@@ -504,7 +505,7 @@
             switchView(currentView);
         }
 
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v42')) {
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v44')) {
             let macroCheck = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
             let hasTGA = macroCheck.some(a => a.ticker === 'FRED:WTREGEN');
             if(!hasTGA) macroCheck.push({ type: 'asset', ticker: 'FRED:WTREGEN', name: '미 재무부 TGA 잔고' });
@@ -514,7 +515,7 @@
             
             let tabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
             if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v42', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v44', 'true');
         }
 
         let portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
@@ -526,12 +527,19 @@
         let livePrices = {}; let chartInstances = {}; let summaryChartInstance = null; let trendChartInstance = null; let assetClassChartInstance = null;
         
         const _fetchingPromises = {};
+        
+        // 💡 엔진 다중 호출 방지 디바운서
+        let rebalanceTimer = null;
+        function triggerRebalance() {
+            if(rebalanceTimer) clearTimeout(rebalanceTimer);
+            rebalanceTimer = setTimeout(() => { calculateRebalancingEngine(); }, 150);
+        }
 
         if(localStorage.getItem("theme_Master") === "dark") document.body.classList.add("dark-mode");
         function toggleTheme() {
             document.body.classList.toggle("dark-mode");
             localStorage.setItem("theme_Master", document.body.classList.contains("dark-mode") ? "dark" : "light");
-            if(currentView !== 'macro' && currentView !== 'portfolio_hub') calculateRebalancingEngine();
+            if(currentView !== 'macro' && currentView !== 'portfolio_hub') triggerRebalance();
         }
 
         function toggleLayout() {
@@ -620,7 +628,7 @@
         function updatePrincipal(parsedNumber) {
             if (currentView === 'combined') return;
             let tab = portfolioTabs.find(t => t.id === currentView);
-            if(tab) { tab.principal = parsedNumber; saveTabs(); calculateRebalancingEngine(); }
+            if(tab) { tab.principal = parsedNumber; saveTabs(); triggerRebalance(); }
         }
 
         function saveChartEdit() {
@@ -635,7 +643,7 @@
             else { history.push({ date: ym + '-28', principal: p, evalValue: e }); }
             history.sort((a,b) => String(a.date).localeCompare(String(b.date)));
             localStorage.setItem(hKey, JSON.stringify(history));
-            calculateRebalancingEngine();
+            triggerRebalance();
         }
 
         function updateCombinedSelection() {
@@ -654,7 +662,9 @@
             let dateStr = new Date().toISOString().split('T')[0]; let ym = dateStr.substring(0,7);
             if(!confirm(`현재 실시간 주가와 원금을 기준으로 모든 계좌의 [${ym}] 마감 기록을 저장하시겠습니까?\n(이미 이번 달 기록이 있다면 새 값으로 덮어씁니다.)`)) return;
 
-            let fxRate = parseFloat(livePrices['KRW=X']) || 1350;
+            let fallbackRate = parseFloat(localStorage.getItem('lastFxRate_Master')) || 1400;
+            let fxRate = parseFloat(livePrices['KRW=X']) || fallbackRate;
+
             portfolioTabs.forEach(tab => {
                 let accAssets = portfolios[tab.id] || []; let totalVal = 0;
                 accAssets.forEach(a => {
@@ -673,9 +683,14 @@
             alert('✅ 모든 계좌의 이번 달 실적 마감이 완료되어 차트에 영구 반영되었습니다.'); renderHubView();
         }
 
-        function drawSparkline(cellId, prices) {
+        function drawSparkline(cellId, rawPrices) {
             const cell = document.getElementById(cellId);
-            if (!cell || !Array.isArray(prices) || prices.length < 2) return;
+            if (!cell || !Array.isArray(rawPrices)) return;
+            
+            // 💡 문자열 데이터 스파크라인 파싱 철벽 방어 (NaN 제외)
+            const prices = rawPrices.map(p => parseFloat(p)).filter(p => !isNaN(p));
+            if (prices.length < 2) { cell.innerHTML = '-'; return; }
+            
             const W = 64, H = 28, pad = 2;
             const min = Math.min(...prices), max = Math.max(...prices);
             const range = max - min || 1;
@@ -684,6 +699,8 @@
                 const y = H - pad - ((p - min) / range) * (H - pad * 2);
                 return `${x.toFixed(1)},${y.toFixed(1)}`;
             }).join(' ');
+            
+            // 상승 초록, 하락 빨강
             const last = prices[prices.length - 1]; const first = prices[0];
             const color = last >= first ? '#2ecc71' : '#e74c3c';
             const lx = (pad + (W - pad * 2)).toFixed(1);
@@ -704,16 +721,23 @@
         async function renderHubView() {
             const container = document.getElementById('dynamic-content-area');
             Object.values(chartInstances).forEach(c => { if(c && typeof c.destroy === 'function') c.destroy(); }); chartInstances = {};
+            if(assetClassChartInstance) { assetClassChartInstance.destroy(); assetClassChartInstance = null; }
+            if(summaryChartInstance) { summaryChartInstance.destroy(); summaryChartInstance = null; }
+            if(trendChartInstance) { trendChartInstance.destroy(); trendChartInstance = null; }
             
-            let fxRate = parseFloat(livePrices['KRW=X']) || 1350;
+            let fallbackRate = parseFloat(localStorage.getItem('lastFxRate_Master')) || 1400;
+            let fxRate = parseFloat(livePrices['KRW=X']) || fallbackRate;
+            
             if(!livePrices['KRW=X']) {
                 try {
                     const data = await fetchOnce('KRW=X');
                     if(data && data.success) {
-                        livePrices['KRW=X'] = data.price; livePrices['KRW=X_h'] = data.high52; fxRate = parseFloat(data.price)||1350;
+                        livePrices['KRW=X'] = data.price; livePrices['KRW=X_h'] = data.high52; 
+                        fxRate = parseFloat(data.price)||fallbackRate; localStorage.setItem('lastFxRate_Master', fxRate);
                         if(data.chartData && data.chartLabels) {
                             if(!window.rawChartData) window.rawChartData = {};
-                            window.rawChartData['KRW=X'] = { prices: data.chartData, labels: data.chartLabels };
+                            const safePrices = data.chartData.map(v => parseFloat(v));
+                            window.rawChartData['KRW=X'] = { prices: safePrices, labels: data.chartLabels };
                         }
                     }
                 } catch(e){}
@@ -762,7 +786,13 @@
             try {
                 if(currentView === 'portfolio_hub') return;
                 const container = document.getElementById('dynamic-content-area');
+                
+                // 💡 차트 및 표 백지화 버그 완벽 방어: HTML을 교체하기 전 구형 차트 객체를 무조건 파괴(destroy)
                 Object.values(chartInstances).forEach(c => { if(c && typeof c.destroy === 'function') c.destroy(); }); chartInstances = {};
+                if(assetClassChartInstance) { assetClassChartInstance.destroy(); assetClassChartInstance = null; }
+                if(summaryChartInstance) { summaryChartInstance.destroy(); summaryChartInstance = null; }
+                if(trendChartInstance) { trendChartInstance.destroy(); trendChartInstance = null; }
+
                 let activeList = getActiveArray() || []; let isCombined = (currentView === 'combined');
                 let htmlStr = '';
 
@@ -785,33 +815,30 @@
                 if (currentView === 'macro') {
                     let layoutClass = localStorage.getItem('mobileLayout_Master') === '3col' ? 'mobile-3col' : '';
                     htmlStr += `<div id="cards-container" class="${layoutClass}">`;
-                    for (let i = 0; i < 12; i++) {
-                        if (i < activeList.length) {
-                            let asset = activeList[i]; const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, ''); const cardId = 'card-' + safeTicker; 
-                            if (asset.type === 'scheduler') {
-                                htmlStr += `<div class="card scheduler-card non-draggable" id="${cardId}"><div class="asset-info"><h2>${String(asset.name)}</h2><p>재무부 정책 집중 일정</p></div><ul class="scheduler-list"><li><span>국채 발행 계획 (QRA)</span><span class="sched-date">2026-07-29</span></li><li><span>의회 예산국 적자 점검</span><span class="sched-date">2026-09-30</span></li></ul></div>`;
-                            } else {
-                                htmlStr += `
-                                    <div class="card asset-card" id="${cardId}" data-ticker="${String(asset.ticker)}">
-                                        <button class="delete-btn" onclick="removeAsset('${String(asset.ticker)}')" title="삭제">&times;</button>
-                                        <div class="asset-info">
-                                            <h2><span class="editable-name" contenteditable="true" onblur="updateInlineAsset('${String(asset.ticker)}', 'name', this.innerText.trim())">${String(asset.name || asset.ticker)}</span></h2>
-                                            <p>${String(asset.ticker)}</p>
+                    for (let i = 0; i < activeList.length; i++) {
+                        let asset = activeList[i]; const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, ''); const cardId = 'card-' + safeTicker; 
+                        if (asset.type === 'scheduler') {
+                            htmlStr += `<div class="card scheduler-card non-draggable" id="${cardId}"><div class="asset-info"><h2>${String(asset.name)}</h2><p>재무부 정책 집중 일정</p></div><ul class="scheduler-list"><li><span>국채 발행 계획 (QRA)</span><span class="sched-date">2026-07-29</span></li><li><span>의회 예산국 적자 점검</span><span class="sched-date">2026-09-30</span></li></ul></div>`;
+                        } else {
+                            htmlStr += `
+                                <div class="card asset-card" id="${cardId}" data-ticker="${String(asset.ticker)}">
+                                    <button class="delete-btn" onclick="removeAsset('${String(asset.ticker)}')" title="삭제">&times;</button>
+                                    <div class="asset-info">
+                                        <h2><span class="editable-name" contenteditable="true" onblur="updateInlineAsset('${String(asset.ticker)}', 'name', this.innerText.trim())">${String(asset.name || asset.ticker)}</span></h2>
+                                        <p>${String(asset.ticker)}</p>
+                                    </div>
+                                    <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
+                                    <div class="data-section">
+                                        <div class="mdd-wrapper">
+                                            <div class="price-line">현재: <span id="price-${cardId}" class="price-current"><span class="fetch-loading"><span class="spinner"></span>로딩 중</span></span></div>
+                                            <div class="price-high" id="high-wrapper-${cardId}" style="display:inline-block; font-size:0.75rem; color:var(--text-sub);">(<span style="color:#e74c3c;">🔴</span> 고점: <span id="high-${cardId}" style="color:#e74c3c; font-weight:bold;">-</span>)</div>
                                         </div>
-                                        <div class="chart-container"><canvas id="canvas-${cardId}"></canvas></div>
-                                        <div class="data-section">
-                                            <div class="mdd-wrapper">
-                                                <div class="price-line">현재: <span id="price-${cardId}" class="price-current"><span class="fetch-loading"><span class="spinner"></span>로딩 중</span></span></div>
-                                                <div class="price-high" id="high-wrapper-${cardId}" style="display:inline-block; font-size:0.75rem; color:var(--text-sub);">(<span style="color:#e74c3c;">🔴</span> 고점: <span id="high-${cardId}" style="color:#e74c3c; font-weight:bold;">-</span>)</div>
-                                            </div>
-                                            <div class="right-display-wrapper"><div id="mdd-${cardId}" class="mdd-value">-</div><div id="status-${cardId}" class="status-badge status-loading">⏳</div></div>
-                                        </div>
-                                    </div>`;
-                            }
-                        } else if (i === activeList.length) {
-                            htmlStr += `<div class="card empty-card non-draggable"><div class="add-form"><h3>➕ 모듈 추가</h3><input type="text" id="add-ticker" placeholder="티커 코드"><input type="text" id="add-name" placeholder="표시 이름"><button onclick="gridAddModule('macro')">추가하기</button></div></div>`;
+                                        <div class="right-display-wrapper"><div id="mdd-${cardId}" class="mdd-value">-</div><div id="status-${cardId}" class="status-badge status-loading">⏳</div></div>
+                                    </div>
+                                </div>`;
                         }
                     }
+                    htmlStr += `<div class="card empty-card non-draggable"><div class="add-form"><h3>➕ 모듈 추가</h3><input type="text" id="add-ticker" placeholder="티커 코드"><input type="text" id="add-name" placeholder="표시 이름"><button onclick="gridAddModule('macro')">추가하기</button></div></div>`;
                     htmlStr += `</div>`;
                 } 
                 else {
@@ -868,31 +895,37 @@
                 container.innerHTML = htmlStr;
                 initDragAndDrop();
 
-                setTimeout(() => {
+                // 💡 안전 통신: Google 서버 차단 방지를 위한 스마트 배치 요청 (동시 4개 제한)
+                setTimeout(async () => {
                     const fetchTasks = activeList.filter(asset => asset.type !== 'scheduler').map(asset => {
-                        const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
-                        const cardId = currentView === 'macro' ? 'card-' + safeTicker : 'row-' + safeTicker;
-                        if (livePrices[asset.ticker]) {
-                            updateCardUI(asset, cardId, livePrices[asset.ticker], livePrices[asset.ticker+'_h'] || 1);
-                            if (currentView === 'macro' && window.rawChartData && window.rawChartData[asset.ticker]) drawChart(cardId, window.rawChartData[asset.ticker].labels, window.rawChartData[asset.ticker].prices, false);
-                            if (currentView !== 'macro' && currentView !== 'portfolio_hub' && window.rawChartData && window.rawChartData[asset.ticker]) {
-                                drawSparkline('spark-' + cardId, window.rawChartData[asset.ticker].prices);
+                        return () => {
+                            const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
+                            const cardId = currentView === 'macro' ? 'card-' + safeTicker : 'row-' + safeTicker;
+                            if (livePrices[asset.ticker]) {
+                                updateCardUI(asset, cardId, livePrices[asset.ticker], livePrices[asset.ticker+'_h'] || 1);
+                                if (currentView === 'macro' && window.rawChartData && window.rawChartData[asset.ticker]) drawChart(cardId, window.rawChartData[asset.ticker].labels, window.rawChartData[asset.ticker].prices, false);
+                                if (currentView !== 'macro' && currentView !== 'portfolio_hub' && window.rawChartData && window.rawChartData[asset.ticker]) drawSparkline('spark-' + cardId, window.rawChartData[asset.ticker].prices);
+                                return Promise.resolve(); 
                             }
-                            return Promise.resolve(); 
-                        }
-                        return fetchData(asset, cardId); 
+                            return fetchData(asset, cardId);
+                        };
                     });
 
-                    Promise.allSettled(fetchTasks).then(() => { if (currentView !== 'macro') calculateRebalancingEngine(); });
-                    
-                    if (currentView !== 'macro') { 
-                        fetchTasks.forEach(p => { 
-                            if (p && typeof p.then === 'function') {
-                                p.then(() => calculateRebalancingEngine()).catch(() => {}); 
-                            }
-                        }); 
+                    // 동시 요청수 4개 제한 큐 가동
+                    const limit = 4;
+                    let executing = [];
+                    for (const task of fetchTasks) {
+                        const p = Promise.resolve().then(() => task());
+                        p.finally(() => { if (currentView !== 'macro') triggerRebalance(); });
+                        executing.push(p);
+                        if (executing.length >= limit) {
+                            await Promise.race(executing);
+                            executing = executing.filter(e => e !== p);
+                        }
                     }
-                }, 50);
+                    await Promise.allSettled(executing);
+                    if (currentView !== 'macro') triggerRebalance();
+                }, 100); // DOM이 확실히 그려질 여유 100ms 부여
 
             } catch(e) { console.error("Dashboard Render Error:", e); }
         }
@@ -903,7 +936,7 @@
                 if(el) {
                     new Sortable(el, { 
                         animation: 200, filter: '.non-draggable, input, button, select, [contenteditable="true"]', preventOnFilter: false, 
-                        delay: 350, delayOnTouchOnly: true, onEnd: function (evt) {
+                        delay: 150, delayOnTouchOnly: true, fallbackTolerance: 5, onEnd: function (evt) {
                         let list = getActiveArray(); let movedItem = list.splice(evt.oldIndex, 1)[0]; list.splice(evt.newIndex, 0, movedItem); 
                         saveCurrentState(); renderDashboard();
                     }});
@@ -913,7 +946,7 @@
                 if(el) {
                     new Sortable(el, { 
                         animation: 200, handle: '.drag-handle', filter: 'input, button, select, [contenteditable="true"]', preventOnFilter: false,
-                        delay: 350, delayOnTouchOnly: true, onEnd: function (evt) {
+                        delay: 150, delayOnTouchOnly: true, fallbackTolerance: 5, onEnd: function (evt) {
                         let list = getActiveArray(); let movedItem = list.splice(evt.oldIndex, 1)[0]; list.splice(evt.newIndex, 0, movedItem); 
                         saveCurrentState(); renderDashboard();
                     }});
@@ -929,15 +962,16 @@
             try {
                 const data = await fetchOnce(asset.ticker);
                 if (!data.success) throw new Error("API Return Fail");
+                
                 livePrices[asset.ticker] = data.price; livePrices[asset.ticker+'_h'] = data.high52;
 
-                if(!window.rawChartData) window.rawChartData = {};
-                if(data.chartData && data.chartLabels) { window.rawChartData[asset.ticker] = { prices: data.chartData, labels: data.chartLabels }; }
-
-                if(viewAtCall === 'macro') { if(data.chartData && data.chartLabels) { drawChart(cardId, data.chartLabels, data.chartData, false); } }
-                if(viewAtCall !== 'macro' && viewAtCall !== 'portfolio_hub') {
-                    if(data.chartData) drawSparkline('spark-' + cardId, data.chartData);
+                if(data.chartData && data.chartLabels) {
+                    if(!window.rawChartData) window.rawChartData = {};
+                    const safePrices = data.chartData.map(v => parseFloat(v));
+                    window.rawChartData[asset.ticker] = { prices: safePrices, labels: data.chartLabels };
                 }
+
+                if(viewAtCall === 'macro') { if(data.chartData && data.chartLabels) { drawChart(cardId, data.chartLabels, window.rawChartData[asset.ticker].prices, false); } }
                 if(viewAtCall === currentView) { updateCardUI(asset, cardId, data.price, data.high52); }
             } catch (error) { 
                 if(viewAtCall === currentView) {
@@ -956,17 +990,20 @@
             
             const pEl = document.getElementById(`price-${cardId}`); if (pEl) pEl.innerText = displayPrice;
 
-            const sparkEl = document.getElementById(`spark-${cardId}`);
-            if(sparkEl && window.rawChartData && window.rawChartData[asset.ticker]) {
-                const prices = window.rawChartData[asset.ticker].prices;
-                if(prices && prices.length > 1) {
-                    let min = Math.min(...prices), max = Math.max(...prices);
-                    let range = max - min || 1;
-                    let w = 60, h = 25; 
-                    let pts = prices.map((p, i) => `${(i/(prices.length-1))*w},${h - ((p-min)/range)*h}`).join(' ');
-                    let color = prices[prices.length-1] >= prices[0] ? '#2ecc71' : '#e74c3c'; 
-                    sparkEl.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 -5 ${w} ${h+10}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
-                } else { sparkEl.innerHTML = '-'; }
+            if (currentView !== 'macro' && currentView !== 'portfolio_hub') {
+                const sparkEl = document.getElementById(`spark-${cardId}`);
+                if(sparkEl && window.rawChartData && window.rawChartData[asset.ticker]) {
+                    const rawPrices = window.rawChartData[asset.ticker].prices;
+                    const prices = rawPrices.filter(p => typeof p === 'number' && !isNaN(p));
+                    if(prices.length > 1) {
+                        let min = Math.min(...prices), max = Math.max(...prices);
+                        let range = max - min || 1;
+                        let w = 60, h = 25; 
+                        let pts = prices.map((p, i) => `${(i/(prices.length-1))*w},${h - ((p-min)/range)*h}`).join(' ');
+                        let color = prices[prices.length-1] >= prices[0] ? '#2ecc71' : '#e74c3c'; 
+                        sparkEl.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 -5 ${w} ${h+10}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+                    } else { sparkEl.innerHTML = '-'; }
+                }
             }
             
             if (currentView === 'macro') {
@@ -984,13 +1021,17 @@
             }
         }
 
+        // 💡 캔버스 초기화 시 new Chart를 강제로 재생성하여 화면 꼬임 증발 철벽 차단
         function drawChart(cardId, labels, data, isDanger) {
             const canvas = document.getElementById(`canvas-${cardId}`); if (!canvas) return;
             const lineColor = isDanger ? '#e74c3c' : '#3498db'; 
             let pointRadii = new Array(data.length).fill(0); let pointColors = new Array(data.length).fill('transparent'); 
-            let maxVal = -Infinity; let maxIdx = -1; for (let i = 0; i < data.length; i++) { if (data[i] > maxVal) { maxVal = data[i]; maxIdx = i; } }
+            let maxVal = -Infinity; let maxIdx = -1; 
+            for (let i = 0; i < data.length; i++) { if (!isNaN(data[i]) && data[i] > maxVal) { maxVal = data[i]; maxIdx = i; } }
             if (maxIdx !== -1) { pointRadii[maxIdx] = 3; pointColors[maxIdx] = '#e74c3c'; }
+            
             if (chartInstances[cardId]) { if(typeof chartInstances[cardId].destroy === 'function') chartInstances[cardId].destroy(); }
+            
             chartInstances[cardId] = new Chart(canvas.getContext('2d'), {
                 type: 'line', data: { labels: labels, datasets: [{ data: data, borderColor: lineColor, backgroundColor: 'transparent', borderWidth: 1.2, pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { display: false }, y: { display: false } }, layout: { padding: { top: 4, bottom: 2 } } }
@@ -999,7 +1040,7 @@
 
         function updateInlineAsset(ticker, field, value) {
             let list = getActiveArray(); let asset = list.find(a => a.ticker === ticker);
-            if (asset) { asset[field] = (field==='name'||field==='assetClass')? String(value): parseFloat(value)||0; saveCurrentState(); if (currentView !== 'macro') calculateRebalancingEngine(); }
+            if (asset) { asset[field] = (field==='name'||field==='assetClass')? String(value): parseFloat(value)||0; saveCurrentState(); if (currentView !== 'macro') triggerRebalance(); }
         }
 
         function gridAddModule(viewType) {
@@ -1023,7 +1064,6 @@
             saveCurrentState(); renderDashboard();
         }
 
-        // 💡 1. 계산 엔진 0원 버그 전면 방어 (데이터 증발/오류 차단)
         function calculateRebalancingEngine() {
             if(currentView === 'macro' || currentView === 'portfolio_hub') return;
             try {
@@ -1031,11 +1071,13 @@
                 let totalAccountValueInWon = 0; let totalPrincipal = 0;
                 let chartLabels = []; let actualDataArr = []; let targetDataArr = []; let assetClassSums = {};
                 
-                const currentFxRate = parseFloat(livePrices['KRW=X']) || 1350; 
+                let fallbackRate = parseFloat(localStorage.getItem('lastFxRate_Master')) || 1400;
+                const currentFxRate = parseFloat(livePrices['KRW=X']) || fallbackRate; 
 
+                // 평가금액 선제 계산: livePrices가 없어도 0원으로 안전 우회
                 list.forEach(asset => {
                     let tickerStr = String(asset.ticker || '').toUpperCase(); 
-                    let price = parseFloat(livePrices[asset.ticker]) || 1; 
+                    let price = parseFloat(livePrices[asset.ticker]) || 0; 
                     if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
                     
                     const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
@@ -1089,15 +1131,15 @@
                         const isWonAsset = tickerUpper.indexOf('.KS') !== -1 || tickerUpper.indexOf('.KQ') !== -1 || tickerUpper === 'CASH';
                         const targetUnitPriceWon = isWonAsset ? curPrice : curPrice * currentFxRate;
 
-                        if (Math.abs(tradeRequiredWon) < 15000) { 
+                        if (Math.abs(tradeRequiredWon) < REBALANCING_THRESHOLD) { 
                             sigEl.innerHTML = `<span class="badge badge-hold">HOLD</span>`; 
                         }
                         else if (tradeRequiredWon > 0) { 
-                            const sharesTxt = targetUnitPriceWon > 0 ? `<br><span style="font-size:0.75rem; color:var(--text-sub); font-weight:bold;">(≈ ${(tradeRequiredWon / targetUnitPriceWon).toFixed(1)}주)</span>` : '';
+                            const sharesTxt = targetUnitPriceWon > 0 ? `<div style="margin-top:4px; font-size:0.75rem; color:var(--text-sub); font-weight:bold;">(≈ ${(tradeRequiredWon / targetUnitPriceWon).toFixed(1)}주)</div>` : '';
                             sigEl.innerHTML = `<span class="badge badge-buy">+${Math.round(tradeRequiredWon).toLocaleString()}원 매수</span>${sharesTxt}`; 
                         }
                         else { 
-                            const sharesTxt = targetUnitPriceWon > 0 ? `<br><span style="font-size:0.75rem; color:var(--text-sub); font-weight:bold;">(≈ ${(Math.abs(tradeRequiredWon) / targetUnitPriceWon).toFixed(1)}주)</span>` : '';
+                            const sharesTxt = targetUnitPriceWon > 0 ? `<div style="margin-top:4px; font-size:0.75rem; color:var(--text-sub); font-weight:bold;">(≈ ${(Math.abs(tradeRequiredWon) / targetUnitPriceWon).toFixed(1)}주)</div>` : '';
                             sigEl.innerHTML = `<span class="badge badge-sell">${Math.round(Math.abs(tradeRequiredWon)).toLocaleString()}원 매도</span>${sharesTxt}`; 
                         }
                     }
@@ -1136,10 +1178,6 @@
                 let barColors = trendAmtData.map(val => val >= 0 ? 'rgba(231, 76, 60, 0.4)' : 'rgba(41, 128, 185, 0.4)');
                 let barBorders = trendAmtData.map(val => val >= 0 ? '#e74c3c' : '#2980b9');
 
-                if (trendChartInstance) { trendChartInstance.destroy(); trendChartInstance = null; }
-                if (summaryChartInstance) { summaryChartInstance.destroy(); summaryChartInstance = null; }
-                if (assetClassChartInstance) { assetClassChartInstance.destroy(); assetClassChartInstance = null; }
-
                 const isDark = document.body.classList.contains("dark-mode");
                 const textColor = isDark ? '#a0a0a0' : '#7f8c8d'; const gridColor = isDark ? '#333' : '#eee';
 
@@ -1147,15 +1185,12 @@
                 if (donutCanvas) {
                     let originalLabels = Object.keys(assetClassSums); 
                     let donutData = Object.values(assetClassSums).map(v => parseFloat(v.toFixed(1)));
-                    
-                    // 💡 3. 도넛 차트 0% 오류 (Divide by Zero) 강제 셧다운 방어 완료
                     const totalWeightSum = donutData.reduce((a,b) => a+b, 0);
                     let displayLabels, donutColors;
 
                     if (totalWeightSum === 0) {
                         displayLabels = ['데이터 없음']; donutData = [100]; donutColors = ['#e0e0e0'];
                     } else {
-                        // 💡 기능 요청: 범례(Legend) 텍스트를 "자산군 00.0%" 형태로 강제 변환
                         displayLabels = originalLabels.map((l, i) => `${l}  ${donutData[i]}%`);
                         donutColors = originalLabels.map(l => ASSET_CLASS_COLORS[l] || '#95a5a6');
                     }
