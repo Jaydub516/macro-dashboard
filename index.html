@@ -29,7 +29,6 @@
         .header-wrap { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; flex-wrap: wrap; gap: 10px; }
         .header-wrap h1 { margin: 0; font-size: 1.5rem; }
         
-        /* 헤더 버튼 가로 스크롤 적용 (모바일 쾌적화) */
         .header-controls { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .header-controls::-webkit-scrollbar { display: none; }
         .header-btn { flex-shrink: 0; background: var(--bg-card); border: 1px solid var(--text-sub); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
@@ -80,17 +79,15 @@
         .mdd-value { font-size: 1.15rem; font-weight: bold; text-align: right; }
         .status-badge { padding: 3px 8px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
 
-        /* 로딩 스피너 및 새로고침 애니메이션 */
         .fetch-loading { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-sub); }
         .spinner { width: 14px; height: 14px; border: 2px solid var(--border-dash); border-top-color: var(--tab-active); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes spin-once { 0% { transform: rotate(0deg); } 100% { transform: rotate(720deg); } }
         .spin-once { animation: spin-once 1.5s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; }
         
-        /* 스파크라인 셀 */
-        .sparkline-cell { width: 72px; padding: 4px 8px !important; vertical-align: middle !important; text-align: center !important; }
+        /* 💡 UX: 스파크라인 레이아웃 쉬프트(떨림) 방어 */
+        .sparkline-cell { width: 72px; min-width: 72px; min-height: 35px; padding: 4px 8px !important; vertical-align: middle !important; text-align: center !important; }
 
-        /* 허브 카드 수익률 테두리 */
         .hub-card.roi-plus-strong  { border-color: #2ecc71 !important; }
         .hub-card.roi-plus-mild    { border-color: #a8e6c1 !important; }
         .hub-card.roi-minus-mild   { border-color: #a8c8e8 !important; }
@@ -113,11 +110,14 @@
         .hub-delete-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.2rem; color: #bdc3c7; cursor: pointer; padding: 0; line-height: 1; z-index: 10; }
         .hub-delete-btn:hover { color: #e74c3c; }
 
+        /* 💡 UX: 드래그 앤 드롭 시각적 피드백 효과 추가 */
+        .sortable-ghost { opacity: 0.5; background-color: var(--account-summary-bg) !important; }
+        .sortable-drag { cursor: grabbing !important; box-shadow: 0 8px 15px rgba(0,0,0,0.15) !important; transform: scale(1.02); z-index: 9999; }
+
         .table-container { width: 100%; overflow-x: auto; background: var(--bg-card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; margin-bottom: 20px; }
         .portfolio-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; min-width: 900px; }
         .portfolio-table th, .portfolio-table td { padding: 12px 8px; border-bottom: 1px solid var(--border-dash); text-align: right; vertical-align: middle; }
         
-        /* 테이블 헤더 상단 고정 */
         .portfolio-table thead th { background: var(--bg-body); color: var(--text-sub); font-weight: bold; position: sticky; top: 0; z-index: 4; }
         .portfolio-table th:first-child, .portfolio-table td:first-child { text-align: left; }
         .portfolio-table th:nth-child(3), .portfolio-table td:nth-child(3) { text-align: center; }
@@ -171,10 +171,8 @@
             #cards-container:not(.mobile-3col) { grid-template-columns: 1fr; gap: 15px; }
             #cards-container.mobile-3col { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
             
-            /* 💡 거시경제 3열 모드 시 일정카드 1열 전체 확장 유지 */
             #cards-container.mobile-3col .scheduler-card { grid-column: 1 / -1; }
             
-            /* 💡 모바일 허브 카드 3열 모드 폰트 최적화 (글씨 잘림 방지) */
             #cards-container.mobile-3col .hub-card { padding: 8px 4px; height: auto; min-height: 95px; justify-content: center; }
             #cards-container.mobile-3col .hub-card h2 { font-size: 0.65rem; margin-bottom: 3px; white-space: normal; line-height: 1.2; word-break: keep-all; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; width: 100%; }
             #cards-container.mobile-3col .hub-card p { font-size: 0.6rem; margin-bottom: 4px; white-space: normal; word-break: keep-all; line-height: 1.1; }
@@ -195,7 +193,6 @@
             #cards-container.mobile-3col .card .status-badge { padding: 1px 4px; font-size: 0.6rem; border-radius: 4px; }
             #cards-container.mobile-3col .delete-btn { top: 4px; right: 4px; font-size: 1rem; }
 
-            /* 💡 모바일 종목명 틀고정 및 공간 압축 */
             .table-container { padding: 0; border-radius: 0; box-shadow: none; border-top: 1px solid var(--border-dash); border-bottom: 1px solid var(--border-dash); overflow-x: auto; }
             .portfolio-table { min-width: 800px; }
             .portfolio-table th:first-child, .portfolio-table td:first-child {
@@ -338,8 +335,8 @@
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         const REBALANCING_THRESHOLD = 15000;
 
-        // 💡 마이그레이션 키 V46 (완벽 차트 리셋, 모바일 최적화 및 파일 동기화)
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV46_";
+        // 💡 V47 마이그레이션 키 (목표비중 검증 및 드래그 애니메이션 추가)
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV47_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
@@ -358,17 +355,6 @@
             "✨ 원자재/대체": "#e67e22", "💵 현금(유동성)": "#95a5a6"
         };
 
-        const DEFAULT_MACRO_ASSETS = [
-            { type: 'asset', ticker: 'MAGS', name: 'MAGS ETF (빅테크7)' },
-            { type: 'asset', ticker: '^NDX', name: '나스닥 100 지수' },
-            { type: 'asset', ticker: 'SGOV', name: '초단기채 (현금)' },
-            { type: 'asset', ticker: '^TNX', name: '10년물 국채 금리' },
-            { type: 'asset', ticker: '^VIX', name: 'VIX (공포 지수)' },
-            { type: 'asset', ticker: 'KRW=X', name: '원/달러 환율' },
-            { type: 'asset', ticker: 'FRED:WTREGEN', name: '미 재무부 TGA 잔고' },
-            { type: 'scheduler', ticker: 'BESSENT_QRA', name: '📅 Scott Bessent 재무부 정책 일정' }
-        ];
-
         function getAccIdByName(name) { return 'acc_' + String(name || '').replace(/\s+/g, '').replace(/[^a-zA-Z0-9가-힣]/g, ''); }
 
         function safeParse(key, defaultVal) {
@@ -377,11 +363,11 @@
             try { return JSON.parse(val) || defaultVal; } catch (e) { return defaultVal; }
         }
 
-        // V22~V45 모든 데이터 철통 승계
+        // 마이그레이션 모듈 (V22~V46 모두 승계)
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
             const keysToMigrate = [];
             for (let i = 0; i < localStorage.length; i++) { keysToMigrate.push(localStorage.key(i)); }
-            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_'];
+            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_'];
             let mergedTabsMap = {};
 
             oldPrefixes.forEach(prefix => {
@@ -418,7 +404,6 @@
             else { container.style.display = 'none'; arrow.innerText = '▼'; }
         }
 
-        // 💡 UX 로직: 파일 다운로드(백업)
         function exportDataToFile() {
             let backup = {};
             for(let i=0; i<localStorage.length; i++) {
@@ -441,7 +426,6 @@
             document.getElementById('sync-modal').style.display='none';
         }
 
-        // 💡 UX 로직: 파일 업로드(복원)
         function importDataFromFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -537,24 +521,11 @@
             switchView(currentView);
         }
 
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v46')) {
-            let macroCheck = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
-            let hasTGA = macroCheck.some(a => a.ticker === 'FRED:WTREGEN');
-            if(!hasTGA) macroCheck.push({ type: 'asset', ticker: 'FRED:WTREGEN', name: '미 재무부 TGA 잔고' });
-            let hasSched = macroCheck.some(a => a.ticker === 'BESSENT_QRA');
-            if(!hasSched) macroCheck.push({ type: 'scheduler', ticker: 'BESSENT_QRA', name: '📅 Scott Bessent 재무부 정책 일정' });
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'macro', JSON.stringify(macroCheck));
-            
-            let tabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
-            if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v46', 'true');
-        }
-
         let portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
         let combinedSelections = safeParse(STORAGE_KEY_PREFIX + 'combinedSelections', []);
         let portfolios = {}; 
         portfolioTabs.forEach(tab => { portfolios[tab.id] = safeParse(STORAGE_KEY_PREFIX + tab.id, []); });
-        let macroAssets = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
+        let macroAssets = safeParse(STORAGE_KEY_PREFIX + 'macro', []);
 
         let livePrices = {}; let chartInstances = {}; let summaryChartInstance = null; let trendChartInstance = null; let assetClassChartInstance = null;
         const _fetchingPromises = {};
@@ -632,8 +603,6 @@
                 summaryWidget.style.display = 'flex';
                 if(viewMode === 'combined') { 
                     combinedBox.style.display = 'flex'; principalInput.disabled = true; 
-                    
-                    // 💡 합산탭 진입시 아코디언은 무조건 닫혀서 렌더링되게 처리
                     document.getElementById('checkbox-container').style.display = 'none';
                     document.getElementById('combined-selector-arrow').innerText = '▼';
                     let cbHtml = '';
@@ -761,8 +730,8 @@
                 try {
                     const data = await fetchOnce('KRW=X');
                     if(data && data.success) {
-                        livePrices['KRW=X'] = data.price; livePrices['KRW=X_h'] = data.high52; fxRate = parseFloat(data.price)||fallbackRate;
-                        localStorage.setItem('lastFxRate_Master', fxRate); 
+                        livePrices['KRW=X'] = data.price; livePrices['KRW=X_h'] = data.high52; 
+                        fxRate = parseFloat(data.price)||fallbackRate; localStorage.setItem('lastFxRate_Master', fxRate); 
                         if(data.chartData && data.chartLabels) {
                             if(!window.rawChartData) window.rawChartData = {};
                             window.rawChartData['KRW=X'] = { prices: data.chartData, labels: data.chartLabels };
@@ -815,7 +784,6 @@
                 if(currentView === 'portfolio_hub') return;
                 const container = document.getElementById('dynamic-content-area');
                 
-                // 💡 치명적 에러 완벽 방어: 탭 전환 시 기존 차트 객체들을 무조건 소각하여 렌더링 꼬임 방지
                 Object.values(chartInstances).forEach(c => { if(c && typeof c.destroy === 'function') c.destroy(); }); chartInstances = {};
                 if(assetClassChartInstance) { assetClassChartInstance.destroy(); assetClassChartInstance = null; }
                 if(summaryChartInstance) { summaryChartInstance.destroy(); summaryChartInstance = null; }
@@ -906,7 +874,22 @@
                                 ${!isCombined ? `<td><button class="btn-delete-sm" onclick="removeAsset('${String(asset.ticker)}')">삭제</button></td>` : ''}
                             </tr>`;
                     });
-                    htmlStr += `</tbody></table></div>`;
+                    
+                    // 💡 UX 개선 1: 하단에 목표 비중 100% 검증용 Footer 표기 (조합 탭이 아닐 경우)
+                    if(!isCombined) {
+                        htmlStr += `</tbody>
+                            <tfoot id="target-weight-footer">
+                                <tr style="background: var(--account-summary-bg);">
+                                    <td colspan="6" style="text-align:right; font-weight:bold; color:var(--text-main); font-size:0.9rem;">총 목표 비중 합계:</td>
+                                    <td id="total-target-weight" style="font-weight:bold; color:var(--text-main); font-size:1rem; text-align:right;">-</td>
+                                    <td colspan="3"></td>
+                                </tr>
+                            </tfoot>
+                        </table></div>`;
+                    } else {
+                        htmlStr += `</tbody></table></div>`;
+                    }
+
                     if(!isCombined) {
                         htmlStr += `
                         <div class="add-module-box">
@@ -923,7 +906,6 @@
                 container.innerHTML = htmlStr;
                 initDragAndDrop();
 
-                // 💡 안정성 최우선: 서버 차단을 방지하는 동시 4개 제한 병렬 처리
                 setTimeout(async () => {
                     const fetchTasks = activeList.filter(asset => asset.type !== 'scheduler').map(asset => {
                         return () => {
@@ -951,7 +933,7 @@
                     }
                     await Promise.allSettled(executing);
                     if (currentView !== 'macro') triggerRebalance();
-                }, 50);
+                }, 100);
 
             } catch(e) { console.error("Dashboard Render Error:", e); }
         }
@@ -1030,7 +1012,7 @@
                         let w = 60, h = 25; 
                         let pts = prices.map((p, i) => `${(i/(prices.length-1))*w},${h - ((p-min)/range)*h}`).join(' ');
                         let color = prices[prices.length-1] >= prices[0] ? '#2ecc71' : '#e74c3c'; 
-                        sparkEl.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 -5 ${w} ${h+10}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+                        sparkEl.innerHTML = `<svg width="${w}" height="${h}" style="display:block;margin:auto;overflow:visible"><polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
                     } else { sparkEl.innerHTML = '-'; }
                 }
             }
@@ -1058,7 +1040,6 @@
             for (let i = 0; i < data.length; i++) { if (!isNaN(data[i]) && data[i] > maxVal) { maxVal = data[i]; maxIdx = i; } }
             if (maxIdx !== -1) { pointRadii[maxIdx] = 3; pointColors[maxIdx] = '#e74c3c'; }
             
-            // 💡 무조건 삭제 후 다시 그려서 탭 전환 시 에러 원천 차단
             if (chartInstances[cardId]) { if(typeof chartInstances[cardId].destroy === 'function') chartInstances[cardId].destroy(); }
             chartInstances[cardId] = new Chart(canvas.getContext('2d'), {
                 type: 'line', data: { labels: labels, datasets: [{ data: data, borderColor: lineColor, backgroundColor: 'transparent', borderWidth: 1.2, pointRadius: pointRadii, pointBackgroundColor: pointColors, pointBorderColor: pointColors }] },
@@ -1098,6 +1079,7 @@
                 let list = getActiveArray(); let isCombined = (currentView === 'combined');
                 let totalAccountValueInWon = 0; let totalPrincipal = 0;
                 let chartLabels = []; let actualDataArr = []; let targetDataArr = []; let assetClassSums = {};
+                let totalTargetWeightSum = 0; // 💡 1. 총 목표 비중(%) 산출용 변수
                 
                 let fallbackRate = parseFloat(localStorage.getItem('lastFxRate_Master')) || 1400;
                 const currentFxRate = parseFloat(livePrices['KRW=X']) || fallbackRate; 
@@ -1114,6 +1096,11 @@
                     if(isNaN(asset.evalValueWon)) asset.evalValueWon = 0;
                     
                     totalAccountValueInWon += asset.evalValueWon;
+                    
+                    // 총 목표 비중 합계 누적 (개별 포트폴리오에서만)
+                    if(!isCombined) {
+                        totalTargetWeightSum += parseFloat(asset.targetWeight || 0);
+                    }
                 });
 
                 if (isCombined) {
@@ -1126,6 +1113,20 @@
                 } else {
                     let tabInfo = portfolioTabs.find(t => t.id === currentView); 
                     totalPrincipal = tabInfo ? (parseFloat(tabInfo.principal) || 0) : 0;
+                    
+                    // 💡 1. 총 목표 비중 UI 업데이트 로직 가동
+                    const twEl = document.getElementById('total-target-weight');
+                    if (twEl) {
+                        twEl.innerText = totalTargetWeightSum.toFixed(1) + "%";
+                        // 100%가 아니면 빨간 경고색으로 표시
+                        if (Math.abs(totalTargetWeightSum - 100) > 0.1) {
+                            twEl.style.color = 'var(--profit-red)';
+                            twEl.innerHTML += ' ⚠️';
+                        } else {
+                            twEl.style.color = '#2ecc71';
+                            twEl.innerHTML += ' ✅';
+                        }
+                    }
                 }
 
                 let finalTotalAccountValueWon = totalAccountValueInWon + rawNumericSimulation;
@@ -1177,7 +1178,8 @@
                     if (isCombined) {
                         let combinedMap = {};
                         (combinedSelections || []).forEach(accId => {
-                            let h = safeParse(STORAGE_KEY_PREFIX + 'history_' + accId, []);
+                            let hStr = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId);
+                            let h = hStr ? JSON.parse(hStr) : [];
                             if(Array.isArray(h)) {
                                 h.forEach(snap => {
                                     if(!combinedMap[snap.date]) combinedMap[snap.date] = { principal: 0, evalValue: 0, date: snap.date };
@@ -1188,7 +1190,8 @@
                         });
                         rawHistory = Object.values(combinedMap).sort((a,b) => String(a.date).localeCompare(String(b.date)));
                     } else {
-                        rawHistory = safeParse(STORAGE_KEY_PREFIX + 'history_' + currentView, []);
+                        let hStr = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + currentView);
+                        rawHistory = hStr ? JSON.parse(hStr) : [];
                         if(!Array.isArray(rawHistory)) rawHistory = [];
                     }
                 } catch(e) { rawHistory = []; }
@@ -1205,10 +1208,6 @@
                 let barColors = trendAmtData.map(val => val >= 0 ? 'rgba(231, 76, 60, 0.4)' : 'rgba(41, 128, 185, 0.4)');
                 let barBorders = trendAmtData.map(val => val >= 0 ? '#e74c3c' : '#2980b9');
 
-                if (trendChartInstance) { trendChartInstance.destroy(); trendChartInstance = null; }
-                if (summaryChartInstance) { summaryChartInstance.destroy(); summaryChartInstance = null; }
-                if (assetClassChartInstance) { assetClassChartInstance.destroy(); assetClassChartInstance = null; }
-
                 const isDark = document.body.classList.contains("dark-mode");
                 const textColor = isDark ? '#a0a0a0' : '#7f8c8d'; const gridColor = isDark ? '#333' : '#eee';
 
@@ -1222,11 +1221,11 @@
                     if (totalWeightSum === 0) {
                         displayLabels = ['데이터 없음']; donutData = [100]; donutColors = ['#e0e0e0'];
                     } else {
-                        // 💡 우측 라벨 00.0% 표기 렌더링 복원 완료
                         displayLabels = originalLabels.map((l, i) => `${l}  ${donutData[i]}%`);
                         donutColors = originalLabels.map(l => ASSET_CLASS_COLORS[l] || '#95a5a6');
                     }
 
+                    if(assetClassChartInstance) { if(typeof assetClassChartInstance.destroy === 'function') assetClassChartInstance.destroy(); }
                     assetClassChartInstance = new Chart(donutCanvas.getContext('2d'), {
                         type: 'doughnut', data: { labels: displayLabels, datasets: [{ data: donutData, backgroundColor: donutColors, borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff' }] },
                         options: {
@@ -1249,6 +1248,7 @@
                     let summaryDatasets = chartLabels.map((label, idx) => ({ 
                         label: label, data: [targetDataArr[idx] || 0, actualDataArr[idx] || 0], backgroundColor: palette[idx % palette.length], borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff' 
                     }));
+                    if(summaryChartInstance) { if(typeof summaryChartInstance.destroy === 'function') summaryChartInstance.destroy(); }
                     summaryChartInstance = new Chart(barCanvas.getContext('2d'), {
                         type: 'bar', data: { labels: ['🎯 목표', '📊 실제'], datasets: summaryDatasets }, 
                         options: { 
@@ -1265,6 +1265,7 @@
 
                 const trendCanvas = document.getElementById('performance-trend-chart');
                 if (trendCanvas && safeFilteredHistory.length > 0) {
+                    if(trendChartInstance) { if(typeof trendChartInstance.destroy === 'function') trendChartInstance.destroy(); }
                     trendChartInstance = new Chart(trendCanvas.getContext('2d'), {
                         data: {
                             labels: trendLabels,
@@ -1308,7 +1309,7 @@
                         }],
                         options: {
                             responsive: true, maintainAspectRatio: false,
-                            layout: { padding: { top: 20, bottom: 0, left: 5, right: 5 } },
+                            layout: { padding: { top: 35, bottom: 0, left: 5, right: 5 } }, 
                             onClick: (e, activeEls) => {
                                 if (activeEls.length > 0 && currentView !== 'combined') {
                                     const idx = activeEls[0].index; const rawData = safeFilteredHistory[idx]; if(!rawData || rawData.isCurrent) return;
@@ -1336,8 +1337,8 @@
                             },
                             scales: { 
                                 x: { ticks: { color: textColor, font:{size:10} }, grid: { display: false } }, 
-                                y: { type: 'linear', display: true, position: 'left', ticks: { color: textColor, font:{size:10}, callback: (v) => Math.round((parseFloat(v)||0)/10000).toLocaleString() + '만' }, grid: { color: gridColor } },
-                                y1: { type: 'linear', display: true, position: 'right', ticks: { color: textColor, font:{size:10}, callback: (v) => v + '%' }, grid: { drawOnChartArea: false } }
+                                y: { type: 'linear', display: true, position: 'left', grace: '25%', ticks: { color: textColor, font:{size:10}, callback: (v) => Math.round((parseFloat(v)||0)/10000).toLocaleString() + '만' }, grid: { color: gridColor } },
+                                y1: { type: 'linear', display: true, position: 'right', grace: '25%', ticks: { color: textColor, font:{size:10}, callback: (v) => v + '%' }, grid: { drawOnChartArea: false } }
                             }
                         }
                     });
