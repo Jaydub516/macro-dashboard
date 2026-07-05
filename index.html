@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>매크로 & 자산 배분 마스터 대시보드</title>
-    <!-- 차트 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script> 
-    <!-- 드래그 앤 드롭 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     
     <style>
@@ -223,21 +221,24 @@
         <div class="modal-content">
             <h2>🔄 PC ↔ 모바일 데이터 파일 동기화</h2>
             <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; line-height: 1.5;">
-                현재 기기의 데이터를 <strong>파일(.txt)</strong>로 다운로드하여 백업하거나, 백업 파일을 업로드하여 원터치로 복원할 수 있습니다.
+                현재 기기의 데이터를 <strong>파일(.txt)</strong>로 다운로드하여 백업하거나, 복원할 수 있습니다.
             </p>
             <input type="file" id="sync-file-input" accept=".txt,.json" style="display:none;" onchange="importDataFromFile(event)">
             
             <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
                 <button class="header-btn" style="background:#34495e; color:white; border:none; padding:12px;" onclick="exportDataToFile()">📤 백업 파일 다운로드 (PC/스마트폰 저장)</button>
                 <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none; padding:12px;" onclick="document.getElementById('sync-file-input').click()">📥 백업 파일 업로드 (원터치 복원)</button>
+                <button class="header-btn" style="background:var(--text-sub); color:white; border:none; padding:12px;" onclick="copyDataToClipboard()">📋 텍스트로 복사하기 (다운로드 안될 때)</button>
             </div>
+            
+            <textarea id="sync-fallback-textarea" style="display:none; width:100%; margin-top:10px; height:80px; font-size:0.7rem;" placeholder="복사된 텍스트가 여기에 나타납니다."></textarea>
+            
             <div style="text-align:right; margin-top:20px;">
                 <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='none'">닫기</button>
             </div>
         </div>
     </div>
 
-    <!-- 엑셀 자산 연동 모달 -->
     <div id="data-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>⚙️ 엑셀 과거 자산 연동 (최신화 덮어쓰기)</h2>
@@ -252,7 +253,6 @@
         </div>
     </div>
     
-    <!-- 배당금 엑셀 업로드 모달 -->
     <div id="dividend-data-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>⚙️ 배당금 엑셀 일괄 등록</h2>
@@ -267,7 +267,6 @@
         </div>
     </div>
 
-    <!-- 수동 편집 모달 -->
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 400px; text-align: left;">
             <h2 id="edit-modal-title" style="margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid var(--border-dash); padding-bottom: 10px;">데이터 수정</h2>
@@ -329,7 +328,6 @@
                 <div class="summary-item">
                     <span class="label">💡 이번 달 누적 투자 원금</span>
                     <div style="display:flex; align-items:center; gap:4px;">
-                        <!-- 💡 V58: 음수(-) 입력을 허용하도록 oninput 수정됨 -->
                         <input type="text" class="cash-sim-input" id="principal-masked-val" value="0" oninput="handleLiveCommaMasking(this, 'principal')"> <span>원</span>
                     </div>
                 </div>
@@ -364,7 +362,8 @@
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         const REBALANCING_THRESHOLD = 15000;
 
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV58_";
+        // V59
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV59_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
@@ -420,7 +419,7 @@
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
             const keysToMigrate = [];
             for (let i = 0; i < localStorage.length; i++) { keysToMigrate.push(localStorage.key(i)); }
-            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_'];
+            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_'];
             let mergedTabsMap = {};
 
             oldPrefixes.forEach(prefix => {
@@ -447,7 +446,7 @@
         let dividendRecords = safeParse(STORAGE_KEY_PREFIX + 'dividends', []);
         function saveDividends() { localStorage.setItem(STORAGE_KEY_PREFIX + 'dividends', JSON.stringify(dividendRecords)); }
 
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v58')) {
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v59')) {
             let macroCheck = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
             const ensureAsset = (ticker, name, type='asset') => { 
                 if(!macroCheck.some(a => a.ticker === ticker)) macroCheck.push({ type: type, ticker: ticker, name: name }); 
@@ -459,7 +458,7 @@
             
             let tabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
             if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v58', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v59', 'true');
         }
 
         let portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
@@ -581,36 +580,12 @@
             if(tab) { tab.principal = parsedNumber; saveTabs(); triggerRebalance(); }
         }
 
-        // 💡 V58: 음수(-) 입력을 완벽하게 허용하도록 정규식 및 마스킹 로직 고도화
-        function handleLiveCommaMasking(el, targetType) {
-            let val = String(el.value);
-            let isNegative = val.startsWith('-');
-            let numericString = val.replace(/[^\d]/g, '');
-            if(!numericString) numericString = '0';
-            
-            let parsedNumber = parseFloat(numericString);
-            if(isNegative) parsedNumber = -parsedNumber;
-            
-            if(parsedNumber === 0 && isNegative) {
-                el.value = '-';
-            } else {
-                el.value = parsedNumber.toLocaleString('ko-KR');
-            }
-
-            if(targetType === 'principal') { 
-                rawNumericPrincipal = parsedNumber; 
-                updatePrincipal(parsedNumber); 
-            } else { 
-                rawNumericSimulation = parsedNumber; 
-                triggerRebalance(); 
-            }
-        }
-
         function saveChartEdit() {
             const ym = document.getElementById('edit-modal-ym').value;
             const p = parseFloat(document.getElementById('edit-modal-principal').value) || 0;
             const e = parseFloat(document.getElementById('edit-modal-eval').value) || 0;
             document.getElementById('edit-modal').style.display = 'none';
+            
             let hKey = STORAGE_KEY_PREFIX + 'history_' + currentView;
             let history = safeParse(hKey, []);
             let match = history.find(h => String(h.date).substring(0,7) === ym);
@@ -618,6 +593,18 @@
             else { history.push({ date: ym + '-28', principal: p, evalValue: e }); }
             history.sort((a,b) => String(a.date).localeCompare(String(b.date)));
             localStorage.setItem(hKey, JSON.stringify(history));
+
+            let tab = portfolioTabs.find(t => t.id === currentView);
+            if (tab && history.length > 0) {
+                let latestMonth = history[history.length - 1];
+                if (latestMonth.date.substring(0,7) === ym) {
+                    tab.principal = p;
+                    saveTabs();
+                    const pValEl = document.getElementById('principal-masked-val');
+                    if(pValEl) pValEl.value = Math.round(p).toLocaleString('ko-KR');
+                }
+            }
+
             triggerRebalance();
         }
 
@@ -688,6 +675,84 @@
                 return r.json();
             }).finally(() => { delete _fetchingPromises[safeTicker]; });
             _fetchingPromises[safeTicker] = p; return p;
+        }
+
+        // 💡 1. 백업 데이터 추출 로직 보강 및 텍스트 폴백(복사) 기능 추가
+        function exportDataToFile() {
+            let backup = {};
+            for(let i=0; i<localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if(key.startsWith(STORAGE_KEY_PREFIX)) backup[key] = localStorage.getItem(key);
+            }
+            let dataStr = encodeURIComponent(JSON.stringify(backup));
+            let encodedData = btoa(dataStr); 
+            const blob = new Blob([encodedData], {type: "text/plain"});
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date();
+            const dateString = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}`;
+            a.download = `MacroDashboard_Backup_${dateString}.txt`;
+            
+            // DOM에 추가 후 딜레이 클릭 (브라우저 차단 우회)
+            document.body.appendChild(a);
+            setTimeout(() => {
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }, 50);
+            
+            document.getElementById('sync-modal').style.display='none';
+        }
+
+        // 💡 2. 다운로드 불가 환경 대비 수동 텍스트 복사 폴백 기능
+        function copyDataToClipboard() {
+            let backup = {};
+            for(let i=0; i<localStorage.length; i++) {
+                let key = localStorage.key(i);
+                if(key.startsWith(STORAGE_KEY_PREFIX)) backup[key] = localStorage.getItem(key);
+            }
+            let dataStr = btoa(encodeURIComponent(JSON.stringify(backup)));
+            
+            const textarea = document.getElementById('sync-fallback-textarea');
+            textarea.style.display = 'block';
+            textarea.value = dataStr;
+            
+            textarea.select();
+            textarea.setSelectionRange(0, 999999); // 모바일 대응
+            
+            try {
+                document.execCommand('copy');
+                alert('백업 데이터 텍스트가 클립보드에 복사되었습니다! 메모장 등에 붙여넣어 보관하세요.');
+            } catch (err) {
+                alert('복사에 실패했습니다. 아래 텍스트 상자의 내용을 직접 선택하여 복사해주세요.');
+            }
+        }
+
+        function importDataFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const contents = e.target.result.trim();
+                    let backup = JSON.parse(decodeURIComponent(atob(contents)));
+                    let count = 0;
+                    for(let key in backup) { 
+                        if(key.startsWith(STORAGE_KEY_PREFIX)) { 
+                            localStorage.setItem(key, backup[key]); 
+                            count++; 
+                        } 
+                    }
+                    if(count > 0) { alert("데이터 복원이 완벽하게 완료되었습니다!"); location.reload(); } 
+                    else { alert("유효한 백업 데이터 구조가 아닙니다."); }
+                } catch(err) { alert("파일을 읽는 중 오류가 발생했습니다. 올바른 텍스트 백업 파일인지 확인해주세요."); }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
         }
 
         function renderDividendView() {
@@ -1519,7 +1584,11 @@
 
                 const currentYM = `${new Date().getFullYear()}-${("0" + (new Date().getMonth() + 1)).slice(-2)}-28`;
                 let currentMonthIdx = rawHistory.findIndex(r => r.date === currentYM);
-                let currentMonthData = { principal: totalPrincipal, evalValue: totalAccountValueInWon, date: currentYM, isCurrent: true };
+                let displayEvalValue = totalAccountValueInWon;
+                if (totalAccountValueInWon === 0 && currentMonthIdx > -1 && rawHistory[currentMonthIdx].evalValue > 0) {
+                    displayEvalValue = rawHistory[currentMonthIdx].evalValue;
+                }
+                let currentMonthData = { principal: totalPrincipal, evalValue: displayEvalValue, date: currentYM, isCurrent: true };
                 if(currentMonthIdx > -1) rawHistory[currentMonthIdx] = currentMonthData; else rawHistory.push(currentMonthData);
 
                 const safeFilteredHistory = rawHistory.filter(h => String(h.date).substring(0,7) >= trendStartDateStr && String(h.date).substring(0,7) <= trendEndDateStr);
@@ -1550,9 +1619,20 @@
                         donutColors = originalLabels.map(l => ASSET_CLASS_COLORS[l] || '#95a5a6');
                     }
 
+                    if(assetClassChartInstance) { if(typeof assetClassChartInstance.destroy === 'function') assetClassChartInstance.destroy(); }
                     assetClassChartInstance = new Chart(donutCanvas.getContext('2d'), {
                         type: 'doughnut', data: { labels: displayLabels, datasets: [{ data: donutData, backgroundColor: donutColors, borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff' }] },
-                        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: totalWeightSum > 0, position: 'right', labels: { boxWidth: 10, font: {size: 11, weight:'bold'}, color: textColor, padding: 12 } }, datalabels: { color: isDark ? '#fff' : '#2c3e50', font: { weight: 'bold', size: 12 }, formatter: (value) => (totalWeightSum > 0 && value > 4) ? value + '%' : '' }, tooltip: { callbacks: { label: (ctx) => totalWeightSum > 0 ? ' ' + ctx.raw + '%' : ' 데이터 없음' } } } }
+                        options: {
+                            responsive: true, maintainAspectRatio: false, cutout: '60%',
+                            plugins: {
+                                legend: { display: totalWeightSum > 0, position: 'right', labels: { boxWidth: 10, font: {size: 11, weight:'bold'}, color: textColor, padding: 12 } },
+                                datalabels: { 
+                                    color: isDark ? '#fff' : '#2c3e50', font: { weight: 'bold', size: 12 }, 
+                                    formatter: (value) => (totalWeightSum > 0 && value > 4) ? value + '%' : '' 
+                                },
+                                tooltip: { callbacks: { label: (ctx) => totalWeightSum > 0 ? ' ' + ctx.raw + '%' : ' 데이터 없음' } }
+                            }
+                        }
                     });
                 }
 
@@ -1562,34 +1642,99 @@
                     let summaryDatasets = chartLabels.map((label, idx) => ({ 
                         label: label, data: [targetDataArr[idx] || 0, actualDataArr[idx] || 0], backgroundColor: palette[idx % palette.length], borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff' 
                     }));
+                    if(summaryChartInstance) { if(typeof summaryChartInstance.destroy === 'function') summaryChartInstance.destroy(); }
                     summaryChartInstance = new Chart(barCanvas.getContext('2d'), {
                         type: 'bar', data: { labels: ['🎯 목표', '📊 실제'], datasets: summaryDatasets }, 
-                        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.raw + '%' } }, datalabels: { color: '#ffffff', font: { weight: 'bold', size: 10 }, formatter: (value) => value > 5 ? value + '%' : '' } }, scales: { x: { stacked: true, max: 100, ticks: { color: textColor, font:{size:10} }, grid: { color: gridColor } }, y: { stacked: true, ticks: { color: textColor, font:{size:11, weight:'bold'} }, grid: { display: false } } } }
+                        options: { 
+                            indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+                            plugins: { 
+                                legend: { display: false }, 
+                                tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.raw + '%' } },
+                                datalabels: { color: '#ffffff', font: { weight: 'bold', size: 10 }, formatter: (value) => value > 5 ? value + '%' : '' }
+                            }, 
+                            scales: { x: { stacked: true, max: 100, ticks: { color: textColor, font:{size:10} }, grid: { color: gridColor } }, y: { stacked: true, ticks: { color: textColor, font:{size:11, weight:'bold'} }, grid: { display: false } } } 
+                        }
                     });
                 }
 
                 const trendCanvas = document.getElementById('performance-trend-chart');
                 if (trendCanvas && safeFilteredHistory.length > 0) {
+                    if(trendChartInstance) { if(typeof trendChartInstance.destroy === 'function') trendChartInstance.destroy(); }
                     trendChartInstance = new Chart(trendCanvas.getContext('2d'), {
-                        data: { labels: trendLabels, datasets: [ { type: 'bar', label: '수익금 (원)', data: trendAmtData, backgroundColor: barColors, borderColor: barBorders, borderWidth: 1, yAxisID: 'y' }, { type: 'line', label: '수익률 (%)', data: trendRateData, borderColor: '#f39c12', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f39c12', yAxisID: 'y1', tension: 0.1 } ] },
+                        data: {
+                            labels: trendLabels,
+                            datasets: [
+                                { type: 'bar', label: '수익금 (원)', data: trendAmtData, backgroundColor: barColors, borderColor: barBorders, borderWidth: 1, yAxisID: 'y' },
+                                { type: 'line', label: '수익률 (%)', data: trendRateData, borderColor: '#f39c12', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f39c12', yAxisID: 'y1', tension: 0.1 }
+                            ]
+                        },
                         plugins: [{
                             id: 'trendLabelPlugin',
                             afterDatasetsDraw(chart) {
                                 const ctx = chart.ctx; ctx.font = 'bold 10px "Malgun Gothic"'; ctx.textAlign = 'center';
                                 const barMeta = chart.getDatasetMeta(0); const lineMeta = chart.getDatasetMeta(1);
                                 if (barMeta.hidden && lineMeta.hidden) return;
+
                                 for (let idx = 0; idx < chart.data.labels.length; idx++) {
                                     const barEl = barMeta.data[idx]; const lineEl = lineMeta.data[idx];
                                     const barVal = parseFloat(chart.data.datasets[0].data[idx])||0; const lineVal = parseFloat(chart.data.datasets[1].data[idx])||0;
-                                    let barLabelY = barEl ? (barVal >= 0 ? barEl.y - 4 : barEl.y + 4) : 0; let lineLabelY = lineEl ? (lineVal >= 0 ? lineEl.y - 12 : lineEl.y + 12) : 0;
-                                    if (barEl && lineEl && !barMeta.hidden && !lineMeta.hidden && barVal !== 0) { if (Math.abs(barLabelY - lineLabelY) < 18) { if (lineLabelY <= barLabelY) { lineLabelY -= 8; barLabelY += 8; } else { lineLabelY += 8; barLabelY -= 8; } } }
+                                    let barLabelY = barEl ? (barVal >= 0 ? barEl.y - 4 : barEl.y + 4) : 0;
+                                    let lineLabelY = lineEl ? (lineVal >= 0 ? lineEl.y - 12 : lineEl.y + 12) : 0;
+
+                                    if (barEl && lineEl && !barMeta.hidden && !lineMeta.hidden && barVal !== 0) {
+                                        if (Math.abs(barLabelY - lineLabelY) < 18) {
+                                            if (lineLabelY <= barLabelY) { lineLabelY -= 8; barLabelY += 8; } else { lineLabelY += 8; barLabelY -= 8; }
+                                        }
+                                    }
                                     ctx.strokeStyle = isDark ? 'rgba(30,30,30,0.9)' : 'rgba(255,255,255,0.9)'; ctx.lineWidth = 4;
-                                    if (barEl && !barMeta.hidden && barVal !== 0) { ctx.fillStyle = isDark ? '#e0e0e0' : '#2c3e50'; ctx.textBaseline = barVal >= 0 ? 'bottom' : 'top'; ctx.strokeText(Math.round(barVal / 10000).toLocaleString() + '만', barEl.x, barLabelY); ctx.fillText(Math.round(barVal / 10000).toLocaleString() + '만', barEl.x, barLabelY); }
-                                    if (lineEl && !lineMeta.hidden) { ctx.fillStyle = '#f39c12'; ctx.textBaseline = lineVal >= 0 ? 'bottom' : 'top'; ctx.strokeText(lineVal + '%', lineEl.x, lineLabelY); ctx.fillText(lineVal + '%', lineEl.x, lineLabelY); }
+                                    
+                                    if (barEl && !barMeta.hidden && barVal !== 0) {
+                                        ctx.fillStyle = isDark ? '#e0e0e0' : '#2c3e50';
+                                        ctx.textBaseline = barVal >= 0 ? 'bottom' : 'top';
+                                        ctx.strokeText(Math.round(barVal / 10000).toLocaleString() + '만', barEl.x, barLabelY); ctx.fillText(Math.round(barVal / 10000).toLocaleString() + '만', barEl.x, barLabelY);
+                                    }
+                                    if (lineEl && !lineMeta.hidden) {
+                                        ctx.fillStyle = '#f39c12';
+                                        ctx.textBaseline = lineVal >= 0 ? 'bottom' : 'top';
+                                        ctx.strokeText(lineVal + '%', lineEl.x, lineLabelY); ctx.fillText(lineVal + '%', lineEl.x, lineLabelY);
+                                    }
                                 }
                             }
                         }],
-                        options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 35, bottom: 0, left: 5, right: 5 } }, onClick: (e, activeEls) => { if (activeEls.length > 0 && currentView !== 'combined') { const idx = activeEls[0].index; const rawData = safeFilteredHistory[idx]; if(!rawData || rawData.isCurrent) return; const ym = rawData.date.substring(0,7); document.getElementById('edit-modal-ym').value = ym; document.getElementById('edit-modal-title').innerText = `[ ${ym} ] 성과 데이터 수동 편집`; document.getElementById('edit-modal-principal').value = Math.round(rawData.principal); document.getElementById('edit-modal-eval').value = Math.round(rawData.evalValue); document.getElementById('edit-modal').style.display = 'flex'; } }, plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { title: (ctx) => ctx[0].label === '현재' ? '현재 실시간 상태' : '20' + ctx[0].label + ' 말 기준', beforeBody: (ctx) => { let r = safeFilteredHistory[ctx[0].dataIndex]; if(!r) return ''; return ` 원금: ${Math.round(r.principal).toLocaleString()}원\n 평가: ${Math.round(r.evalValue).toLocaleString()}원\n`; }, label: (ctx) => ctx.datasetIndex === 0 ? ` 수익금: ${ctx.raw > 0 ? '+' : ''}${Math.round(ctx.raw).toLocaleString()}원` : ` 수익률: ${ctx.raw > 0 ? '+' : ''}${ctx.raw}%` } } }, scales: { x: { ticks: { color: textColor, font:{size:10} }, grid: { display: false } }, y: { type: 'linear', display: true, position: 'left', grace: '25%', ticks: { color: textColor, font:{size:10}, callback: (v) => Math.round((parseFloat(v)||0)/10000).toLocaleString() + '만' }, grid: { color: gridColor } }, y1: { type: 'linear', display: true, position: 'right', grace: '25%', ticks: { color: textColor, font:{size:10}, callback: (v) => v + '%' }, grid: { drawOnChartArea: false } } } }
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            layout: { padding: { top: 35, bottom: 0, left: 5, right: 5 } }, 
+                            onClick: (e, activeEls) => {
+                                if (activeEls.length > 0 && currentView !== 'combined') {
+                                    const idx = activeEls[0].index; const rawData = safeFilteredHistory[idx]; if(!rawData || rawData.isCurrent) return;
+                                    const ym = rawData.date.substring(0,7);
+                                    document.getElementById('edit-modal-ym').value = ym;
+                                    document.getElementById('edit-modal-title').innerText = `[ ${ym} ] 성과 데이터 수동 편집`;
+                                    document.getElementById('edit-modal-principal').value = Math.round(rawData.principal);
+                                    document.getElementById('edit-modal-eval').value = Math.round(rawData.evalValue);
+                                    document.getElementById('edit-modal').style.display = 'flex';
+                                }
+                            },
+                            plugins: { 
+                                legend: { display: false }, datalabels: { display: false },
+                                tooltip: {
+                                    mode: 'index', intersect: false,
+                                    callbacks: {
+                                        title: (ctx) => ctx[0].label === '현재' ? '현재 실시간 상태' : '20' + ctx[0].label + ' 말 기준',
+                                        beforeBody: (ctx) => {
+                                            let r = safeFilteredHistory[ctx[0].dataIndex]; if(!r) return '';
+                                            return ` 원금: ${Math.round(r.principal).toLocaleString()}원\n 평가: ${Math.round(r.evalValue).toLocaleString()}원\n`;
+                                        },
+                                        label: (ctx) => ctx.datasetIndex === 0 ? ` 수익금: ${ctx.raw > 0 ? '+' : ''}${Math.round(ctx.raw).toLocaleString()}원` : ` 수익률: ${ctx.raw > 0 ? '+' : ''}${ctx.raw}%`
+                                    }
+                                }
+                            },
+                            scales: { 
+                                x: { ticks: { color: textColor, font:{size:10} }, grid: { display: false } }, 
+                                y: { type: 'linear', display: true, position: 'left', grace: '25%', ticks: { color: textColor, font:{size:10}, callback: (v) => Math.round((parseFloat(v)||0)/10000).toLocaleString() + '만' }, grid: { color: gridColor } },
+                                y1: { type: 'linear', display: true, position: 'right', grace: '25%', ticks: { color: textColor, font:{size:10}, callback: (v) => v + '%' }, grid: { drawOnChartArea: false } }
+                            }
+                        }
                     });
                 }
             } catch(e) { console.error("Engine Error:", e); }
