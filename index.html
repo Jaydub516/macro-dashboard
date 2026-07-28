@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>매크로 & 자산 배분 마스터 대시보드</title>
+    <!-- 차트 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script> 
+    <!-- 드래그 앤 드롭 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     
     <style>
@@ -239,6 +241,7 @@
         </div>
     </div>
 
+    <!-- 엑셀 과거 자산 연동 모달 -->
     <div id="data-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>⚙️ 엑셀 과거 자산 연동 (최신화 덮어쓰기)</h2>
@@ -253,6 +256,7 @@
         </div>
     </div>
     
+    <!-- 배당금 엑셀 업로드 모달 -->
     <div id="dividend-data-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>⚙️ 배당금 엑셀 일괄 등록</h2>
@@ -267,6 +271,7 @@
         </div>
     </div>
 
+    <!-- 수동 편집 모달 -->
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 400px; text-align: left;">
             <h2 id="edit-modal-title" style="margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid var(--border-dash); padding-bottom: 10px;">데이터 수정</h2>
@@ -296,6 +301,8 @@
                     <button class="header-btn" onclick="toggleLayout()" id="layout-btn">📱 1열/3열</button>
                     <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='flex'">🔄 동기화</button>
                     <button class="header-btn btn-highlight" onclick="document.getElementById('data-modal').style.display='flex'">⚙️ 자산 연동</button>
+                    <!-- 💡 V61: AI 분석용 데이터 다운로드 버튼 추가 -->
+                    <button class="header-btn" onclick="exportForAI()" style="background:var(--tab-combined); color:white; border:none;">🤖 AI 분석용 추출</button>
                     <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 모드</button>
                 </div>
             </div>
@@ -362,8 +369,8 @@
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         const REBALANCING_THRESHOLD = 15000;
 
-        // V59
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV59_";
+        // 💡 V61 - AI 분석 추출 엔진 이식 완료
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV61_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
@@ -419,7 +426,7 @@
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
             const keysToMigrate = [];
             for (let i = 0; i < localStorage.length; i++) { keysToMigrate.push(localStorage.key(i)); }
-            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_'];
+            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_', 'macroDashboard_MasterV59_', 'macroDashboard_MasterV60_'];
             let mergedTabsMap = {};
 
             oldPrefixes.forEach(prefix => {
@@ -446,7 +453,7 @@
         let dividendRecords = safeParse(STORAGE_KEY_PREFIX + 'dividends', []);
         function saveDividends() { localStorage.setItem(STORAGE_KEY_PREFIX + 'dividends', JSON.stringify(dividendRecords)); }
 
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v59')) {
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v61')) {
             let macroCheck = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
             const ensureAsset = (ticker, name, type='asset') => { 
                 if(!macroCheck.some(a => a.ticker === ticker)) macroCheck.push({ type: type, ticker: ticker, name: name }); 
@@ -458,7 +465,7 @@
             
             let tabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
             if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v59', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v61', 'true');
         }
 
         let portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
@@ -608,6 +615,15 @@
             triggerRebalance();
         }
 
+        function handleLiveCommaMasking(el, targetType) {
+            let val = String(el.value).replace(/[^\d.-]/g, '');
+            if(!val || val === '-') val = '0';
+            let parsedNumber = parseFloat(val);
+            el.value = parsedNumber.toLocaleString('ko-KR');
+            if(targetType === 'principal') { rawNumericPrincipal = parsedNumber; updatePrincipal(parsedNumber); }
+            else { rawNumericSimulation = parsedNumber; triggerRebalance(); }
+        }
+
         function updateCombinedSelection() {
             let checkboxes = document.querySelectorAll('#checkbox-container input[type="checkbox"]');
             combinedSelections = []; checkboxes.forEach(cb => { if(cb.checked) combinedSelections.push(cb.value); });
@@ -677,7 +693,6 @@
             _fetchingPromises[safeTicker] = p; return p;
         }
 
-        // 💡 1. 백업 데이터 추출 로직 보강 및 텍스트 폴백(복사) 기능 추가
         function exportDataToFile() {
             let backup = {};
             for(let i=0; i<localStorage.length; i++) {
@@ -695,7 +710,6 @@
             const dateString = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}`;
             a.download = `MacroDashboard_Backup_${dateString}.txt`;
             
-            // DOM에 추가 후 딜레이 클릭 (브라우저 차단 우회)
             document.body.appendChild(a);
             setTimeout(() => {
                 a.click();
@@ -708,7 +722,6 @@
             document.getElementById('sync-modal').style.display='none';
         }
 
-        // 💡 2. 다운로드 불가 환경 대비 수동 텍스트 복사 폴백 기능
         function copyDataToClipboard() {
             let backup = {};
             for(let i=0; i<localStorage.length; i++) {
@@ -722,7 +735,7 @@
             textarea.value = dataStr;
             
             textarea.select();
-            textarea.setSelectionRange(0, 999999); // 모바일 대응
+            textarea.setSelectionRange(0, 999999); 
             
             try {
                 document.execCommand('copy');
@@ -730,6 +743,87 @@
             } catch (err) {
                 alert('복사에 실패했습니다. 아래 텍스트 상자의 내용을 직접 선택하여 복사해주세요.');
             }
+        }
+
+        // 💡 V61: AI 분석용 데이터 추출 함수 신설
+        function exportForAI() {
+            if (currentView === 'macro' || currentView === 'dividend' || currentView === 'portfolio_hub') {
+                alert("개별 포트폴리오 계좌 화면 또는 '전체 합산' 탭에서만 AI 분석 데이터를 추출할 수 있습니다.");
+                return;
+            }
+
+            let list = getActiveArray();
+            if (!list || list.length === 0) {
+                alert("현재 추출할 자산 데이터가 없습니다.");
+                return;
+            }
+
+            let isCombined = (currentView === 'combined');
+            let accName = isCombined ? "전체 합산 포트폴리오" : (portfolioTabs.find(t => t.id === currentView)?.name || "개별 포트폴리오").replace('💼 ', '');
+            
+            // 날짜 포맷 (YYYY-MM-DD)
+            let d = new Date();
+            let todayStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+
+            let fallbackRate = parseFloat(localStorage.getItem('lastFxRate_Master')) || 1400;
+            let fxRate = parseFloat(livePrices['KRW=X']) || fallbackRate;
+
+            // 평가액 및 최종 비중 1차 계산
+            let totalAccountValueInWon = 0;
+            list.forEach(asset => {
+                let tickerStr = String(asset.ticker || '').toUpperCase();
+                let price = parseFloat(livePrices[asset.ticker]) || 0;
+                if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
+                const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
+                let qty = parseFloat(String(asset.quantity).replace(/,/g, '')) || 0;
+                let evalWon = isWon ? (price * qty) : (price * qty * fxRate);
+                totalAccountValueInWon += (isNaN(evalWon) ? 0 : evalWon);
+            });
+
+            // 사용자가 화면에서 시뮬레이션으로 더한 금액도 비중 계산에 반영
+            let finalTotalValue = totalAccountValueInWon + rawNumericSimulation;
+
+            // 💡 Excel 및 AI 인식을 위한 한글 깨짐 방지 인코딩(BOM) 추가
+            let csvContent = '\uFEFF'; 
+            csvContent += "계좌명,추출일자,자산군,종목명,티커,현재가,보유수량,평가금액(원),목표비중(%),실제비중(%)\n";
+
+            list.forEach(asset => {
+                let tickerStr = String(asset.ticker || '').toUpperCase();
+                let price = parseFloat(livePrices[asset.ticker]) || 0;
+                if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
+                
+                const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
+                let qty = parseFloat(String(asset.quantity).replace(/,/g, '')) || 0;
+                let evalWon = isWon ? (price * qty) : (price * qty * fxRate);
+                if(isNaN(evalWon)) evalWon = 0;
+
+                let actualWeight = finalTotalValue > 0 ? (evalWon / finalTotalValue) * 100 : 0;
+                let targetWeight = parseFloat(asset.targetWeight || 0);
+
+                // CSV 데이터 오염 방지 (내부 콤마 무시 처리)
+                let aClass = `"${String(asset.assetClass || '📈 주식(성장)')}"`;
+                let aName = `"${String(asset.name || asset.ticker)}"`;
+                let aTicker = `"${asset.ticker}"`;
+                let priceStr = isWon ? `${Math.round(price)}` : `${price}`;
+
+                csvContent += `"${accName}","${todayStr}",${aClass},${aName},${aTicker},${priceStr},${qty},${Math.round(evalWon)},${targetWeight.toFixed(1)},${actualWeight.toFixed(1)}\n`;
+            });
+
+            // 시뮬레이션 현금 데이터가 존재하면 로우(Row) 추가
+            if (rawNumericSimulation > 0) {
+                let simWeight = finalTotalValue > 0 ? (rawNumericSimulation / finalTotalValue) * 100 : 0;
+                csvContent += `"${accName}","${todayStr}","💵 현금(유동성)","시뮬레이션 추가 현금","CASH",1,${rawNumericSimulation},${rawNumericSimulation},0.0,${simWeight.toFixed(1)}\n`;
+            }
+
+            // 파일 강제 다운로드 트리거
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `AI_Portfolio_Data_${todayStr}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function importDataFromFile(event) {
@@ -1515,9 +1609,42 @@
                     }
                 }
 
-                let finalTotalAccountValueWon = totalAccountValueInWon + rawNumericSimulation;
-                let profit = totalAccountValueInWon - totalPrincipal; 
-                let roi = totalPrincipal > 0 ? (profit / totalPrincipal) * 100 : 0;
+                let rawHistory = [];
+                try {
+                    if (isCombined) {
+                        let combinedMap = {};
+                        (combinedSelections || []).forEach(accId => {
+                            let hStr = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId);
+                            let h = hStr ? JSON.parse(hStr) : [];
+                            if(Array.isArray(h)) {
+                                h.forEach(snap => {
+                                    if(!combinedMap[snap.date]) combinedMap[snap.date] = { principal: 0, evalValue: 0, date: snap.date };
+                                    combinedMap[snap.date].principal += (parseFloat(snap.principal)||0); 
+                                    combinedMap[snap.date].evalValue += (parseFloat(snap.evalValue)||0);
+                                });
+                            }
+                        });
+                        rawHistory = Object.values(combinedMap).sort((a,b) => String(a.date).localeCompare(String(b.date)));
+                    } else {
+                        let hStr = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + currentView);
+                        rawHistory = hStr ? JSON.parse(hStr) : [];
+                        if(!Array.isArray(rawHistory)) rawHistory = [];
+                    }
+                } catch(e) { rawHistory = []; }
+
+                const currentYM = `${new Date().getFullYear()}-${("0" + (new Date().getMonth() + 1)).slice(-2)}-28`;
+                let currentMonthIdx = rawHistory.findIndex(r => r.date === currentYM);
+                
+                let baseEvalValue = totalAccountValueInWon;
+                if (totalAccountValueInWon === 0 && currentMonthIdx > -1 && rawHistory[currentMonthIdx].evalValue > 0) {
+                    baseEvalValue = rawHistory[currentMonthIdx].evalValue;
+                }
+
+                let finalTotalAccountValueWon = baseEvalValue + rawNumericSimulation;
+                let finalPrincipal = totalPrincipal + rawNumericSimulation;
+                
+                let profit = finalTotalAccountValueWon - finalPrincipal; 
+                let roi = finalPrincipal > 0 ? (profit / finalPrincipal) * 100 : 0;
 
                 const sTotalEl = document.getElementById('sum-total-value'); const sProfitEl = document.getElementById('sum-profit-value');
                 if(sTotalEl) sTotalEl.innerText = Math.round(finalTotalAccountValueWon).toLocaleString() + "원";
@@ -1559,36 +1686,7 @@
                     }
                 });
 
-                let rawHistory = [];
-                try {
-                    if (isCombined) {
-                        let combinedMap = {};
-                        (combinedSelections || []).forEach(accId => {
-                            let hStr = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + accId);
-                            let h = hStr ? JSON.parse(hStr) : [];
-                            if(Array.isArray(h)) {
-                                h.forEach(snap => {
-                                    if(!combinedMap[snap.date]) combinedMap[snap.date] = { principal: 0, evalValue: 0, date: snap.date };
-                                    combinedMap[snap.date].principal += (parseFloat(snap.principal)||0); 
-                                    combinedMap[snap.date].evalValue += (parseFloat(snap.evalValue)||0);
-                                });
-                            }
-                        });
-                        rawHistory = Object.values(combinedMap).sort((a,b) => String(a.date).localeCompare(String(b.date)));
-                    } else {
-                        let hStr = localStorage.getItem(STORAGE_KEY_PREFIX + 'history_' + currentView);
-                        rawHistory = hStr ? JSON.parse(hStr) : [];
-                        if(!Array.isArray(rawHistory)) rawHistory = [];
-                    }
-                } catch(e) { rawHistory = []; }
-
-                const currentYM = `${new Date().getFullYear()}-${("0" + (new Date().getMonth() + 1)).slice(-2)}-28`;
-                let currentMonthIdx = rawHistory.findIndex(r => r.date === currentYM);
-                let displayEvalValue = totalAccountValueInWon;
-                if (totalAccountValueInWon === 0 && currentMonthIdx > -1 && rawHistory[currentMonthIdx].evalValue > 0) {
-                    displayEvalValue = rawHistory[currentMonthIdx].evalValue;
-                }
-                let currentMonthData = { principal: totalPrincipal, evalValue: displayEvalValue, date: currentYM, isCurrent: true };
+                let currentMonthData = { principal: finalPrincipal, evalValue: finalTotalAccountValueWon, date: currentYM, isCurrent: true };
                 if(currentMonthIdx > -1) rawHistory[currentMonthIdx] = currentMonthData; else rawHistory.push(currentMonthData);
 
                 const safeFilteredHistory = rawHistory.filter(h => String(h.date).substring(0,7) >= trendStartDateStr && String(h.date).substring(0,7) <= trendEndDateStr);
@@ -1619,7 +1717,6 @@
                         donutColors = originalLabels.map(l => ASSET_CLASS_COLORS[l] || '#95a5a6');
                     }
 
-                    if(assetClassChartInstance) { if(typeof assetClassChartInstance.destroy === 'function') assetClassChartInstance.destroy(); }
                     assetClassChartInstance = new Chart(donutCanvas.getContext('2d'), {
                         type: 'doughnut', data: { labels: displayLabels, datasets: [{ data: donutData, backgroundColor: donutColors, borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff' }] },
                         options: {
@@ -1642,7 +1739,6 @@
                     let summaryDatasets = chartLabels.map((label, idx) => ({ 
                         label: label, data: [targetDataArr[idx] || 0, actualDataArr[idx] || 0], backgroundColor: palette[idx % palette.length], borderWidth: 1, borderColor: isDark ? '#1e1e1e' : '#fff' 
                     }));
-                    if(summaryChartInstance) { if(typeof summaryChartInstance.destroy === 'function') summaryChartInstance.destroy(); }
                     summaryChartInstance = new Chart(barCanvas.getContext('2d'), {
                         type: 'bar', data: { labels: ['🎯 목표', '📊 실제'], datasets: summaryDatasets }, 
                         options: { 
@@ -1659,7 +1755,6 @@
 
                 const trendCanvas = document.getElementById('performance-trend-chart');
                 if (trendCanvas && safeFilteredHistory.length > 0) {
-                    if(trendChartInstance) { if(typeof trendChartInstance.destroy === 'function') trendChartInstance.destroy(); }
                     trendChartInstance = new Chart(trendCanvas.getContext('2d'), {
                         data: {
                             labels: trendLabels,
