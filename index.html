@@ -241,7 +241,23 @@
         </div>
     </div>
 
-    <!-- 엑셀 과거 자산 연동 모달 -->
+    <!-- 💡 V62: AI 분석을 위한 다중 계좌 선택 모달 -->
+    <div id="ai-export-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 450px;">
+            <h2>🤖 AI 분석용 포트폴리오 선택</h2>
+            <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; line-height: 1.4;">
+                분석을 원하는 계좌를 선택해주세요. 선택된 계좌의 데이터가 하나로 합쳐져 AI 맞춤형 CSV로 추출됩니다.
+            </p>
+            <div id="ai-export-checkbox-container" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px; max-height: 200px; overflow-y: auto;">
+                <!-- 동적 렌더링 -->
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="header-btn" onclick="document.getElementById('ai-export-modal').style.display='none'">닫기</button>
+                <button class="header-btn" style="background:var(--tab-combined); color:white; border:none;" onclick="executeAIExport()">📥 선택 항목 추출</button>
+            </div>
+        </div>
+    </div>
+
     <div id="data-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>⚙️ 엑셀 과거 자산 연동 (최신화 덮어쓰기)</h2>
@@ -256,7 +272,6 @@
         </div>
     </div>
     
-    <!-- 배당금 엑셀 업로드 모달 -->
     <div id="dividend-data-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>⚙️ 배당금 엑셀 일괄 등록</h2>
@@ -301,7 +316,7 @@
                     <button class="header-btn" onclick="toggleLayout()" id="layout-btn">📱 1열/3열</button>
                     <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='flex'">🔄 동기화</button>
                     <button class="header-btn btn-highlight" onclick="document.getElementById('data-modal').style.display='flex'">⚙️ 자산 연동</button>
-                    <!-- 💡 V61: AI 분석용 데이터 다운로드 버튼 추가 -->
+                    <!-- AI 분석 추출 버튼 -->
                     <button class="header-btn" onclick="exportForAI()" style="background:var(--tab-combined); color:white; border:none;">🤖 AI 분석용 추출</button>
                     <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 모드</button>
                 </div>
@@ -352,7 +367,8 @@
                     <div class="date-picker-wrap">
                         <input type="month" id="trend-start" value="2026-01" onchange="trendStartDateStr=this.value; triggerRebalance();" style="padding:2px 4px; font-size:0.7rem; border-radius:4px; border:1px solid var(--input-border); background:var(--bg-card); color:var(--text-main);">
                         <span style="font-size:0.7rem;">~</span>
-                        <input type="month" id="trend-end" value="2026-07" onchange="trendEndDateStr=this.value; triggerRebalance();" style="padding:2px 4px; font-size:0.7rem; border-radius:4px; border:1px solid var(--input-border); background:var(--bg-card); color:var(--text-main);">
+                        <!-- 💡 V62: 8월 표시 수정 -->
+                        <input type="month" id="trend-end" value="2026-08" onchange="trendEndDateStr=this.value; triggerRebalance();" style="padding:2px 4px; font-size:0.7rem; border-radius:4px; border:1px solid var(--input-border); background:var(--bg-card); color:var(--text-main);">
                     </div>
                 </div>
                 <div style="height:190px; position:relative; cursor:pointer;"><canvas id="performance-trend-chart"></canvas></div>
@@ -369,12 +385,12 @@
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         const REBALANCING_THRESHOLD = 15000;
 
-        // 💡 V61 - AI 분석 추출 엔진 이식 완료
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV61_";
+        // 💡 V62 - AI 추출 계좌 선택 및 허브 렌더링 최적화
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV62_";
         
         let currentView = 'portfolio_hub';
         let trendStartDateStr = '2026-01';
-        let trendEndDateStr = '2026-07'; 
+        let trendEndDateStr = '2026-08'; // 💡 8월 반영 
 
         let rawNumericPrincipal = 0;
         let rawNumericSimulation = 0;
@@ -426,7 +442,7 @@
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
             const keysToMigrate = [];
             for (let i = 0; i < localStorage.length; i++) { keysToMigrate.push(localStorage.key(i)); }
-            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_', 'macroDashboard_MasterV59_', 'macroDashboard_MasterV60_'];
+            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_', 'macroDashboard_MasterV59_', 'macroDashboard_MasterV60_', 'macroDashboard_MasterV61_'];
             let mergedTabsMap = {};
 
             oldPrefixes.forEach(prefix => {
@@ -453,7 +469,7 @@
         let dividendRecords = safeParse(STORAGE_KEY_PREFIX + 'dividends', []);
         function saveDividends() { localStorage.setItem(STORAGE_KEY_PREFIX + 'dividends', JSON.stringify(dividendRecords)); }
 
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v61')) {
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v62')) {
             let macroCheck = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
             const ensureAsset = (ticker, name, type='asset') => { 
                 if(!macroCheck.some(a => a.ticker === ticker)) macroCheck.push({ type: type, ticker: ticker, name: name }); 
@@ -465,7 +481,7 @@
             
             let tabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
             if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v61', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v62', 'true');
         }
 
         let portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
@@ -508,13 +524,14 @@
             else if (currentView !== 'combined' && currentView !== 'portfolio_hub' && currentView !== 'dividend') localStorage.setItem(STORAGE_KEY_PREFIX + currentView, JSON.stringify(portfolios[currentView] || []));
         }
 
-        function getAggregatedAssets() {
+        function getAggregatedAssets(targetAccIds) {
             let aggregatedMap = {};
-            (combinedSelections || []).forEach(accId => {
+            let idsToAggregate = targetAccIds || combinedSelections || [];
+            idsToAggregate.forEach(accId => {
                 let accAssets = portfolios[accId] || [];
                 accAssets.forEach(a => {
                     const safeTicker = String(a.ticker || 'unknown');
-                    if (!aggregatedMap[safeTicker]) { aggregatedMap[safeTicker] = { type: 'portfolio', ticker: safeTicker, name: String(a.name || safeTicker), quantity: 0, targetWeight: 0, assetClass: String(a.assetClass || "📈 주식(성장)") }; }
+                    if (!aggregatedMap[safeTicker]) { aggregatedMap[safeTicker] = { type: 'portfolio', ticker: safeTicker, name: String(a.name || safeTicker), quantity: 0, targetWeight: parseFloat(a.targetWeight)||0, assetClass: String(a.assetClass || "📈 주식(성장)") }; }
                     aggregatedMap[safeTicker].quantity += parseFloat(a.quantity) || 0;
                 });
             });
@@ -745,30 +762,51 @@
             }
         }
 
-        // 💡 V61: AI 분석용 데이터 추출 함수 신설
+        // 💡 V62: 선택형 AI 데이터 추출 모달 호출 로직
         function exportForAI() {
-            if (currentView === 'macro' || currentView === 'dividend' || currentView === 'portfolio_hub') {
-                alert("개별 포트폴리오 계좌 화면 또는 '전체 합산' 탭에서만 AI 분석 데이터를 추출할 수 있습니다.");
+            if (currentView === 'macro' || currentView === 'dividend') {
+                alert("개별 포트폴리오, 전체 합산, 또는 계좌 목록 화면에서만 AI 분석 데이터를 추출할 수 있습니다.");
                 return;
             }
-
-            let list = getActiveArray();
-            if (!list || list.length === 0) {
-                alert("현재 추출할 자산 데이터가 없습니다.");
+            if(portfolioTabs.length === 0) {
+                alert("추출할 포트폴리오 계좌가 존재하지 않습니다.");
                 return;
             }
-
-            let isCombined = (currentView === 'combined');
-            let accName = isCombined ? "전체 합산 포트폴리오" : (portfolioTabs.find(t => t.id === currentView)?.name || "개별 포트폴리오").replace('💼 ', '');
             
-            // 날짜 포맷 (YYYY-MM-DD)
+            let container = document.getElementById('ai-export-checkbox-container');
+            let html = '';
+            portfolioTabs.forEach(tab => {
+                let isChecked = '';
+                if (currentView === 'combined') {
+                    isChecked = combinedSelections.includes(tab.id) ? 'checked' : '';
+                } else if (currentView === 'portfolio_hub') {
+                    isChecked = 'checked'; // 메인 화면에서는 기본적으로 전체 선택
+                } else {
+                    isChecked = (tab.id === currentView) ? 'checked' : ''; // 개별 계좌 화면에서는 해당 계좌만
+                }
+                html += `<label style="display:flex; align-items:center; gap:6px; cursor:pointer; background:var(--bg-body); padding:8px; border-radius:6px;"><input type="checkbox" value="${tab.id}" ${isChecked}> ${String(tab.name)}</label>`;
+            });
+            container.innerHTML = html;
+            document.getElementById('ai-export-modal').style.display = 'flex';
+        }
+
+        // 💡 V62: 선택된 계좌 합산 추출 실행 로직
+        function executeAIExport() {
+            let checkboxes = document.querySelectorAll('#ai-export-checkbox-container input[type="checkbox"]:checked');
+            let selectedAccIds = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (selectedAccIds.length === 0) {
+                alert("최소 하나 이상의 계좌를 선택해주세요."); return;
+            }
+
+            let list = getAggregatedAssets(selectedAccIds);
+
             let d = new Date();
             let todayStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
 
             let fallbackRate = parseFloat(localStorage.getItem('lastFxRate_Master')) || 1400;
             let fxRate = parseFloat(livePrices['KRW=X']) || fallbackRate;
 
-            // 평가액 및 최종 비중 1차 계산
             let totalAccountValueInWon = 0;
             list.forEach(asset => {
                 let tickerStr = String(asset.ticker || '').toUpperCase();
@@ -780,10 +818,9 @@
                 totalAccountValueInWon += (isNaN(evalWon) ? 0 : evalWon);
             });
 
-            // 사용자가 화면에서 시뮬레이션으로 더한 금액도 비중 계산에 반영
             let finalTotalValue = totalAccountValueInWon + rawNumericSimulation;
+            let accName = selectedAccIds.length > 1 ? "다중 선택 포트폴리오 합산" : (portfolioTabs.find(t=>t.id===selectedAccIds[0])?.name || "").replace('💼 ', '');
 
-            // 💡 Excel 및 AI 인식을 위한 한글 깨짐 방지 인코딩(BOM) 추가
             let csvContent = '\uFEFF'; 
             csvContent += "계좌명,추출일자,자산군,종목명,티커,현재가,보유수량,평가금액(원),목표비중(%),실제비중(%)\n";
 
@@ -798,9 +835,8 @@
                 if(isNaN(evalWon)) evalWon = 0;
 
                 let actualWeight = finalTotalValue > 0 ? (evalWon / finalTotalValue) * 100 : 0;
-                let targetWeight = parseFloat(asset.targetWeight || 0);
+                let targetWeight = parseFloat(asset.targetWeight || 0); // 다중 계좌일 경우 목표 비중은 합산 과정에서 0으로 표기됨 (합리적 설계)
 
-                // CSV 데이터 오염 방지 (내부 콤마 무시 처리)
                 let aClass = `"${String(asset.assetClass || '📈 주식(성장)')}"`;
                 let aName = `"${String(asset.name || asset.ticker)}"`;
                 let aTicker = `"${asset.ticker}"`;
@@ -809,13 +845,11 @@
                 csvContent += `"${accName}","${todayStr}",${aClass},${aName},${aTicker},${priceStr},${qty},${Math.round(evalWon)},${targetWeight.toFixed(1)},${actualWeight.toFixed(1)}\n`;
             });
 
-            // 시뮬레이션 현금 데이터가 존재하면 로우(Row) 추가
             if (rawNumericSimulation > 0) {
                 let simWeight = finalTotalValue > 0 ? (rawNumericSimulation / finalTotalValue) * 100 : 0;
                 csvContent += `"${accName}","${todayStr}","💵 현금(유동성)","시뮬레이션 추가 현금","CASH",1,${rawNumericSimulation},${rawNumericSimulation},0.0,${simWeight.toFixed(1)}\n`;
             }
 
-            // 파일 강제 다운로드 트리거
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -824,6 +858,8 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
+            document.getElementById('ai-export-modal').style.display = 'none';
         }
 
         function importDataFromFile(event) {
@@ -1185,6 +1221,7 @@
             } else { alert("인식 가능한 배당 데이터가 없습니다. 형식을 확인해주세요."); }
         }
 
+        // 💡 V62: 포트폴리오 메인 화면(허브) 백그라운드 데이터 자동 갱신 렌더링 로직 추가
         async function renderHubView() {
             const container = document.getElementById('dynamic-content-area');
             Object.values(chartInstances).forEach(c => { if(c && typeof c.destroy === 'function') c.destroy(); }); chartInstances = {};
@@ -1209,43 +1246,75 @@
                 } catch(e){}
             }
 
-            let htmlStr = `
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-                <h2 style="margin:0; font-size:1.3rem; color:var(--text-main);">전체 포트폴리오 요약</h2>
-                <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none; padding:8px 15px;" onclick="bulkTakeSnapshot()">📸 현재 상태로 전체 일괄 마감</button>
-            </div>`;
-            
-            let layoutClass = localStorage.getItem('mobileLayout_Master') === '3col' ? 'mobile-3col' : '';
-            htmlStr += `<div id="cards-container" class="${layoutClass}">`;
-            
-            if(portfolioTabs.length === 0) htmlStr += `<div style="width:100%; padding:30px; text-align:center; color:var(--text-sub);">등록된 계좌가 없습니다. 상단 [자산 연동]을 이용해 데이터를 가져오세요.</div>`;
-
-            (portfolioTabs || []).forEach(tab => {
-                let accAssets = portfolios[tab.id] || []; let evalWon = 0;
-                accAssets.forEach(a => {
-                    let tickerStr = String(a.ticker || '').toUpperCase(); let price = parseFloat(livePrices[a.ticker]) || 1; if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
-                    const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
-                    evalWon += isWon ? (price * (parseFloat(a.quantity)||0)) : (price * (parseFloat(a.quantity)||0) * fxRate);
-                });
-                let principal = parseFloat(tab.principal) || 0; let profit = evalWon - principal; let roi = principal > 0 ? (profit / principal) * 100 : 0;
+            function drawHubCards() {
+                let htmlStr = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; width:100%; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                    <h2 style="margin:0; font-size:1.3rem; color:var(--text-main);">전체 포트폴리오 요약</h2>
+                    <button class="header-btn" style="background:var(--tab-portfolio); color:white; border:none; padding:8px 15px;" onclick="bulkTakeSnapshot()">📸 현재 상태로 전체 일괄 마감</button>
+                </div>`;
                 
-                let borderClass = '';
-                if(principal > 0) {
-                    if (roi >= 5) borderClass = 'roi-plus-strong';
-                    else if (roi >= 0) borderClass = 'roi-plus-mild';
-                    else if (roi >= -5) borderClass = 'roi-minus-mild';
-                    else borderClass = 'roi-minus-strong';
-                }
+                let layoutClass = localStorage.getItem('mobileLayout_Master') === '3col' ? 'mobile-3col' : '';
+                htmlStr += `<div id="cards-container" class="${layoutClass}">`;
+                
+                if(portfolioTabs.length === 0) htmlStr += `<div style="width:100%; padding:30px; text-align:center; color:var(--text-sub);">등록된 계좌가 없습니다. 상단 [자산 연동]을 이용해 데이터를 가져오세요.</div>`;
 
-                htmlStr += `
-                    <div class="card hub-card ${borderClass}" onclick="switchView('${tab.id}')">
-                        <button class="hub-delete-btn" onclick="event.stopPropagation(); if(confirm('이 계좌를 영구 삭제하시겠습니까?')){ portfolioTabs = portfolioTabs.filter(t=>t.id!=='${tab.id}'); saveTabs(); switchView('portfolio_hub'); }">&times;</button>
-                        <div><h2 style="margin:0; font-size:1.15rem;">${String(tab.name)}</h2><p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-sub);">누적 원금: ${Math.round(principal).toLocaleString()}원</p></div>
-                        <div style="margin-top:10px;"><div class="hub-val" style="color:var(--tab-active);">${Math.round(evalWon).toLocaleString()}원</div><div class="hub-roi ${profit>=0?'profit-plus':'profit-minus'}">${profit>=0?'+':''}${Math.round(profit).toLocaleString()}원 (${roi.toFixed(1)}%)</div></div>
-                    </div>`;
+                (portfolioTabs || []).forEach(tab => {
+                    let accAssets = portfolios[tab.id] || []; let evalWon = 0;
+                    accAssets.forEach(a => {
+                        let tickerStr = String(a.ticker || '').toUpperCase(); let price = parseFloat(livePrices[a.ticker]) || 1; if(['CASH','예수금','현금'].includes(tickerStr)) price = 1;
+                        const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
+                        evalWon += isWon ? (price * (parseFloat(a.quantity)||0)) : (price * (parseFloat(a.quantity)||0) * fxRate);
+                    });
+                    let principal = parseFloat(tab.principal) || 0; let profit = evalWon - principal; let roi = principal > 0 ? (profit / principal) * 100 : 0;
+                    
+                    let borderClass = '';
+                    if(principal > 0) {
+                        if (roi >= 5) borderClass = 'roi-plus-strong';
+                        else if (roi >= 0) borderClass = 'roi-plus-mild';
+                        else if (roi >= -5) borderClass = 'roi-minus-mild';
+                        else borderClass = 'roi-minus-strong';
+                    }
+
+                    htmlStr += `
+                        <div class="card hub-card ${borderClass}" onclick="switchView('${tab.id}')">
+                            <button class="hub-delete-btn" onclick="event.stopPropagation(); if(confirm('이 계좌를 영구 삭제하시겠습니까?')){ portfolioTabs = portfolioTabs.filter(t=>t.id!=='${tab.id}'); saveTabs(); switchView('portfolio_hub'); }">&times;</button>
+                            <div><h2 style="margin:0; font-size:1.15rem;">${String(tab.name)}</h2><p style="margin:5px 0 0 0; font-size:0.85rem; color:var(--text-sub);">누적 원금: ${Math.round(principal).toLocaleString()}원</p></div>
+                            <div style="margin-top:10px;"><div class="hub-val" style="color:var(--tab-active);">${Math.round(evalWon).toLocaleString()}원</div><div class="hub-roi ${profit>=0?'profit-plus':'profit-minus'}">${profit>=0?'+':''}${Math.round(profit).toLocaleString()}원 (${roi.toFixed(1)}%)</div></div>
+                        </div>`;
+                });
+                htmlStr += `<div class="card hub-card hub-add-card" onclick="addNewAccount()"><h2>➕ 빈 계좌 생성</h2></div></div>`;
+                container.innerHTML = htmlStr;
+            }
+
+            drawHubCards(); 
+
+            let fetchTasks = [];
+            portfolioTabs.forEach(tab => {
+                (portfolios[tab.id] || []).forEach(a => {
+                    let tickerStr = String(a.ticker || '').toUpperCase();
+                    if(tickerStr && !['CASH','예수금','현금'].includes(tickerStr) && !livePrices[a.ticker]) {
+                        if (!_fetchingPromises[a.ticker]) {
+                            fetchTasks.push(() => fetchOnce(a.ticker).then(data => {
+                                if (data.success) livePrices[a.ticker] = data.price;
+                            }).catch(e=>e));
+                        }
+                    }
+                });
             });
-            htmlStr += `<div class="card hub-card hub-add-card" onclick="addNewAccount()"><h2>➕ 빈 계좌 생성</h2></div></div>`;
-            container.innerHTML = htmlStr;
+
+            if (fetchTasks.length > 0) {
+                const limit = 4; let executing = new Set();
+                for (const task of fetchTasks) {
+                    const p = Promise.resolve().then(() => task());
+                    executing.add(p);
+                    const clean = () => executing.delete(p);
+                    p.then(clean).catch(clean);
+                    if (executing.size >= limit) { await Promise.race(executing); }
+                }
+                await Promise.allSettled(executing).then(() => {
+                    if (currentView === 'portfolio_hub') drawHubCards(); 
+                });
+            }
         }
 
         async function renderDashboard() {
