@@ -85,7 +85,7 @@
         .status-badge { padding: 3px 8px; border-radius: 20px; font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
 
         .scheduler-list { list-style: none; padding: 0; margin: 8px 0 0 0; font-size: 0.8rem; }
-        .scheduler-list li { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dashed var(--border-dash); color: var(--text-main); font-weight: bold; }
+        .scheduler-list li { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dashed var(--border-dash); color: var(--text-main); font-weight: bold; transition: opacity 0.3s; }
         .scheduler-list li:last-child { border-bottom: none; }
         .sched-date { font-size: 0.72rem; color: var(--text-sub); background: var(--tab-bg); padding: 1px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; }
         .sched-dday { font-size: 0.72rem; font-weight: bold; color: var(--profit-red); }
@@ -96,8 +96,6 @@
         @keyframes spin-once { 0% { transform: rotate(0deg); } 100% { transform: rotate(720deg); } }
         .spin-once { animation: spin-once 1.5s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; }
         
-        .sparkline-cell { width: 72px; min-width: 72px; min-height: 35px; padding: 4px 8px !important; vertical-align: middle !important; text-align: center !important; }
-
         .hub-card.roi-plus-strong  { border-color: #2ecc71 !important; }
         .hub-card.roi-plus-mild    { border-color: #a8e6c1 !important; }
         .hub-card.roi-minus-mild   { border-color: #a8c8e8 !important; }
@@ -241,7 +239,7 @@
         </div>
     </div>
 
-    <!-- 💡 V62: AI 분석을 위한 다중 계좌 선택 모달 -->
+    <!-- AI 분석을 위한 다중 계좌 선택 모달 -->
     <div id="ai-export-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 450px;">
             <h2>🤖 AI 분석용 포트폴리오 선택</h2>
@@ -316,7 +314,6 @@
                     <button class="header-btn" onclick="toggleLayout()" id="layout-btn">📱 1열/3열</button>
                     <button class="header-btn" onclick="document.getElementById('sync-modal').style.display='flex'">🔄 동기화</button>
                     <button class="header-btn btn-highlight" onclick="document.getElementById('data-modal').style.display='flex'">⚙️ 자산 연동</button>
-                    <!-- AI 분석 추출 버튼 -->
                     <button class="header-btn" onclick="exportForAI()" style="background:var(--tab-combined); color:white; border:none;">🤖 AI 분석용 추출</button>
                     <button class="header-btn theme-toggle" onclick="toggleTheme()">🌙 모드</button>
                 </div>
@@ -367,7 +364,6 @@
                     <div class="date-picker-wrap">
                         <input type="month" id="trend-start" value="2026-01" onchange="trendStartDateStr=this.value; triggerRebalance();" style="padding:2px 4px; font-size:0.7rem; border-radius:4px; border:1px solid var(--input-border); background:var(--bg-card); color:var(--text-main);">
                         <span style="font-size:0.7rem;">~</span>
-                        <!-- 💡 V62: 8월 표시 수정 -->
                         <input type="month" id="trend-end" value="2026-08" onchange="trendEndDateStr=this.value; triggerRebalance();" style="padding:2px 4px; font-size:0.7rem; border-radius:4px; border:1px solid var(--input-border); background:var(--bg-card); color:var(--text-main);">
                     </div>
                 </div>
@@ -385,12 +381,14 @@
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         const REBALANCING_THRESHOLD = 15000;
 
-        // 💡 V62 - AI 추출 계좌 선택 및 허브 렌더링 최적화
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV62_";
+        // 💡 V64: D-Day 최신화, MDD 버그 수정, 100% 무손실 데이터 승계
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV64_";
         
         let currentView = 'portfolio_hub';
+        const now = new Date();
+        const currentYearMonth = `${now.getFullYear()}-${("0" + (now.getMonth() + 1)).slice(-2)}`;
         let trendStartDateStr = '2026-01';
-        let trendEndDateStr = '2026-08'; // 💡 8월 반영 
+        let trendEndDateStr = currentYearMonth; 
 
         let rawNumericPrincipal = 0;
         let rawNumericSimulation = 0;
@@ -406,14 +404,18 @@
         };
         const DIVIDEND_ACCOUNT_COLORS = ['#27ae60', '#2980b9', '#8e44ad', '#e67e22', '#f39c12', '#16a085', '#c0392b'];
 
-        function calculateDDay(targetDateStr) {
-            const currentBaseDate = new Date('2026-06-30');
+        // 💡 V64: 오늘 날짜 기준 리얼타임 D-Day 엔진
+        function getDDayHTML(targetDateStr) {
+            const currentBaseDate = new Date();
+            currentBaseDate.setHours(0, 0, 0, 0);
             const targetDate = new Date(targetDateStr);
-            const diffTime = targetDate - currentBaseDate;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays > 0) return `D-${diffDays}`;
-            if (diffDays === 0) return `D-Day`;
-            return `종료`;
+            targetDate.setHours(0, 0, 0, 0);
+            
+            const diffDays = Math.ceil((targetDate - currentBaseDate) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays > 0) return { html: `<b class="sched-dday">D-${diffDays}</b>`, isPast: false };
+            if (diffDays === 0) return { html: `<b class="sched-dday" style="color:#e74c3c;">D-Day</b>`, isPast: false };
+            return { html: `<b class="sched-dday" style="color:#bdc3c7;">종료</b>`, isPast: true };
         }
 
         const DEFAULT_MACRO_ASSETS = [
@@ -442,7 +444,7 @@
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
             const keysToMigrate = [];
             for (let i = 0; i < localStorage.length; i++) { keysToMigrate.push(localStorage.key(i)); }
-            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_', 'macroDashboard_MasterV59_', 'macroDashboard_MasterV60_', 'macroDashboard_MasterV61_'];
+            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_', 'macroDashboard_MasterV59_', 'macroDashboard_MasterV60_', 'macroDashboard_MasterV61_', 'macroDashboard_MasterV62_', 'macroDashboard_MasterV63_'];
             let mergedTabsMap = {};
 
             oldPrefixes.forEach(prefix => {
@@ -469,7 +471,7 @@
         let dividendRecords = safeParse(STORAGE_KEY_PREFIX + 'dividends', []);
         function saveDividends() { localStorage.setItem(STORAGE_KEY_PREFIX + 'dividends', JSON.stringify(dividendRecords)); }
 
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v62')) {
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v64')) {
             let macroCheck = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
             const ensureAsset = (ticker, name, type='asset') => { 
                 if(!macroCheck.some(a => a.ticker === ticker)) macroCheck.push({ type: type, ticker: ticker, name: name }); 
@@ -481,7 +483,7 @@
             
             let tabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
             if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v62', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v64', 'true');
         }
 
         let portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
@@ -678,28 +680,6 @@
             alert('✅ 모든 계좌의 이번 달 실적 마감이 완료되어 차트에 영구 반영되었습니다.'); renderHubView();
         }
 
-        function drawSparkline(cellId, rawPrices) {
-            const cell = document.getElementById(cellId);
-            if (!cell || !Array.isArray(rawPrices)) return;
-            const prices = rawPrices.map(p => parseFloat(p)).filter(p => !isNaN(p));
-            if (prices.length < 2) { cell.innerHTML = '-'; return; }
-            
-            const W = 64, H = 28, pad = 2;
-            const min = Math.min(...prices), max = Math.max(...prices);
-            const range = max - min || 1;
-            const pts = prices.map((p, i) => {
-                const x = pad + (i / (prices.length - 1)) * (W - pad * 2);
-                const y = H - pad - ((p - min) / range) * (H - pad * 2);
-                return `${x.toFixed(1)},${y.toFixed(1)}`;
-            }).join(' ');
-            
-            const last = prices[prices.length - 1]; const first = prices[0];
-            const color = last >= first ? '#2ecc71' : '#e74c3c';
-            const lx = (pad + (W - pad * 2)).toFixed(1);
-            const ly = (H - pad - ((last - min) / range) * (H - pad * 2)).toFixed(1);
-            cell.innerHTML = `<svg width="${W}" height="${H}" style="display:block;margin:auto;overflow:visible"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${lx}" cy="${ly}" r="2.5" fill="${color}"/></svg>`;
-        }
-
         function fetchOnce(ticker) {
             const safeTicker = String(ticker);
             if (_fetchingPromises[safeTicker]) return _fetchingPromises[safeTicker];
@@ -762,7 +742,6 @@
             }
         }
 
-        // 💡 V62: 선택형 AI 데이터 추출 모달 호출 로직
         function exportForAI() {
             if (currentView === 'macro' || currentView === 'dividend') {
                 alert("개별 포트폴리오, 전체 합산, 또는 계좌 목록 화면에서만 AI 분석 데이터를 추출할 수 있습니다.");
@@ -780,9 +759,9 @@
                 if (currentView === 'combined') {
                     isChecked = combinedSelections.includes(tab.id) ? 'checked' : '';
                 } else if (currentView === 'portfolio_hub') {
-                    isChecked = 'checked'; // 메인 화면에서는 기본적으로 전체 선택
+                    isChecked = 'checked';
                 } else {
-                    isChecked = (tab.id === currentView) ? 'checked' : ''; // 개별 계좌 화면에서는 해당 계좌만
+                    isChecked = (tab.id === currentView) ? 'checked' : ''; 
                 }
                 html += `<label style="display:flex; align-items:center; gap:6px; cursor:pointer; background:var(--bg-body); padding:8px; border-radius:6px;"><input type="checkbox" value="${tab.id}" ${isChecked}> ${String(tab.name)}</label>`;
             });
@@ -790,7 +769,6 @@
             document.getElementById('ai-export-modal').style.display = 'flex';
         }
 
-        // 💡 V62: 선택된 계좌 합산 추출 실행 로직
         function executeAIExport() {
             let checkboxes = document.querySelectorAll('#ai-export-checkbox-container input[type="checkbox"]:checked');
             let selectedAccIds = Array.from(checkboxes).map(cb => cb.value);
@@ -835,7 +813,7 @@
                 if(isNaN(evalWon)) evalWon = 0;
 
                 let actualWeight = finalTotalValue > 0 ? (evalWon / finalTotalValue) * 100 : 0;
-                let targetWeight = parseFloat(asset.targetWeight || 0); // 다중 계좌일 경우 목표 비중은 합산 과정에서 0으로 표기됨 (합리적 설계)
+                let targetWeight = parseFloat(asset.targetWeight || 0);
 
                 let aClass = `"${String(asset.assetClass || '📈 주식(성장)')}"`;
                 let aName = `"${String(asset.name || asset.ticker)}"`;
@@ -1221,7 +1199,6 @@
             } else { alert("인식 가능한 배당 데이터가 없습니다. 형식을 확인해주세요."); }
         }
 
-        // 💡 V62: 포트폴리오 메인 화면(허브) 백그라운드 데이터 자동 갱신 렌더링 로직 추가
         async function renderHubView() {
             const container = document.getElementById('dynamic-content-area');
             Object.values(chartInstances).forEach(c => { if(c && typeof c.destroy === 'function') c.destroy(); }); chartInstances = {};
@@ -1238,10 +1215,6 @@
                     if(data && data.success) {
                         livePrices['KRW=X'] = data.price; livePrices['KRW=X_h'] = data.high52; fxRate = parseFloat(data.price)||fallbackRate;
                         localStorage.setItem('lastFxRate_Master', fxRate); 
-                        if(data.chartData && data.chartLabels) {
-                            if(!window.rawChartData) window.rawChartData = {};
-                            window.rawChartData['KRW=X'] = { prices: data.chartData, labels: data.chartLabels };
-                        }
                     }
                 } catch(e){}
             }
@@ -1295,7 +1268,10 @@
                     if(tickerStr && !['CASH','예수금','현금'].includes(tickerStr) && !livePrices[a.ticker]) {
                         if (!_fetchingPromises[a.ticker]) {
                             fetchTasks.push(() => fetchOnce(a.ticker).then(data => {
-                                if (data.success) livePrices[a.ticker] = data.price;
+                                if (data.success) {
+                                    livePrices[a.ticker] = data.price;
+                                    livePrices[a.ticker+'_h'] = data.high52;
+                                }
                             }).catch(e=>e));
                         }
                     }
@@ -1356,22 +1332,32 @@
                             if (asset.ticker === 'BESSENT_QRA') {
                                 htmlStr += `<div class="card scheduler-card non-draggable" id="${cardId}">
                                     <div class="asset-info"><h2>${String(asset.name)}</h2><p>국채 발행 및 변동성 모니터링</p></div>
-                                    <ul class="scheduler-list">
-                                        <li><span>미 중간선거 & 발행 surge 리스크</span><span class="sched-date">11/03 <b class="sched-dday">${calculateDDay('2026-11-03')}</b></span></li>
-                                        <li><span>재무부 3분기 QRA 발표 계획</span><span class="sched-date">07/29 <b class="sched-dday">${calculateDDay('2026-07-29')}</b></span></li>
-                                        <li><span>의회 예산국(CBO) 적자 점검</span><span class="sched-date">09-30</span></li>
-                                    </ul></div>`;
+                                    <ul class="scheduler-list">`;
+                                [
+                                    {name: '재무부 3분기 QRA 발표 계획', date: '2026-07-29'},
+                                    {name: '의회 예산국(CBO) 적자 점검', date: '2026-09-30'},
+                                    {name: '미 중간선거 & 발행 surge 리스크', date: '2026-11-03'}
+                                ].forEach(ev => {
+                                    let dinfo = getDDayHTML(ev.date);
+                                    htmlStr += `<li style="${dinfo.isPast ? 'text-decoration:line-through; opacity:0.4;' : ''}"><span>${ev.name}</span><span class="sched-date">${ev.date.substring(5).replace('-','/')} ${dinfo.html}</span></li>`;
+                                });
+                                htmlStr += `</ul></div>`;
                             } else if (asset.ticker === 'MARKET_2026_H2') {
                                 htmlStr += `<div class="card scheduler-card non-draggable" id="${cardId}" style="border-left: 4px solid var(--tab-portfolio);">
                                     <div class="asset-info"><h2>${String(asset.name)}</h2><p>26년 하반기 핵심 마일스톤</p></div>
-                                    <ul class="scheduler-list">
-                                        <li><span>🔥 7~8월 빅테크 실적 검증 시즌</span><span class="sched-date">7~8월 수령</span></li>
-                                        <li><span>🇨🇳 제네시스 미션 (탈중국 안보)</span><span class="sched-date">08/21 <b class="sched-dday" style="color:var(--tab-active);">${calculateDDay('2026-08-21')}</b></span></li>
-                                        <li><span>🦅 잭슨홀 미팅 (새 의장 기조)</span><span class="sched-date">08/27 <b class="sched-dday" style="color:var(--tab-active);">${calculateDDay('2026-08-27')}</b></span></li>
-                                        <li><span>📊 S&P 500 리밸런싱 지수 발표</span><span class="sched-date">09/10 <b class="sched-dday">${calculateDDay('2026-09-10')}</b></span></li>
-                                        <li><span>🗳️ 미국 중간 선거 (불확실성 해소)</span><span class="sched-date">11/03 <b class="sched-dday">${calculateDDay('2026-11-03')}</b></span></li>
-                                        <li><span>🛍️ 블랙프라이데이 (소비 양극화)</span><span class="sched-date">11/27 <b class="sched-dday">${calculateDDay('2026-11-27')}</b></span></li>
-                                    </ul></div>`;
+                                    <ul class="scheduler-list">`;
+                                [
+                                    {name: '🔥 7~8월 빅테크 실적 검증 시즌', date: '2026-08-31'},
+                                    {name: '🇨🇳 제네시스 미션 (탈중국 안보)', date: '2026-08-21'},
+                                    {name: '🦅 잭슨홀 미팅 (새 의장 기조)', date: '2026-08-27'},
+                                    {name: '📊 S&P 500 리밸런싱 지수 발표', date: '2026-09-10'},
+                                    {name: '🗳️ 미국 중간 선거 (불확실성 해소)', date: '2026-11-03'},
+                                    {name: '🛍️ 블랙프라이데이 (소비 양극화)', date: '2026-11-27'}
+                                ].forEach(ev => {
+                                    let dinfo = getDDayHTML(ev.date);
+                                    htmlStr += `<li style="${dinfo.isPast ? 'text-decoration:line-through; opacity:0.4;' : ''}"><span>${ev.name}</span><span class="sched-date">${ev.date.substring(5).replace('-','/')} ${dinfo.html}</span></li>`;
+                                });
+                                htmlStr += `</ul></div>`;
                             }
                         } else {
                             htmlStr += `
@@ -1401,7 +1387,7 @@
                         <table class="portfolio-table">
                             <thead>
                                 <tr>
-                                    <th>자산군 / 종목명 (클릭 수정)</th><th>티커</th><th>차트</th><th>현재가</th><th>보유 수량</th><th>평가금액</th><th>목표(%)</th><th>실제(%)</th><th>리밸런싱 신호</th>${!isCombined ? `<th>관리</th>` : ''}
+                                    <th>자산군 / 종목명 (클릭 수정)</th><th>티커</th><th style="text-align:center;">고점대비</th><th>현재가</th><th>보유 수량</th><th>평가금액</th><th>목표(%)</th><th>실제(%)</th><th>리밸런싱 신호</th>${!isCombined ? `<th>관리</th>` : ''}
                                 </tr>
                             </thead><tbody id="portfolio-tbody">`;
                     
@@ -1422,7 +1408,7 @@
                                     </div>
                                 </td>
                                 <td style="text-align:center;"><span class="ticker-badge">${String(asset.ticker)}</span></td>
-                                <td class="sparkline-cell" id="spark-${cardId}"><span style="font-size:0.7rem;color:var(--text-sub);">-</span></td>
+                                <td id="mdd-cell-${cardId}" style="text-align:center; font-weight:bold; font-size:0.85rem;">-</td>
                                 <td id="price-${cardId}"><span class="fetch-loading"><span class="spinner"></span></span></td>
                                 <td>${isCombined ? parseFloat(asset.quantity)||0 : `<input type="number" class="table-input" id="edit-qty-${cardId}" value="${parseFloat(asset.quantity)||0}" oninput="updateInlineAsset('${String(asset.ticker)}', 'quantity', this.value)">`}</td>
                                 <td id="eval-${cardId}" style="font-weight:bold; color:var(--text-main);">-</td>
@@ -1469,9 +1455,8 @@
                             const safeTicker = String(asset.ticker || 'unknown').replace(/[^a-zA-Z0-9]/g, '');
                             const cardId = currentView === 'macro' ? 'card-' + safeTicker : 'row-' + safeTicker;
                             if (livePrices[asset.ticker]) {
-                                updateCardUI(asset, cardId, livePrices[asset.ticker], livePrices[asset.ticker+'_h'] || 1);
+                                updateCardUI(asset, cardId, livePrices[asset.ticker], livePrices[asset.ticker+'_h']);
                                 if (currentView === 'macro' && window.rawChartData && window.rawChartData[asset.ticker]) drawChart(cardId, window.rawChartData[asset.ticker].labels, window.rawChartData[asset.ticker].prices, false);
-                                if (currentView !== 'macro' && currentView !== 'portfolio_hub' && currentView !== 'dividend' && window.rawChartData && window.rawChartData[asset.ticker]) drawSparkline('spark-' + cardId, window.rawChartData[asset.ticker].prices);
                                 return Promise.resolve(); 
                             }
                             return fetchData(asset, cardId);
@@ -1536,9 +1521,7 @@
                 }
 
                 if(viewAtCall === 'macro') { if(data.chartData && data.chartLabels) { drawChart(cardId, data.chartLabels, window.rawChartData[asset.ticker].prices, false); } }
-                if(viewAtCall !== 'macro' && viewAtCall !== 'portfolio_hub' && viewAtCall !== 'dividend') {
-                    if(data.chartData) drawSparkline('spark-' + cardId, data.chartData);
-                }
+
                 if(viewAtCall === currentView) { updateCardUI(asset, cardId, data.price, data.high52); }
             } catch (error) { 
                 if(viewAtCall === currentView) {
@@ -1548,40 +1531,46 @@
             }
         }
 
+        // 💡 V64: 고점대비 수치 계산 버그(hp 예외처리) 완벽 수정
         function updateCardUI(asset, cardId, currentPrice, high52) {
             const tickerStr = String(asset.ticker || '').toUpperCase();
             const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
-            let cp = parseFloat(currentPrice) || 0; let hp = parseFloat(high52) || 0;
+            let cp = parseFloat(currentPrice) || 0; 
+            let hp = parseFloat(high52) || 0;
+            
             let displayPrice = isWon ? Math.round(cp).toLocaleString() + "원" : "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             let displayHigh = isWon ? Math.round(hp).toLocaleString() + "원" : "$" + hp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             
             const pEl = document.getElementById(`price-${cardId}`); if (pEl) pEl.innerText = displayPrice;
 
             if (currentView !== 'macro' && currentView !== 'portfolio_hub' && currentView !== 'dividend') {
-                const sparkEl = document.getElementById(`spark-${cardId}`);
-                if(sparkEl && window.rawChartData && window.rawChartData[asset.ticker]) {
-                    const rawPrices = window.rawChartData[asset.ticker].prices;
-                    const prices = rawPrices.filter(p => typeof p === 'number' && !isNaN(p));
-                    if(prices.length > 1) {
-                        let min = Math.min(...prices), max = Math.max(...prices);
-                        let range = max - min || 1;
-                        let w = 60, h = 25; 
-                        let pts = prices.map((p, i) => `${(i/(prices.length-1))*w},${h - ((p-min)/range)*h}`).join(' ');
-                        let color = prices[prices.length-1] >= prices[0] ? '#2ecc71' : '#e74c3c'; 
-                        sparkEl.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 -5 ${w} ${h+10}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
-                    } else { sparkEl.innerHTML = '-'; }
+                const mddCell = document.getElementById(`mdd-cell-${cardId}`);
+                if(mddCell) {
+                    if (hp > 0 && cp > 0 && !['CASH','예수금','현금'].includes(tickerStr)) {
+                        if (cp >= hp) {
+                            mddCell.innerHTML = `<span style="color:var(--tab-dividend); font-weight:bold;">0.0%</span>`;
+                        } else {
+                            let mdd = (cp / hp) - 1;
+                            let mddPct = (mdd * 100).toFixed(1);
+                            let color = mdd <= -0.15 ? 'var(--profit-red)' : 'var(--text-main)';
+                            mddCell.innerHTML = `<span style="color:${color}; font-weight:bold;">${mddPct}%</span>`;
+                        }
+                    } else {
+                        mddCell.innerHTML = `<span style="color:var(--text-sub);">-</span>`;
+                    }
                 }
             }
             
             if (currentView === 'macro') {
-                const hEl = document.getElementById(`high-${cardId}`); if(hEl) hEl.innerText = displayHigh;
-                let mdd = hp > 0 ? (cp / hp) - 1 : 0; let mddPercentage = (mdd * 100).toFixed(2) + "%";
+                const hEl = document.getElementById(`high-${cardId}`); if(hEl) hEl.innerText = hp > 0 ? displayHigh : "-";
+                let mdd = hp > 0 ? (cp / hp) - 1 : 0; 
+                let mddPercentage = hp > 0 ? (mdd * 100).toFixed(2) + "%" : "-";
                 let statusMsg = "✅ 관망"; let statusClass = "status-normal";
                 if (tickerStr.indexOf('FRED:') === 0) { displayPrice = "$" + cp.toLocaleString('en-US', { minimumFractionDigits: 1 }) + "B"; mddPercentage = "유동성"; statusMsg = "💵 TGA"; if(pEl) pEl.innerText = displayPrice; }
                 else if (tickerStr === 'KRW=X') { mddPercentage = "환율"; statusMsg = "💵 외환"; } 
                 else if (tickerStr === '^TNX') { displayPrice = cp.toFixed(2) + "%"; mddPercentage = "금리"; if (cp >= 4.5) { statusMsg = "⚠️ 발작 대기"; statusClass = "status-warning"; } if(pEl) pEl.innerText = displayPrice; } 
                 else if (tickerStr === '^VIX') { displayPrice = cp.toFixed(2) + "pt"; mddPercentage = "공포지수"; if (cp >= 25) { statusMsg = "⚠️ 변동성 확대"; statusClass = "status-warning"; } if(pEl) pEl.innerText = displayPrice; } 
-                else { if (mdd <= -0.15) { statusMsg = "🎯 1차 매수"; statusClass = "status-warning"; } }
+                else { if (hp > 0 && mdd <= -0.15) { statusMsg = "🎯 1차 매수"; statusClass = "status-warning"; } }
                 
                 const mEl = document.getElementById(`mdd-${cardId}`); if (mEl) mEl.innerText = mddPercentage;
                 const sEl = document.getElementById(`status-${cardId}`); if (sEl) { sEl.style.display = 'inline-block'; sEl.innerText = statusMsg; sEl.className = "status-badge " + statusClass; }
