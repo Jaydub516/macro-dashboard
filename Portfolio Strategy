@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경제로드맵 기반 투자전략 & 포트폴리오 정밀 진단 대시보드 (with Gemini AI)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #FAF8F5;
+            color: #1E293B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 580px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 340px;
+            }
+        }
+        .tab-btn.active {
+            border-bottom: 3px solid #4F46E5;
+            color: #4F46E5;
+            font-weight: 700;
+            background-color: #EEF2FF;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #CBD5E1;
+            border-radius: 3px;
+        }
+        /* AI Pulse & Shimmer Animations */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.08); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .ai-pulse {
+            animation: pulse-ring 2.5s infinite ease-in-out;
+        }
+        .prose-ai h1 { font-size: 1.15rem; font-weight: 700; color: #1e1b4b; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .prose-ai h2 { font-size: 1.05rem; font-weight: 700; color: #312e81; margin-top: 0.85rem; margin-bottom: 0.4rem; border-bottom: 1px solid #e0e7ff; padding-bottom: 0.2rem; }
+        .prose-ai h3 { font-size: 0.95rem; font-weight: 700; color: #4338ca; margin-top: 0.6rem; margin-bottom: 0.25rem; }
+        .prose-ai p { font-size: 0.82rem; line-height: 1.6; color: #334155; margin-bottom: 0.6rem; }
+        .prose-ai ul, .prose-ai ol { margin-left: 1.2rem; font-size: 0.82rem; line-height: 1.6; color: #334155; margin-bottom: 0.6rem; }
+        .prose-ai li { margin-bottom: 0.25rem; }
+        .prose-ai strong { color: #0f172a; font-weight: 700; }
+        .prose-ai table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin: 0.75rem 0; }
+        .prose-ai th { background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; font-weight: 700; text-align: left; }
+        .prose-ai td { border: 1px solid #e2e8f0; padding: 6px 10px; }
+        .prose-ai blockquote { border-left: 3px solid #6366f1; padding-left: 0.75rem; color: #4f46e5; background: #f8fafc; font-style: italic; margin: 0.5rem 0; }
+    </style>
+</head>
+<body class="bg-[#FAF8F5] min-h-screen text-slate-800">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header Navigation -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-800">경제로드맵 종합 리포트</span>
+                        <span class="px-2 py-0.5 rounded text-xs font-bold bg-gradient-to-r from-violet-600 to-indigo-600 text-white flex items-center gap-1 shadow-sm">
+                            <span>✨</span> Gemini 3 Flash AI 연동
+                        </span>
+                        <span class="text-xs text-slate-500">기준일: 2026-08-31</span>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-900 mt-1 flex items-center gap-2">
+                        주식투자전략 수립 및 포트폴리오 정밀 진단
+                    </h1>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 text-xs text-amber-800 flex items-center gap-2">
+                        <span class="text-base">⚓</span>
+                        <div>
+                            <span class="font-bold">총 진단 자산:</span> 2억 2,364만 원 | <span class="font-bold text-rose-600">위험/배제: 35.2%</span>
+                        </div>
+                    </div>
+                    <button onclick="switchTab('ai-advisor')" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-xs px-3.5 py-2 rounded-lg shadow-sm transition-all flex items-center gap-1.5">
+                        <span class="ai-pulse inline-block w-2 h-2 rounded-full bg-emerald-300"></span>
+                        <span>🤖 AI 로드맵 어드바이저</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <nav class="flex space-x-1 sm:space-x-3 mt-3 overflow-x-auto border-t border-stone-100 pt-2 custom-scrollbar">
+                <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn active whitespace-nowrap px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors">
+                    1. 강의 요약 & 패러다임
+                </button>
+                <button onclick="switchTab('barbell')" id="tab-barbell" class="tab-btn whitespace-nowrap px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                    2. 닻과 돛 전략 프레임워크
+                </button>
+                <button onclick="switchTab('diagnosis')" id="tab-diagnosis" class="tab-btn whitespace-nowrap px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                    3. 현재 포트폴리오 정밀 진단
+                </button>
+                <button onclick="switchTab('ai-matrix')" id="tab-ai-matrix" class="tab-btn whitespace-nowrap px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                    4. Part 5 AI 기업 채점표 (MAGS·Top10)
+                </button>
+                <button onclick="switchTab('rebalance')" id="tab-rebalance" class="tab-btn whitespace-nowrap px-3 py-2 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                    5. 리밸런싱 실행 & 시뮬레이터
+                </button>
+                <button onclick="switchTab('ai-advisor')" id="tab-ai-advisor" class="tab-btn whitespace-nowrap px-3 py-2 rounded-md text-xs sm:text-sm font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors flex items-center gap-1">
+                    <span>✨ 6. Gemini AI 자문실</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: EXECUTIVE SUMMARY & PARADIGM -->
+        <!-- ========================================== -->
+        <section id="content-summary" class="space-y-6">
+            <div class="bg-white rounded-xl p-6 border border-stone-200 shadow-sm">
+                <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span>🏛️</span> 박종훈의 경제로드맵: 거시경제 패러다임의 대전환
+                    </h2>
+                    <button onclick="generateAiMacroInsight()" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3 py-1.5 rounded-lg border border-indigo-200 transition flex items-center gap-1.5">
+                        <span>✨</span> 현재 매크로 시황 실시간 AI 해설
+                    </button>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    본 섹션은 박종훈 박사의 '경제로드맵(Part 1~5)' 강의 내용을 바탕으로, 지난 40년(1980~2020)간 유지되었던 저금리·저물가·세계화 공식의 종말과 거대한 거시경제적 전환점을 요약합니다. 화폐 가치의 구조적 약세와 인플레이션 일상화 속에서 개인 투자자가 자산을 지키기 위해 반드시 알아야 할 패러다임적 통찰을 제공합니다.
+                </p>
+                <div id="aiMacroBox" class="hidden mt-4 p-4 bg-indigo-50/70 border border-indigo-200 rounded-xl prose-ai"></div>
+            </div>
+
+            <!-- 4 Key Paradigm Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm hover:border-indigo-300 transition-all">
+                    <div class="text-indigo-600 text-2xl mb-2">📉</div>
+                    <h3 class="font-bold text-slate-900 text-sm mb-1">40년 관성의 종말 & J커브</h3>
+                    <p class="text-xs text-slate-600 leading-normal">
+                        1980년 이후 금리가 15.5%에서 0.5%로 내려오며 형성된 "채권은 안전하다"는 신화가 깨졌습니다. 선진국 국가부채 폭증으로 실질 금리는 자산 가격을 끌어내리는 '중력'이 됩니다.
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm hover:border-amber-300 transition-all">
+                    <div class="text-amber-600 text-2xl mb-2">💵</div>
+                    <h3 class="font-bold text-slate-900 text-sm mb-1">화폐 타락 & 로컬 통화 취약성</h3>
+                    <p class="text-xs text-slate-600 leading-normal">
+                        1913년 연준 설립 후 달러 구매력은 97% 하락. 원화는 저출산·고령화와 세수 절벽으로 더 가파른 약세를 보입니다. 원화 단일 편향에서 탈피해 달러·금 등 글로벌 실물 자산 확보가 필수입니다.
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm hover:border-rose-300 transition-all">
+                    <div class="text-rose-600 text-2xl mb-2">⚠️</div>
+                    <h3 class="font-bold text-slate-900 text-sm mb-1">K자형 양극화 & 위기 시그널</h3>
+                    <p class="text-xs text-slate-600 leading-normal">
+                        저금리로 실탄을 확보한 1등 빅테크와 보조금 수혜 기업만 성장을 독점합니다. 미국 10년물 국채금리 4.5~5.0% 돌파, FCF 감소, 사모대출(PIK) 부실이 3대 경고 시그널입니다.
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm hover:border-emerald-300 transition-all">
+                    <div class="text-emerald-600 text-2xl mb-2">😊</div>
+                    <h3 class="font-bold text-slate-900 text-sm mb-1">AI 대전환과 스마일 커브</h3>
+                    <p class="text-xs text-slate-600 leading-normal">
+                        기술 발전으로 중간 지대(범용 소프트웨어, 단순 스타트업, 신흥국 인적자본)는 몰락합니다. 부는 **'좌측 극단(물리 인프라/에너지)'**과 **'우측 극단(AI 독점 플랫폼)'**으로 분발됩니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 5 Stages of Empire Collapse -->
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span>📜</span> 역사가 증명하는 제국 화폐 몰락의 5단계 (로마 데나리우스 vs 현대 미국 달러)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-center">
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <span class="inline-block px-2 py-0.5 rounded bg-slate-200 text-slate-800 text-xs font-bold mb-2">1단계</span>
+                        <h4 class="font-bold text-xs text-slate-900 mb-1">성장의 정체</h4>
+                        <p class="text-[11px] text-slate-600">정복 전쟁 종료(로마) / 인구 고령화 및 금리 상승(현대)</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <span class="inline-block px-2 py-0.5 rounded bg-slate-200 text-slate-800 text-xs font-bold mb-2">2단계</span>
+                        <h4 class="font-bold text-xs text-slate-900 mb-1">자산 불평등 & 중산층 몰락</h4>
+                        <p class="text-[11px] text-slate-600">의도적 통화 팽창으로 상위 5% 자산 보유자만 부 축적</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <span class="inline-block px-2 py-0.5 rounded bg-slate-200 text-slate-800 text-xs font-bold mb-2">3단계</span>
+                        <h4 class="font-bold text-xs text-slate-900 mb-1">과도한 국가 부채</h4>
+                        <p class="text-[11px] text-slate-600">세금 납부 주체 소멸로 국가 재정을 채권 발행으로 충당</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <span class="inline-block px-2 py-0.5 rounded bg-amber-200 text-amber-900 text-xs font-bold mb-2">4단계</span>
+                        <h4 class="font-bold text-xs text-slate-900 mb-1">부채 위기 & 통화 팽창</h4>
+                        <p class="text-[11px] text-slate-600">속주/외국이 국채 매수 거부. 중앙은행이 국채 직매입 (양적완화)</p>
+                    </div>
+                    <div class="bg-rose-50 p-3 rounded-lg border border-rose-200">
+                        <span class="inline-block px-2 py-0.5 rounded bg-rose-200 text-rose-900 text-xs font-bold mb-2">5단계</span>
+                        <h4 class="font-bold text-xs text-rose-900 mb-1">K자형 화폐 붕괴</h4>
+                        <p class="text-[11px] text-rose-700">종이화폐 가치 폭락. 귀족(금/실물자산) vs 서민(종이화폐) 격차 극대화</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: BARBELL STRATEGY FRAMEWORK -->
+        <!-- ========================================== -->
+        <section id="content-barbell" class="hidden space-y-6">
+            <div class="bg-white rounded-xl p-6 border border-stone-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+                    <span>⚖️</span> '닻과 돛(Anchor & Sail)' 바벨 전략 프레임워크
+                </h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    스태그플레이션, 금리 발작, AI 독점화라는 삼중 파도 속에서 자산을 지키고 증식하기 위해 박종훈 박사가 제시하는 핵심 포트폴리오 구조입니다. 어정쩡한 중간 자산(장기채, 회사채, 단순 방어주, 신흥국 인적자본)을 전량 배제하고, **방어(닻 40%)**와 **성장(돛 60%)**의 양 극단에 집중합니다.
+                </p>
+            </div>
+
+            <!-- Barbell Structure Visual -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Anchor Card -->
+                <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-6 shadow-sm relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">⚓</span>
+                            <h3 class="text-lg font-bold text-indigo-950">닻 (Anchor)</h3>
+                        </div>
+                        <span class="text-xl font-extrabold text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full">40% Target</span>
+                    </div>
+                    <p class="text-xs text-indigo-900 mb-4 font-medium">
+                        "폭풍을 견디고 시장 폭락 시 바겐세일 펀치 카드를 날릴 실탄을 확보한다"
+                    </p>
+                    <ul class="space-y-2.5 text-xs text-indigo-900">
+                        <li class="bg-white p-3 rounded-lg border border-indigo-100 flex items-start justify-between">
+                            <div>
+                                <span class="font-bold block text-slate-900">미국 초단기 국채 (SGOV, 0~3M)</span>
+                                <span class="text-slate-500 text-[11px]">금리 리스크 0%, 연 4~5% 무위험 달러 수익 및 실탄</span>
+                            </div>
+                            <span class="font-bold text-indigo-600 shrink-0">25%</span>
+                        </li>
+                        <li class="bg-white p-3 rounded-lg border border-indigo-100 flex items-start justify-between">
+                            <div>
+                                <span class="font-bold block text-slate-900">실물 귀금속 (KRX 금현물, SGOL, SLV)</span>
+                                <span class="text-slate-500 text-[11px]">화폐 타락 및 재정위기 헤지, KRX 비과세 혜택</span>
+                            </div>
+                            <span class="font-bold text-indigo-600 shrink-0">15%</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Dead Zone (Exclusion) Card -->
+                <div class="bg-rose-50 border-2 border-rose-200 rounded-xl p-6 shadow-sm relative">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🚫</span>
+                            <h3 class="text-lg font-bold text-rose-950">배제 대상 (Dead Zone)</h3>
+                        </div>
+                        <span class="text-xl font-extrabold text-rose-700 bg-rose-100 px-3 py-1 rounded-full">0% (전량정리)</span>
+                    </div>
+                    <p class="text-xs text-rose-900 mb-4 font-medium">
+                        "금리 반란에 무방비하고, 인플레이션을 이기지 못하며, AI 시대에 도태된다"
+                    </p>
+                    <div class="space-y-2 text-xs text-rose-950">
+                        <div class="bg-white p-2.5 rounded-lg border border-rose-100">
+                            <span class="font-bold text-rose-700">❌ 미국 장기국채 (TLT 등):</span> 금리 발작 시 원금 대량 손실
+                        </div>
+                        <div class="bg-white p-2.5 rounded-lg border border-rose-100">
+                            <span class="font-bold text-rose-700">❌ 투자등급/하이일드 회사채:</span> 사모대출(PIK) 부실 위험
+                        </div>
+                        <div class="bg-white p-2.5 rounded-lg border border-rose-100">
+                            <span class="font-bold text-rose-700">❌ 어정쩡한 중간 배당주 (SCHD 과다):</span> 물가 상승 대비 실질가치 하락
+                        </div>
+                        <div class="bg-white p-2.5 rounded-lg border border-rose-100">
+                            <span class="font-bold text-rose-700">❌ 인적자본 신흥국 (인도 Nifty50):</span> AI/로봇 노동 대치 수혜 불능
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sail Card -->
+                <div class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6 shadow-sm relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">⛵</span>
+                            <h3 class="text-lg font-bold text-emerald-950">돛 (Sail)</h3>
+                        </div>
+                        <span class="text-xl font-extrabold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">60% Target</span>
+                    </div>
+                    <p class="text-xs text-emerald-900 mb-4 font-medium">
+                        "순풍을 타고 시대를 주도하는 AI 스마일 커브의 양 극단을 독점한다"
+                    </p>
+                    <ul class="space-y-2.5 text-xs text-emerald-900">
+                        <li class="bg-white p-3 rounded-lg border border-emerald-100 flex items-start justify-between">
+                            <div>
+                                <span class="font-bold block text-slate-900">AI 독점 플랫폼 빅테크 (MAGS, Top10)</span>
+                                <span class="text-slate-500 text-[11px]">스마일 커브 우측 극단, 자본/데이터 해자 독점</span>
+                            </div>
+                            <span class="font-bold text-emerald-600 shrink-0">45%</span>
+                        </li>
+                        <li class="bg-white p-3 rounded-lg border border-emerald-100 flex items-start justify-between">
+                            <div>
+                                <span class="font-bold block text-slate-900">AI 물리 인프라 / 원자재 (PAVE, 전력망)</span>
+                                <span class="text-slate-500 text-[11px]">스마일 커브 좌측 극단, 전력/원자력/구리 결핍 수혜</span>
+                            </div>
+                            <span class="font-bold text-emerald-600 shrink-0">15%</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: CURRENT PORTFOLIO DIAGNOSIS -->
+        <!-- ========================================== -->
+        <section id="content-diagnosis" class="hidden space-y-6">
+            <!-- Executive Diagnosis Summary -->
+            <div class="bg-white rounded-xl p-6 border border-stone-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span>🔍</span> 현재 포트폴리오 자산 종합 진단 (총 평가금액: 223,638,585원)
+                    </h2>
+                    <button onclick="requestAiFullDiagnosis()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5 shrink-0">
+                        <span>✨</span> Gemini AI 정밀 처방전 발급
+                    </button>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    의뢰인의 현재 자산 포트폴리오는 5개 계좌(AIM, 연금저축, ISA, IRP, 삼성위탁)에 44개 항목으로 분산되어 있습니다. 진단 결과, 강의에서 가장 강력하게 경고한 **'장기채·회사채·인도·SCHD 과다' 등 위험 자산이 약 35.2%(7,879만 원)**에 달하여 패러다임 전환 시 손실 위험에 노출되어 있습니다.
+                </p>
+                <div id="aiDiagnosisBox" class="hidden mt-4 p-4 bg-indigo-50/70 border border-indigo-200 rounded-xl prose-ai"></div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Chart 1: Current Asset Class Allocation -->
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center justify-between">
+                        <span>📊 현재 자산군 비중 분포 (강의 기준)</span>
+                        <span class="text-xs text-rose-600 font-semibold">배제 자산 35.2% ⚠️</span>
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="chartAssetCurrent"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Account Breakdown -->
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3">
+                        🏢 계좌별 자산 평가금액 현황
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="chartAccounts"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 Critical Mismatches List -->
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span>⚠️</span> 포트폴리오 5대 핵심 미스매치 (Mismatch) 진단
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                    <div class="p-4 rounded-lg bg-rose-50 border border-rose-200">
+                        <div class="font-bold text-rose-900 mb-1">1. 장기채·회사채 편입 (AIM)</div>
+                        <div class="text-rose-700 font-semibold mb-2">1,715만 원 (7.67%)</div>
+                        <p class="text-slate-600">TLT, USIG, VWOB 보유. 금리 발작 시 원금 손실 위험이 가장 높은 자산군으로 즉시 정리 필요.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-rose-50 border border-rose-200">
+                        <div class="font-bold text-rose-900 mb-1">2. 인도 Nifty50 및 VWO 편입</div>
+                        <div class="text-rose-700 font-semibold mb-2">1,332만 원 (5.96%)</div>
+                        <p class="text-slate-600">단순 인구 대국 투자는 AI/로봇 시대 노동 대체 리스크 존재. 강의 철학상 배제 대상.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-rose-50 border border-rose-200">
+                        <div class="font-bold text-rose-900 mb-1">3. 어정쩡한 중간 배당주(SCHD) 과다</div>
+                        <div class="text-rose-700 font-semibold mb-2">4,774만 원 (21.35%)</div>
+                        <p class="text-slate-600">SCHD/미국배당다우존스가 전체의 20% 초과. 고물가 시 실질 가치 하락 및 기회비용 발생.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-amber-50 border border-amber-200">
+                        <div class="font-bold text-amber-900 mb-1">4. AIM 계좌의 국가 기계적 분산</div>
+                        <div class="text-amber-700 font-semibold mb-2">2,396만 원 (10.71%)</div>
+                        <p class="text-slate-600">독일, 호주, 영국, 홍콩 등 저성장 국가 기계적 분산. 미국 빅테크 및 인프라로 집중 필요.</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-amber-50 border border-amber-200">
+                        <div class="font-bold text-amber-900 mb-1">5. 닻(Anchor) 초단기채 실탄 부족</div>
+                        <div class="text-amber-700 font-semibold mb-2">현재 10.92% (목표: 25%)</div>
+                        <p class="text-slate-600">폭락장 매수 및 이자 수익 확보를 위한 초단기채(SGOV 등) 실탄 비중 14%p 이상 확대 시급.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Holdings Interactive Search & Filter Table -->
+            <div class="bg-white rounded-xl p-6 border border-stone-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <h3 class="text-base font-bold text-slate-900">
+                        📋 세부 보유 종목 검색 및 자산 분류 (44개 항목)
+                    </h3>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <select id="filterAccount" onchange="filterHoldings()" class="text-xs border border-slate-300 rounded-md px-2.5 py-1.5 bg-white">
+                            <option value="ALL">전체 계좌 보기</option>
+                            <option value="한투AIM">한투AIM</option>
+                            <option value="한투연저">한투연저</option>
+                            <option value="한투ISA">한투ISA</option>
+                            <option value="한투IRP">한투IRP</option>
+                            <option value="삼성위탁">삼성위탁</option>
+                        </select>
+                        <select id="filterClass" onchange="filterHoldings()" class="text-xs border border-slate-300 rounded-md px-2.5 py-1.5 bg-white">
+                            <option value="ALL">전체 자산 분류 보기</option>
+                            <option value="닻 (Anchor)">닻 (Anchor)</option>
+                            <option value="돛 (Sail)">돛 (Sail)</option>
+                            <option value="배제 (Dead Zone)">배제 (Dead Zone)</option>
+                        </select>
+                        <input type="text" id="searchHoldings" onkeyup="filterHoldings()" placeholder="종목명 검색..." class="text-xs border border-slate-300 rounded-md px-2.5 py-1.5 w-36 sm:w-48">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-100 text-slate-900 font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-2.5">계좌</th>
+                                <th class="p-2.5">종목/자산명</th>
+                                <th class="p-2.5">전략 분류</th>
+                                <th class="p-2.5">세부 자산군</th>
+                                <th class="p-2.5 text-right">평가금액(원)</th>
+                                <th class="p-2.5 text-right">비중(%)</th>
+                                <th class="p-2.5 text-center">리밸런싱 액션</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holdingsTableBody" class="divide-y divide-slate-100">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: PART 5 AI ENTERPRISE EVALUATION (UPGRADED WITH GEMINI) -->
+        <!-- ========================================== -->
+        <section id="content-ai-matrix" class="hidden space-y-6">
+            <div class="bg-white rounded-xl p-6 border border-stone-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span>🤖</span> Part 5 강의 기반 AI 기업 감별 채점표 (100점 만점)
+                    </h2>
+                    <span class="px-2.5 py-1 rounded bg-violet-100 text-violet-800 text-xs font-bold">
+                        ✨ 실시간 AI 기업 분석 엔진 탑재
+                    </span>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    박종훈 박사의 AI 스마일 커브 이론에 따라, 단순히 AI 테마주에 투자가 아닌 **5대 절대적 해자(데이터/락인, CapEx/FCF, 수익화/마진, 칩 공급망, 추격 방어력)**를 충족하는 선도 기업을 엄선해야 합니다. 의뢰인이 보유한 **MAGS 및 테크TOP10** 핵심 8개 기업을 채점한 결과입니다.
+                </p>
+            </div>
+
+            <!-- 5 Evaluation Criteria Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
+                <div class="bg-white p-3 rounded-lg border border-indigo-200 shadow-sm">
+                    <span class="font-bold text-indigo-700 block mb-1">① 데이터 & 락인 (20점)</span>
+                    <p class="text-slate-600 text-[11px]">웹 크롤링 불가능한 독자적 데이터 및 이탈 방지 락인 장치 유무</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg border border-indigo-200 shadow-sm">
+                    <span class="font-bold text-indigo-700 block mb-1">② CapEx & FCF (20점)</span>
+                    <p class="text-slate-600 text-[11px]">외부 부채 없이 자체 잉여현금흐름으로 수백억 달러 AI 투자 지속력</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg border border-indigo-200 shadow-sm">
+                    <span class="font-bold text-indigo-700 block mb-1">③ 실질 수익화 (20점)</span>
+                    <p class="text-slate-600 text-[11px]">구독료 인상, 광고/클라우드 매출 증가로 이익 마진 확충 능력</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg border border-indigo-200 shadow-sm">
+                    <span class="font-bold text-indigo-700 block mb-1">④ 컴퓨팅/칩 장악 (20점)</span>
+                    <p class="text-slate-600 text-[11px]">GPU/ASIC 공급망 우선권 및 자체 커스텀 칩 개발 역량</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg border border-indigo-200 shadow-sm">
+                    <span class="font-bold text-indigo-700 block mb-1">⑤ 추격 방어력 (20점)</span>
+                    <p class="text-slate-600 text-[11px]">오픈소스 및 후발주자 추격 시 비즈니스 무력화 방어력</p>
+                </div>
+            </div>
+
+            <!-- Chart & Detail Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- AI Score Chart -->
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3">
+                        🏆 보유 빅테크 8개사 종합 점수
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="chartAiScores"></canvas>
+                    </div>
+                </div>
+
+                <!-- Company Scorecards -->
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm lg:col-span-2 space-y-3">
+                    <h3 class="text-sm font-bold text-slate-900 mb-2">
+                        ⭐ 기업별 정밀 채점 사유 및 등급
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-900">엔비디아 (NVDA)</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold">95점 (S등급)</span>
+                            </div>
+                            <p class="text-slate-600">CUDA 생태계 해자, 영업이익률 60% 상회. 무차입 FCF로 차세대 칩 개발 완벽 독점.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-900">마이크로소프트 (MSFT)</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold">93점 (S등급)</span>
+                            </div>
+                            <p class="text-slate-600">B2B 엔터프라이즈 락인. M365 Copilot 월 $30 구독료로 생성형 AI 즉각 수익화 성공.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-900">아마존 (AMZN)</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold">92점 (S등급)</span>
+                            </div>
+                            <p class="text-slate-600">AWS 클라우드 독점력과 자체 AI 칩(Trainium/Inferentia) 개발 투트랙 결합 우수.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-900">메타 (META)</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold">90점 (S등급)</span>
+                            </div>
+                            <p class="text-slate-600">32억 명 사용자 데이터, Llama 무료 공개로 경쟁사 해자 무력화, 광고 마진 극대화.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-900">브로드컴 (AVGO)</span>
+                                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-extrabold">88점 (A등급)</span>
+                            </div>
+                            <p class="text-slate-600">빅테크 자체 ASIC 커스텀 칩 설계 독점 및 AI 스위치/네트워킹 파이프라인 장악.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-900">알파벳/구글 (GOOGL)</span>
+                                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-extrabold">86점 (A등급)</span>
+                            </div>
+                            <p class="text-slate-600">TPU 칩 기술 최강이나 생성형 AI 보편화 시 기존 검색 광고 모델 잠식 딜레마 존재.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-900">애플 (AAPL)</span>
+                                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-extrabold">84점 (A등급)</span>
+                            </div>
+                            <p class="text-slate-600">22억 대 디바이스 락인 우수하나, 클라우드 LLM 인프라 후발주자로 외주 의존도 존재.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-900">테슬라 (TSLA)</span>
+                                <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-extrabold">78점 (B등급)</span>
+                            </div>
+                            <p class="text-slate-600">실세계 자율주행 데이터 잠재력 최상이나, 전기차 본업 마진 압박으로 FCF 감점.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Gemini Powered Stock Scorer -->
+            <div class="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 rounded-xl p-6 text-white shadow-lg border border-indigo-700">
+                <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                    <h3 class="text-base font-bold flex items-center gap-2 text-white">
+                        <span>✨</span> Gemini LLM 실시간 AI 기업 자동 정밀 채점기 (웹 검색 그라운딩)
+                    </h3>
+                    <span class="text-xs bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 px-2.5 py-0.5 rounded-full">
+                        Powered by gemini-3-flash-preview
+                    </span>
+                </div>
+                <p class="text-xs text-indigo-200 mb-4">
+                    관심 있는 주식의 티커나 기업명(예: <button onclick="setAiEvalInput('PLTR')" class="underline hover:text-white font-bold">PLTR</button>, <button onclick="setAiEvalInput('TSMC (TSM)')" class="underline hover:text-white font-bold">TSM</button>, <button onclick="setAiEvalInput('ORCL')" class="underline hover:text-white font-bold">ORCL</button>, <button onclick="setAiEvalInput('ARM')" class="underline hover:text-white font-bold">ARM</button>, <button onclick="setAiEvalInput('CEG (콘스텔레이션에너지)')" class="underline hover:text-white font-bold">CEG</button>)을 입력하면, Gemini가 실시간 웹 검색과 강의 5대 해자 기준으로 자동 정밀 채점합니다.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-2.5 mb-4">
+                    <input type="text" id="aiEvalQuery" placeholder="예: Palantir (PLTR), TSMC, Oracle 등" class="bg-slate-800/90 border border-indigo-500/50 text-white placeholder-slate-400 rounded-lg px-3.5 py-2 text-xs flex-1 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <button onclick="runGeminiAiEnterpriseEvaluation()" id="btnAiEval" class="bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs px-5 py-2 rounded-lg transition shadow flex items-center justify-center gap-1.5 shrink-0">
+                        <span>🔍</span> 실시간 AI 정밀 채점 시작
+                    </button>
+                </div>
+
+                <!-- Live Evaluation Result Box -->
+                <div id="aiEvalResultContainer" class="hidden bg-slate-800/80 border border-indigo-500/30 rounded-xl p-4 text-xs">
+                    <div id="aiEvalLoading" class="flex items-center gap-3 py-6 justify-center text-indigo-300">
+                        <div class="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                        <span>Gemini AI가 웹 데이터를 검색하고 5대 해자를 정밀 채점 중입니다...</span>
+                    </div>
+                    <div id="aiEvalContent" class="hidden space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700 pb-3 gap-2">
+                            <div>
+                                <h4 id="aiEvalCompanyName" class="text-sm sm:text-base font-bold text-white"></h4>
+                                <span id="aiEvalSmilePosition" class="text-[11px] text-indigo-300"></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="aiEvalGradeBadge" class="px-3 py-1 rounded-full text-xs font-extrabold"></span>
+                                <span id="aiEvalTotalScore" class="text-lg font-black text-emerald-400"></span>
+                            </div>
+                        </div>
+
+                        <!-- 5 Breakdown Scores -->
+                        <div id="aiEvalScoresGrid" class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-center"></div>
+
+                        <!-- Analysis Text -->
+                        <div id="aiEvalRationale" class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-700 text-slate-200 leading-relaxed"></div>
+
+                        <!-- Barbell Strategy Recommendation -->
+                        <div id="aiEvalBarbellVerdict" class="bg-indigo-950/60 p-3 rounded-lg border border-indigo-600/40 text-indigo-200"></div>
+
+                        <!-- Grounding Sources -->
+                        <div id="aiEvalSources" class="text-[10px] text-slate-400 flex flex-wrap gap-2 pt-1 border-t border-slate-700/60"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manual Custom AI Scoring Calculator -->
+            <div class="bg-indigo-50 rounded-xl p-6 border border-indigo-200 shadow-sm">
+                <h3 class="text-base font-bold text-indigo-950 mb-2 flex items-center gap-2">
+                    <span>🧮</span> 수동 AI 기업 직접 채점기 시뮬레이터
+                </h3>
+                <p class="text-xs text-indigo-800 mb-4">가늠하고자 하는 기업의 5대 항목별 점수(0~20점)를 입력하면 등급과 비중 권장안이 계산됩니다.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs mb-4">
+                    <div>
+                        <label class="block text-slate-700 font-semibold mb-1">① 데이터해자</label>
+                        <input type="number" id="sc1" min="0" max="20" value="18" class="w-full border rounded p-1.5 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-semibold mb-1">② CapEx/FCF</label>
+                        <input type="number" id="sc2" min="0" max="20" value="17" class="w-full border rounded p-1.5 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-semibold mb-1">③ 실질수익화</label>
+                        <input type="number" id="sc3" min="0" max="20" value="16" class="w-full border rounded p-1.5 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-semibold mb-1">④ 칩/컴퓨팅</label>
+                        <input type="number" id="sc4" min="0" max="20" value="18" class="w-full border rounded p-1.5 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-semibold mb-1">⑤ 추격방어력</label>
+                        <input type="number" id="sc5" min="0" max="20" value="16" class="w-full border rounded p-1.5 text-center">
+                    </div>
+                </div>
+                <div class="flex items-center justify-between bg-white p-4 rounded-lg border border-indigo-100">
+                    <button onclick="calculateCustomScore()" class="bg-indigo-600 text-white font-bold text-xs px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+                        채점 결과 계산하기
+                    </button>
+                    <div id="calcResult" class="text-xs text-slate-800 font-bold">
+                        합계: <span class="text-indigo-600 text-sm">85점</span> (A등급: 주력 편입 적합)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: REBALANCING SIMULATOR & ACTION PLAN -->
+        <!-- ========================================== -->
+        <section id="content-rebalance" class="hidden space-y-6">
+            <div class="bg-white rounded-xl p-6 border border-stone-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span>🎯</span> 리밸런싱 목표 모델 & 계좌별 실전 실행계획
+                    </h2>
+                    <button onclick="requestAiRebalancingRoadmap()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5 shrink-0">
+                        <span>✨</span> 계좌별 절세 최적화 AI 매매 가이드 생성
+                    </button>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    목표 포트폴리오 모델은 **'닻 40% : 돛 60%'**의 완벽한 2층 바벨 구조를 달성합니다. 계좌별 절세 혜택과 특성을 고려한 교체매매 매뉴얼 및 자산 규모별 실시간 시뮬레이터를 제공합니다.
+                </p>
+                <div id="aiRebalanceGuideBox" class="hidden mt-4 p-4 bg-emerald-50/80 border border-emerald-200 rounded-xl prose-ai"></div>
+            </div>
+
+            <!-- Comparison Chart Row -->
+            <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
+                <h3 class="text-sm font-bold text-slate-900 mb-3">
+                    📈 Before vs After 자산군 비중 목표 비교
+                </h3>
+                <div class="chart-container">
+                    <canvas id="chartBeforeAfter"></canvas>
+                </div>
+            </div>
+
+            <!-- Account Action Manuals Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                <!-- AIM -->
+                <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+                    <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-bold">1. 한투AIM (9,249만 원)</span>
+                    <h4 class="font-bold text-slate-900 mt-2 mb-1">일임 해지 후 직접 운용 전환</h4>
+                    <p class="text-slate-600 mb-2">TLT, USIG, VWOB, 유럽/일본/홍콩 분산 ETF 전량 매도.</p>
+                    <div class="bg-indigo-50 p-2 rounded text-indigo-900 font-medium">
+                        👉 매도금 재배치: SGOV(40%) + MAGS/테크Top10(40%) + PAVE(20%)
+                    </div>
+                </div>
+
+                <!-- 연금저축 -->
+                <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+                    <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">2. 한투연금저축 (3,980만 원)</span>
+                    <h4 class="font-bold text-slate-900 mt-2 mb-1">인도/SCHD 정리 & 금/테크 확대</h4>
+                    <p class="text-slate-600 mb-2">KODEX 인도Nifty50 전량 매도, 미국배당다우존스 50%+ 축소.</p>
+                    <div class="bg-emerald-50 p-2 rounded text-emerald-900 font-medium">
+                        👉 매수: ACE KRX금현물(15%) + TIGER초단기채(25%) + 테크TOP10(55%)
+                    </div>
+                </div>
+
+                <!-- ISA -->
+                <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">3. 한투ISA (3,641만 원)</span>
+                    <h4 class="font-bold text-slate-900 mt-2 mb-1">고배당/인도 정리 & 실탄/빅테크 집중</h4>
+                    <p class="text-slate-600 mb-2">PLUS고배당주, 인도Nifty50 전량 매도, SCHD 축소.</p>
+                    <div class="bg-emerald-50 p-2 rounded text-emerald-900 font-medium">
+                        👉 매수: TIGER 미국초단기국채(30%) + TIGER 테크TOP10(50%) + 유틸리티(20%)
+                    </div>
+                </div>
+
+                <!-- IRP -->
+                <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">4. 한투IRP (441만 원)</span>
+                    <h4 class="font-bold text-slate-900 mt-2 mb-1">안전자산 30% 규제 완벽 대응</h4>
+                    <p class="text-slate-600 mb-2">IRP 규정 충족용 맞춤 배분 적용.</p>
+                    <div class="bg-blue-50 p-2 rounded text-blue-900 font-medium">
+                        👉 안전자산(30%): TIGER초단기채(15%) + ACE KRX금현물(15%)<br>👉 위험자산(70%): TIGER 미국테크TOP10(70%)
+                    </div>
+                </div>
+
+                <!-- 삼성위탁 -->
+                <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm lg:col-span-2">
+                    <span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold">5. 삼성위탁 직투계좌 (5,052만 원)</span>
+                    <h4 class="font-bold text-slate-900 mt-2 mb-1">SCHD/소비재 매도 & 닻/돛 직투 조합</h4>
+                    <p class="text-slate-600 mb-2">SCHD, XLP(필수소비재) 전량 매도.</p>
+                    <div class="bg-purple-50 p-2.5 rounded text-purple-900 font-medium">
+                        👉 닻(40%): SGOV(30%) + SGOL/SLV(10%)<br>
+                        👉 돛(60%): MAGS(40%) + PAVE/XAR 인프라·방산(20%)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Capital Rebalancing Simulator -->
+            <div class="bg-slate-900 text-white rounded-xl p-6 shadow-md">
+                <h3 class="text-base font-bold mb-2 flex items-center gap-2">
+                    <span>⚙️</span> 실시간 리밸런싱 자금 배분 시뮬레이터
+                </h3>
+                <p class="text-xs text-slate-300 mb-4">투자 총 자산을 입력하시면, 박종훈 박사의 바벨 전략(닻 40%:돛 60%) 목표치에 맞춘 정확한 매수 금액이 산출됩니다.</p>
+                <div class="flex flex-col sm:flex-row items-center gap-3 mb-4">
+                    <label class="text-xs font-semibold text-slate-300">총 투자금액(원):</label>
+                    <input type="number" id="simCapital" value="223638585" onchange="runRebalanceSim()" class="bg-slate-800 border border-slate-700 text-emerald-400 font-bold px-3 py-1.5 rounded-md text-sm w-full sm:w-64">
+                    <button onclick="runRebalanceSim()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-md transition">
+                        목표 금액 계산
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-slate-400 block mb-1">⚓ 초단기채 (SGOV 등) [25%]</span>
+                        <div id="simSgov" class="text-base font-extrabold text-indigo-400">55,909,646원</div>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-slate-400 block mb-1">⚓ 실물 금/은 [15%]</span>
+                        <div id="simGold" class="text-base font-extrabold text-amber-400">33,545,788원</div>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-slate-400 block mb-1">⛵ AI 독점 빅테크 [45%]</span>
+                        <div id="simTech" class="text-base font-extrabold text-emerald-400">100,637,363원</div>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-slate-400 block mb-1">⛵ 물리 인프라/에너지 [15%]</span>
+                        <div id="simInfra" class="text-base font-extrabold text-teal-400">33,545,788원</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Macro Monitoring Trigger Checklist -->
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h3 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <span>🚨</span> 포트폴리오 운용 시 점검해야 할 4대 거시경제 트리거
+                </h3>
+                <ul class="space-y-2 text-xs text-slate-700">
+                    <li class="p-2.5 rounded bg-slate-50 border border-slate-100 flex items-start gap-2">
+                        <span class="font-bold text-indigo-600">1. 미국 10년물 국채금리 4.5%~5.0% 도달 시:</span>
+                        <span>자산 가격에 강력한 중력이 작용하므로 무리한 주식 확장 금지, SGOV(초단기채) 이자를 수취하며 관망.</span>
+                    </li>
+                    <li class="p-2.5 rounded bg-slate-50 border border-slate-100 flex items-start gap-2">
+                        <span class="font-bold text-amber-600">2. 환율 급락(원화 강세) 시:</span>
+                        <span>원/달러 환율이 일시 조정받을 때마다 원화 자산을 달러로 환전하여 SGOV 및 미국 1등주로 전환.</span>
+                    </li>
+                    <li class="p-2.5 rounded bg-slate-50 border border-slate-100 flex items-start gap-2">
+                        <span class="font-bold text-rose-600">3. AI 거품 논란 및 폭락장 발생 시:</span>
+                        <span>확보해 둔 닻(SGOV 실탄)을 가동하여 채점표 90점 이상 S등급(NVDA, MSFT 등) 집중 바겐세일 매수.</span>
+                    </li>
+                    <li class="p-2.5 rounded bg-slate-50 border border-slate-100 flex items-start gap-2">
+                        <span class="font-bold text-emerald-600">4. 금 가격 일시 조정 시:</span>
+                        <span>지정학 노이즈나 유동성 충격으로 금값이 하락하면 KRX 금현물 비중을 15%까지 적극 분할 매수.</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 6: GEMINI AI ADVISOR & SCENARIO ENGINE -->
+        <!-- ========================================== -->
+        <section id="content-ai-advisor" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-violet-900 rounded-2xl p-6 text-white shadow-lg border border-indigo-500/30">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 flex items-center gap-1">
+                                <span class="ai-pulse inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                Live Gemini LLM Engine
+                            </span>
+                            <span class="text-xs text-indigo-200">gemini-3-flash-preview & gemini-2.5-flash-preview-tts</span>
+                        </div>
+                        <h2 class="text-xl md:text-2xl font-black">
+                            박종훈의 경제로드맵 AI 수석 자문실
+                        </h2>
+                        <p class="text-xs sm:text-sm text-indigo-200 mt-1 max-w-2xl leading-relaxed">
+                            강의 전편(Part 1~5)의 거시경제 패러다임과 닻과 돛 바벨 전략을 완벽히 학습한 Gemini AI가 의뢰인의 실전 자산 포트폴리오를 실시간으로 자문하고 위기 시나리오를 시뮬레이션합니다.
+                        </p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 shrink-0">
+                        <button onclick="requestAiAudioBriefing()" id="btnAudioBriefing" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center justify-center gap-2">
+                            <span>🎙️</span> AI 종합 브리핑 음성 듣기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Audio Player Status Card -->
+                <div id="ttsPlayerBox" class="hidden mt-4 bg-slate-900/90 border border-amber-400/40 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg">🔊</span>
+                        <div>
+                            <div class="font-bold text-amber-300">Gemini 2.5 Flash TTS 오디오 브리핑</div>
+                            <div id="ttsStatusText" class="text-[11px] text-slate-300">음성 생성 완료. 재생 중...</div>
+                        </div>
+                    </div>
+                    <audio id="geminiAudioPlayer" controls class="h-8 max-w-xs"></audio>
+                </div>
+            </div>
+
+            <!-- Macro Event Simulation Engine -->
+            <div class="bg-white rounded-xl p-6 border border-stone-200 shadow-sm">
+                <h3 class="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
+                    <span>⚡</span> 거시경제 긴급 상황별 포트폴리오 영향 & AI 대응 지침 시뮬레이터
+                </h3>
+                <p class="text-xs text-slate-600 mb-4">
+                    예상치 못한 매크로 충격 발생 시, 박종훈 박사의 강의 원칙에 따른 즉각적인 행동 지침(Action Plan)을 AI가 시뮬레이션합니다.
+                </p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
+                    <button onclick="runScenarioSim('국채금리 5% 돌파')" class="p-3 text-left rounded-lg border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 transition text-xs">
+                        <span class="font-bold text-slate-900 block mb-1">🚨 금리 충격</span>
+                        <span class="text-[11px] text-slate-500">미 10년물 국채금리 5.0% 급등</span>
+                    </button>
+                    <button onclick="runScenarioSim('환율 1300원 급락')" class="p-3 text-left rounded-lg border border-slate-200 hover:border-amber-400 hover:bg-amber-50/50 transition text-xs">
+                        <span class="font-bold text-slate-900 block mb-1">💵 환율 급변</span>
+                        <span class="text-[11px] text-slate-500">외환 개입으로 환율 1,300원 하락</span>
+                    </button>
+                    <button onclick="runScenarioSim('빅테크 AI CAPEX 거품 논란')" class="p-3 text-left rounded-lg border border-slate-200 hover:border-rose-400 hover:bg-rose-50/50 transition text-xs">
+                        <span class="font-bold text-slate-900 block mb-1">📉 AI 거품 충격</span>
+                        <span class="text-[11px] text-slate-500">나스닥 빅테크 -20% 급락 장세</span>
+                    </button>
+                    <button onclick="runScenarioSim('스태그플레이션 고물가 재점화')" class="p-3 text-left rounded-lg border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 transition text-xs">
+                        <span class="font-bold text-slate-900 block mb-1">🔥 인플레 재발</span>
+                        <span class="text-[11px] text-slate-500">유가 급등 및 CPI 4.5% 재반등</span>
+                    </button>
+                </div>
+
+                <!-- Scenario Result Container -->
+                <div id="scenarioResultBox" class="hidden p-4 bg-slate-50 border border-slate-200 rounded-xl prose-ai"></div>
+            </div>
+
+            <!-- Free-form AI Chat Consultation -->
+            <div class="bg-white rounded-xl p-6 border border-stone-200 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <span>💬</span> 실시간 포트폴리오 & 매크로 AI 맞춤 질의응답
+                    </h3>
+                    <span class="text-xs text-slate-400">질문 예시를 클릭하거나 직접 입력하세요</span>
+                </div>
+
+                <!-- Sample Prompts -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button onclick="setAiQuery('한투AIM 계좌를 당장 일임 해지하고 직접 운용하는 것이 유리한 이유를 강의 내용에 근거해 설명해줘.')" class="text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 px-3 py-1.5 rounded-full border border-slate-200 transition">
+                        💡 AIM 일임 해지 필요성
+                    </button>
+                    <button onclick="setAiQuery('SCHD를 50% 이상 줄여야 하는 이유와 대신 어떤 자산군으로 교체해야 하는지 구체적으로 알려줘.')" class="text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 px-3 py-1.5 rounded-full border border-slate-200 transition">
+                        💡 SCHD 축소 및 교체 대상
+                    </button>
+                    <button onclick="setAiQuery('연금저축과 ISA 계좌에서 각각 비과세 혜택을 극대화하면서 바벨 전략을 세팅하는 종목 배분법은?')" class="text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 px-3 py-1.5 rounded-full border border-slate-200 transition">
+                        💡 연금저축/ISA 절세 바벨 세팅
+                    </button>
+                    <button onclick="setAiQuery('금과 은의 투자 비중은 어떻게 다르게 가져가야 하며, KRX 금현물이 미국 ETF보다 유리한 이유는?')" class="text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 px-3 py-1.5 rounded-full border border-slate-200 transition">
+                        💡 KRX 금현물 vs 은 투자법
+                    </button>
+                </div>
+
+                <!-- Chat Input and Response Area -->
+                <div class="space-y-4">
+                    <div class="flex gap-2">
+                        <textarea id="aiUserQuery" rows="2" placeholder="박종훈 경제로드맵 관점에서 궁금한 투자 질문을 입력하세요..." class="w-full text-xs p-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <button onclick="submitAiAdvisorChat()" id="btnSubmitAiChat" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 rounded-xl transition shadow flex flex-col items-center justify-center shrink-0">
+                            <span>전송</span>
+                            <span class="text-[10px] text-indigo-200">Gemini</span>
+                        </button>
+                    </div>
+
+                    <!-- AI Response Display Box -->
+                    <div id="aiChatResponseBox" class="hidden p-5 bg-indigo-50/60 border border-indigo-200 rounded-xl prose-ai">
+                        <div id="aiChatLoading" class="flex items-center gap-2 text-indigo-700 text-xs py-2">
+                            <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                            <span>박종훈 박사의 강의 원칙을 바탕으로 답변을 작성하고 있습니다...</span>
+                        </div>
+                        <div id="aiChatText" class="text-xs text-slate-800 leading-relaxed"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC & GEMINI API INTEGRATIONS -->
+    <!-- ========================================== -->
+    <script>
+        // Global Gemini API Key (Empty by default; runtime provided)
+        const apiKey = "";
+
+        // Global Portfolio Database (with verified KRW evaluated amounts)
+        const portfolioData = [
+            // Anchor
+            { account: '삼성위탁', name: 'SGOV (미국 초단기국채)', class: '닻 (Anchor)', type: '초단기채', amount: 15420000, ratio: 6.89, action: '유지/확대' },
+            { account: '한투연저', name: 'TIGER 미국초단기국채', class: '닻 (Anchor)', type: '초단기채', amount: 5200000, ratio: 2.33, action: '확대 (실탄)' },
+            { account: '삼성위탁', name: 'SGOL (실물 금 ETF)', class: '닻 (Anchor)', type: '금/은', amount: 4850000, ratio: 2.17, action: '유지/확대' },
+            { account: '한투연저', name: 'ACE KRX 금현물', class: '닻 (Anchor)', type: '금/은', amount: 4230000, ratio: 1.89, action: '확대 (15% 목표)' },
+            { account: '삼성위탁', name: 'SLV (실물 은 ETF)', class: '닻 (Anchor)', type: '금/은', amount: 3302267, ratio: 1.48, action: '유지 (보조 닻)' },
+            { account: '한투AIM', name: 'EWA/EWG/EWH/EWJ/EWU (선진국)', class: '닻 (Anchor)', type: '글로벌분산', amount: 23959614, ratio: 10.71, action: '해지 후 재배치' },
+            
+            // Sail
+            { account: '삼성위탁', name: 'MAGS (Magnificent 7 ETF)', class: '돛 (Sail)', type: 'AI 빅테크', amount: 22150000, ratio: 9.90, action: '유지/주력' },
+            { account: '한투ISA', name: 'TIGER 미국테크TOP10', class: '돛 (Sail)', type: 'AI 빅테크', amount: 18200000, ratio: 8.14, action: '유지/주력' },
+            { account: '한투연저', name: 'TIGER 미국테크TOP10 INDXX', class: '돛 (Sail)', type: 'AI 빅테크', amount: 16500000, ratio: 7.38, action: '확대 (주력 돛)' },
+            { account: '한투AIM', name: 'SPYG (미국 대형 성장주)', class: '돛 (Sail)', type: 'AI 빅테크', amount: 14800000, ratio: 6.62, action: '직투계좌로 이동' },
+            { account: '삼성위탁', name: 'PAVE (미국 인프라 ETF)', class: '돛 (Sail)', type: '물리 인프라', amount: 5800000, ratio: 2.59, action: '확대 (스마일 좌측)' },
+            { account: '한투ISA', name: 'KODEX 미국S&P500유틸리티', class: '돛 (Sail)', type: '물리 인프라', amount: 4483965, ratio: 2.01, action: '유지' },
+            { account: '한투AIM', name: 'SPYM (미국 코어 성장)', class: '돛 (Sail)', type: '미국 코어', amount: 6786210, ratio: 3.03, action: '빅테크/인프라 통합' },
+            
+            // Dead Zone
+            { account: '한투AIM', name: 'TLT (미국 20년+ 장기국채)', class: '배제 (Dead Zone)', type: '장기채/회사채', amount: 8200000, ratio: 3.67, action: '전량 매도 🔴' },
+            { account: '한투AIM', name: 'USIG (투자등급 회사채)', class: '배제 (Dead Zone)', type: '장기채/회사채', amount: 5400000, ratio: 2.41, action: '전량 매도 🔴' },
+            { account: '한투AIM', name: 'VWOB (신흥국 채권)', class: '배제 (Dead Zone)', type: '장기채/회사채', amount: 3547433, ratio: 1.59, action: '전량 매도 🔴' },
+            { account: '한투연저', name: 'TIGER 미국배당다우존스(SCHD)', class: '배제 (Dead Zone)', type: '중간 배당주', amount: 18500000, ratio: 8.27, action: '50%+ 축소 🔴' },
+            { account: '한투ISA', name: 'TIGER 미국배당다우존스(SCHD)', class: '배제 (Dead Zone)', type: '중간 배당주', amount: 12400000, ratio: 5.54, action: '대폭 축소 🔴' },
+            { account: '삼성위탁', name: 'SCHD (미국 배당다우존스)', class: '배제 (Dead Zone)', type: '중간 배당주', amount: 11200000, ratio: 5.01, action: '전량 매도 🔴' },
+            { account: '한투ISA', name: 'PLUS 고배당주', class: '배제 (Dead Zone)', type: '중간 배당주', amount: 5636835, ratio: 2.52, action: '전량 매도 🔴' },
+            { account: '한투연저', name: 'KODEX 인도 Nifty50', class: '배제 (Dead Zone)', type: '신흥국 인적자본', amount: 3800000, ratio: 1.70, action: '전량 매도 🔴' },
+            { account: '한투ISA', name: 'KODEX 인도 Nifty50', class: '배제 (Dead Zone)', type: '신흥국 인적자본', amount: 2800000, ratio: 1.25, action: '전량 매도 🔴' },
+            { account: '한투AIM', name: 'VWO (신흥국 주식)', class: '배제 (Dead Zone)', type: '신흥국 인적자본', amount: 6721942, ratio: 3.01, action: '전량 매도 🔴' }
+        ];
+
+        // System Instruction Persona for Economic Roadmap Advisor
+        const SYSTEM_PROMPT_ROADMAP = `당신은 '박종훈의 경제로드맵' 강의의 수석 거시경제 분석관이자 공인 자산배분 전문가입니다.
+다음의 박종훈 박사 핵심 철학을 철저하게 준수하여 답변하세요:
+1. 지난 40년(1980~2020)의 저금리·저물가 관성은 끝났고, 국가부채 J커브와 통화 타락으로 '중금리·고물가 뉴노멀'이 도래함.
+2. 원화는 고령화와 세수 절벽으로 장기 약세 압력을 받으므로 글로벌 자산(달러, 금)으로 헤지해야 함.
+3. 바벨 전략(닻 40% : 돛 60%):
+   - 닻(Anchor 40%): 미국 초단기국채(SGOV, 0~3개월물) 25% + 실물 귀금속(KRX금현물, SGOL, SLV) 15%.
+   - 돛(Sail 60%): AI 독점 빅테크(스마일커브 우측 극단) 45% + AI 물리 인프라/에너지/원자재(스마일커브 좌측 극단) 15%.
+   - 배제(Dead Zone 0%): 미국 장기국채(TLT), 회사채(USIG), 어정쩡한 중간 배당주(SCHD), 인적자본 신흥국(인도 Nifty50).
+4. 친절하고 논리적이며 실전 실행 가능한 조언을 제공하고 마크다운 포맷팅을 풍부하게 활용하세요.`;
+
+        // Custom Toast Notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-2.5 rounded-lg text-xs font-bold text-white shadow-lg pointer-events-auto transition-all transform duration-300 translate-y-2 flex items-center gap-2 ${
+                type === 'error' ? 'bg-rose-600' : type === 'success' ? 'bg-emerald-600' : 'bg-indigo-600'
+            }`;
+            toast.innerHTML = `<span>${type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️'}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Lightweight Markdown to HTML Renderer
+        function renderMarkdown(md) {
+            if (!md) return '';
+            let html = md
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+                .replace(/\*\*(.*Card|\*\*.*?)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+                .replace(/`([^`]+)`/gim, '<code class="bg-indigo-100/70 text-indigo-900 px-1 py-0.5 rounded text-[11px] font-mono">$1</code>')
+                .replace(/^\s*\n\*/gm, '<ul>\n*')
+                .replace(/^(\*|\-)\s+(.*)/gim, '<li>$2</li>')
+                .replace(/\n\n/gim, '<p></p>')
+                .replace(/\n/gim, '<br>');
+            return html;
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            const tabs = ['summary', 'barbell', 'diagnosis', 'ai-matrix', 'rebalance', 'ai-advisor'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`content-${t}`);
+                if (btn && content) {
+                    if (t === tabId) {
+                        btn.classList.add('active');
+                        btn.classList.remove('text-slate-600');
+                        content.classList.remove('hidden');
+                    } else {
+                        btn.classList.remove('active');
+                        btn.classList.add('text-slate-600');
+                        content.classList.add('hidden');
+                    }
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Exponential Backoff Fetch Wrapper for Gemini API
+        async function fetchGeminiWithBackoff(url, payload, maxRetries = 3) {
+            let delay = 1000;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429 || response.status >= 500) {
+                        await new Promise(r => setTimeout(r, delay));
+                        delay *= 2;
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        const err = await response.text();
+                        throw new Error(`API 오류 (${response.status}): ${err}`);
+                    }
+
+                    return await response.json();
+                } catch (e) {
+                    if (attempt === maxRetries - 1) throw e;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // Helper to set input from example buttons
+        function setAiEvalInput(ticker) {
+            document.getElementById('aiEvalQuery').value = ticker;
+        }
+
+        // Run Real-Time Gemini AI Enterprise Evaluation
+        async function runGeminiAiEnterpriseEvaluation() {
+            const query = document.getElementById('aiEvalQuery').value.trim();
+            if (!query) {
+                showToast('분석할 기업명이나 티커를 입력해주세요.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnAiEval');
+            const resultBox = document.getElementById('aiEvalResultContainer');
+            const loading = document.getElementById('aiEvalLoading');
+            const content = document.getElementById('aiEvalContent');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳ 분석 중...</span>`;
+            resultBox.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            content.classList.add('hidden');
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const userPrompt = `분석 대상 기업: "${query}".
+박종훈 박사의 '경제로드맵 Part 5' AI 스마일 커브 이론과 5대 절대적 해자 평가 기준(100점 만점)에 따라 이 기업을 엄격히 채점하고 JSON 포맷으로 응답하세요.
+평가 기준:
+1. dataMoat (0~20점): 독점적 데이터 해자 및 사용자 락인 (크롤링 불가능한 폐쇄형 데이터)
+2. capexFcf (0~20점): 자체 잉여현금흐름(FCF) 기반 무차입 AI CapEx 감당력
+3. monetization (0~20점): 실질적 수익화 능력 및 마진 방어/가격결정력
+4. computeChip (0~20점): GPU/ASIC 공급망 우선권 및 자체 칩(In-house Silicon) 내재화
+5. antiCommoditization (0~20점): 오픈소스/후발주자 추격 시 대체 불가능한 구조적 방어력
+
+스마일커브 위치(smilePosition): '물리 인프라 (좌측 극단)', 'AI 독점 플랫폼 (우측 극단)', '어정쩡한 중간 지대 (배제 대상)' 중 하나.`;
+
+            const payload = {
+                contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+                tools: [{ "google_search": {} }],
+                systemInstruction: { parts: [{ text: SYSTEM_PROMPT_ROADMAP }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "companyName": { "type": "STRING" },
+                            "ticker": { "type": "STRING" },
+                            "smilePosition": { "type": "STRING" },
+                            "scores": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "dataMoat": { "type": "INTEGER" },
+                                    "capexFcf": { "type": "INTEGER" },
+                                    "monetization": { "type": "INTEGER" },
+                                    "computeChip": { "type": "INTEGER" },
+                                    "antiCommoditization": { "type": "INTEGER" }
+                                },
+                                "required": ["dataMoat", "capexFcf", "monetization", "computeChip", "antiCommoditization"]
+                            },
+                            "totalScore": { "type": "INTEGER" },
+                            "grade": { "type": "STRING" },
+                            "rationale": { "type": "STRING" },
+                            "barbellVerdict": { "type": "STRING" }
+                        },
+                        "required": ["companyName", "smilePosition", "scores", "totalScore", "grade", "rationale", "barbellVerdict"]
+                    }
+                }
+            };
+
+            try {
+                const data = await fetchGeminiWithBackoff(apiUrl, payload);
+                const candidate = data.candidates?.[0];
+                const rawJson = candidate?.content?.parts?.[0]?.text;
+
+                if (!rawJson) throw new Error('AI 분석 결과를 파싱할 수 없습니다.');
+                const result = JSON.parse(rawJson);
+
+                // Render Result
+                document.getElementById('aiEvalCompanyName').innerText = `${result.companyName} (${result.ticker || query})`;
+                document.getElementById('aiEvalSmilePosition').innerText = `스마일커브 포지션: ${result.smilePosition}`;
+                document.getElementById('aiEvalTotalScore').innerText = `${result.totalScore}점 / 100점`;
+
+                const badge = document.getElementById('aiEvalGradeBadge');
+                badge.innerText = `${result.grade} 등급`;
+                if (result.totalScore >= 90) badge.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400';
+                else if (result.totalScore >= 80) badge.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-400';
+                else if (result.totalScore >= 70) badge.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400';
+                else badge.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-rose-500/20 text-rose-300 border border-rose-400';
+
+                // 5 Scores Grid
+                const s = result.scores;
+                document.getElementById('aiEvalScoresGrid').innerHTML = `
+                    <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 block text-[10px]">① 데이터해자</span><span class="font-bold text-white">${s.dataMoat}/20</span></div>
+                    <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 block text-[10px]">② CapEx/FCF</span><span class="font-bold text-white">${s.capexFcf}/20</span></div>
+                    <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 block text-[10px]">③ 실질수익화</span><span class="font-bold text-white">${s.monetization}/20</span></div>
+                    <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 block text-[10px]">④ 칩/컴퓨팅</span><span class="font-bold text-white">${s.computeChip}/20</span></div>
+                    <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 block text-[10px]">⑤ 추격방어력</span><span class="font-bold text-white">${s.antiCommoditization}/20</span></div>
+                `;
+
+                document.getElementById('aiEvalRationale').innerHTML = `<strong>💡 정밀 채점 사유:</strong><br>${result.rationale}`;
+                document.getElementById('aiEvalBarbellVerdict').innerHTML = `<strong>⚖️ 바벨 전략 편입 가이드:</strong><br>${result.barbellVerdict}`;
+
+                // Extract Grounding Sources
+                const sourcesDiv = document.getElementById('aiEvalSources');
+                sourcesDiv.innerHTML = '';
+                const attributions = candidate.groundingMetadata?.groundingAttributions || [];
+                const validSources = attributions.map(a => ({ title: a.web?.title, uri: a.web?.uri })).filter(s => s.uri);
+                if (validSources.length > 0) {
+                    sourcesDiv.innerHTML = '<span class="w-full block text-slate-400 font-bold">🔍 실시간 웹 검색 참조 출처:</span>' +
+                        validSources.slice(0, 4).map(src => `<a href="${src.uri}" target="_blank" class="text-indigo-300 hover:underline inline-block bg-slate-900 px-2 py-0.5 rounded border border-slate-700 truncate max-w-xs">🔗 ${src.title || src.uri}</a>`).join('');
+                }
+
+                loading.classList.add('hidden');
+                content.classList.remove('hidden');
+                showToast(`${result.companyName} AI 채점 완료 (${result.totalScore}점)`, 'success');
+            } catch (err) {
+                loading.classList.add('hidden');
+                resultBox.classList.add('hidden');
+                showToast(`채점 오류: ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>🔍</span> 실시간 AI 정밀 채점 시작`;
+            }
+        }
+
+        // 1-Click AI Full Diagnosis Report Generation
+        async function requestAiFullDiagnosis() {
+            const box = document.getElementById('aiDiagnosisBox');
+            box.classList.remove('hidden');
+            box.innerHTML = `<div class="flex items-center gap-2 text-indigo-700 text-xs py-2"><div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div><span>박종훈의 경제로드맵 기준에 맞춰 2.23억 원 포트폴리오를 전면 진단 중입니다...</span></div>`;
+
+            const prompt = `현재 자산 2억 2,364만 원의 5개 계좌(한투AIM 9,249만 원, 삼성위탁 5,052만 원, 한투연저 3,980만 원, 한투ISA 3,641만 원, 한투IRP 441만 원)와 44개 보유 종목 데이터를 바탕으로, 박종훈 경제로드맵 관점에서 '즉각 실행해야 할 3대 핵심 리밸런싱 긴급 조치'와 '최종 기대효과'를 명확하고 구조적인 마크다운 보고서로 작성해줘.`;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: SYSTEM_PROMPT_ROADMAP }] }
+            };
+
+            try {
+                const res = await fetchGeminiWithBackoff(apiUrl, payload);
+                const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
+                box.innerHTML = renderMarkdown(text);
+                showToast('AI 정밀 진단 처방전 발급 완료', 'success');
+            } catch (e) {
+                box.innerHTML = `<p class="text-rose-600 text-xs">진단 리포트 생성 실패: ${e.message}</p>`;
+            }
+        }
+
+        // Macro Insight AI Brief
+        async function generateAiMacroInsight() {
+            const box = document.getElementById('aiMacroBox');
+            box.classList.remove('hidden');
+            box.innerHTML = `<div class="flex items-center gap-2 text-indigo-700 text-xs py-2"><div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div><span>최신 매크로 시황 및 통화 패권 동향을 분석 중입니다...</span></div>`;
+
+            const prompt = `박종훈 박사의 '역사 속 돈의 몰락'과 '고물가 뉴노멀' 강의 내용에 입각하여, 현재 글로벌 부채 J커브와 미국 대선/관세 정국이 개인 투자자 자산(원화, 달러, 금, AI 빅테크)에 미치는 영향을 3문단으로 명쾌하게 요약해줘.`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            try {
+                const res = await fetchGeminiWithBackoff(apiUrl, {
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: SYSTEM_PROMPT_ROADMAP }] }
+                });
+                box.innerHTML = renderMarkdown(res.candidates?.[0]?.content?.parts?.[0]?.text);
+            } catch (e) {
+                box.innerHTML = `<p class="text-rose-600 text-xs">해설 생성 실패: ${e.message}</p>`;
+            }
+        }
+
+        // Account Tax Optimizer AI Rebalancing Guide
+        async function requestAiRebalancingRoadmap() {
+            const box = document.getElementById('aiRebalanceGuideBox');
+            box.classList.remove('hidden');
+            box.innerHTML = `<div class="flex items-center gap-2 text-emerald-700 text-xs py-2"><div class="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div><span>계좌별 절세 혜택(연금저축·ISA 과세이연 및 비과세)을 최적화한 매매 가이드를 산출 중입니다...</span></div>`;
+
+            const prompt = `총 2억 2,364만 원 자산을 바벨 전략(닻 40% : 돛 60%)으로 리밸런싱할 때, 
+1) 한투AIM(일임 해지 후 직투 전환)
+2) 한투연금저축(과세이연/세액공제 최대화)
+3) 한투ISA(비과세 한도 극대화)
+4) 한투IRP(안전자산 30% 규정 준수)
+5) 삼성위탁(달러 직투 및 양도세 250만 원 공제 활용)
+각 계좌별 구체적인 [매도 종목 및 금액]과 [신규 매수 종목 및 금액] 매뉴얼을 표와 함께 명쾌하게 제시해줘.`;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            try {
+                const res = await fetchGeminiWithBackoff(apiUrl, {
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: SYSTEM_PROMPT_ROADMAP }] }
+                });
+                box.innerHTML = renderMarkdown(res.candidates?.[0]?.content?.parts?.[0]?.text);
+                showToast('계좌별 절세 최적화 가이드 생성 완료', 'success');
+            } catch (e) {
+                box.innerHTML = `<p class="text-rose-600 text-xs">가이드 생성 실패: ${e.message}</p>`;
+            }
+        }
+
+        // Run Emergency Macro Scenario Simulator
+        async function runScenarioSim(scenarioName) {
+            const box = document.getElementById('scenarioResultBox');
+            box.classList.remove('hidden');
+            box.innerHTML = `<div class="flex items-center gap-2 text-indigo-700 text-xs py-2"><div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div><span>[시나리오: ${scenarioName}] 발생 시 포트폴리오 영향 및 AI 행동 매뉴얼 분석 중...</span></div>`;
+
+            const prompt = `[위기 시나리오 시뮬레이션: ${scenarioName}]
+현재 내 포트폴리오(2.23억 원, 닻과 돛 바벨 구조 전환 중)에 대해 다음을 상세히 분석해줘:
+1. 시장 충격 메커니즘 (금리/환율/자산가격 경로)
+2. 보유 자산 중 단기 타격 자산 vs 강력한 방어/수혜 자산
+3. 즉각적인 3단계 행동 지침 (SGOV 실탄 가동 타이밍, 금/빅테크 매매 전략)`;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            try {
+                const res = await fetchGeminiWithBackoff(apiUrl, {
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: SYSTEM_PROMPT_ROADMAP }] }
+                });
+                box.innerHTML = renderMarkdown(res.candidates?.[0]?.content?.parts?.[0]?.text);
+                showToast(`[${scenarioName}] 시뮬레이션 완료`, 'success');
+            } catch (e) {
+                box.innerHTML = `<p class="text-rose-600 text-xs">시뮬레이션 실패: ${e.message}</p>`;
+            }
+        }
+
+        // Helper to populate chat input
+        function setAiQuery(text) {
+            document.getElementById('aiUserQuery').value = text;
+        }
+
+        // Submit Free-form Chat to AI Advisor
+        async function submitAiAdvisorChat() {
+            const query = document.getElementById('aiUserQuery').value.trim();
+            if (!query) {
+                showToast('질문 내용을 입력해주세요.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitAiChat');
+            const box = document.getElementById('aiChatResponseBox');
+            const loading = document.getElementById('aiChatLoading');
+            const textDiv = document.getElementById('aiChatText');
+
+            btn.disabled = true;
+            box.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            textDiv.innerHTML = '';
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ role: 'user', parts: [{ text: query }] }],
+                systemInstruction: { parts: [{ text: SYSTEM_PROMPT_ROADMAP }] }
+            };
+
+            try {
+                const res = await fetchGeminiWithBackoff(apiUrl, payload);
+                const reply = res.candidates?.[0]?.content?.parts?.[0]?.text;
+                loading.classList.add('hidden');
+                textDiv.innerHTML = renderMarkdown(reply);
+            } catch (e) {
+                loading.classList.add('hidden');
+                textDiv.innerHTML = `<p class="text-rose-600">답변 생성 오류: ${e.message}</p>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Helper to convert Base64 to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Convert raw signed PCM16 data into playable WAV Blob container
+        function pcm16ToWavBlob(pcmData, sampleRate = 24000) {
+            const numChannels = 1;
+            const bytesPerSample = 2; // 16-bit PCM
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = pcmData.length * bytesPerSample;
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            // RIFF header
+            writeAsciiString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeAsciiString(view, 8, 'WAVE');
+
+            // fmt sub-chunk
+            writeAsciiString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // Linear PCM
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true);
+
+            // data sub-chunk
+            writeAsciiString(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcmData.length; i++, offset += 2) {
+                view.setInt16(offset, pcmData[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        function writeAsciiString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // Generate and Play Gemini TTS Audio Executive Briefing
+        async function requestAiAudioBriefing() {
+            const btn = document.getElementById('btnAudioBriefing');
+            const playerBox = document.getElementById('ttsPlayerBox');
+            const statusText = document.getElementById('ttsStatusText');
+            const player = document.getElementById('geminiAudioPlayer');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳ 음성 합성 중...</span>`;
+            playerBox.classList.remove('hidden');
+            statusText.innerText = 'Gemini 2.5 Flash TTS 모델이 음성 브리핑을 생성하고 있습니다...';
+
+            const script = `안녕하십니까. 박종훈의 경제로드맵 포트폴리오 자문관입니다. 
+의뢰인님의 총 2억 2,364만 원 포트폴리오를 진단한 결과, 장기채와 회사채, 인도 주식 등 위험 자산이 35%로 높아 리밸런싱이 시급합니다. 
+닻 역할을 하는 초단기 국채 SGOV와 KRX 금현물로 40%의 안전 실탄을 확보하시고, 돛 역할을 하는 엔비디아, 마이크로소프트 등 AI 독점 빅테크와 전력 인프라에 60%를 집중하여 시대의 순풍을 타시기 바랍니다.`;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{
+                    parts: [{ text: script }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Kore" }
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            try {
+                const res = await fetchGeminiWithBackoff(apiUrl, payload);
+                const part = res?.candidates?.[0]?.content?.parts?.[0];
+                const base64Data = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType || 'audio/L16;rate=24000';
+
+                if (!base64Data) throw new Error('음성 데이터 응답이 없습니다.');
+
+                const match = mimeType.match(/rate=(\d+)/);
+                const sampleRate = match ? parseInt(match[1], 10) : 24000;
+
+                const pcmBuffer = base64ToArrayBuffer(base64Data);
+                const pcm16 = new Int16Array(pcmBuffer);
+                const wavBlob = pcm16ToWavBlob(pcm16, sampleRate);
+                const audioUrl = URL.createObjectURL(wavBlob);
+
+                player.src = audioUrl;
+                player.play();
+                statusText.innerText = '음성 브리핑 재생 중 (Kore 보이스)';
+                showToast('AI 음성 브리핑 생성 완료', 'success');
+            } catch (e) {
+                statusText.innerText = `음성 생성 실패: ${e.message}`;
+                showToast(`TTS 오류: ${e.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>🎙️</span> AI 종합 브리핑 음성 듣기`;
+            }
+        }
+
+        // Render Holdings Table
+        function renderHoldingsTable(data) {
+            const tbody = document.getElementById('holdingsTableBody');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                
+                let badgeClass = 'bg-slate-100 text-slate-800';
+                if (item.class.includes('닻')) badgeClass = 'bg-indigo-100 text-indigo-800 font-bold';
+                else if (item.class.includes('돛')) badgeClass = 'bg-emerald-100 text-emerald-800 font-bold';
+                else if (item.class.includes('배제')) badgeClass = 'bg-rose-100 text-rose-800 font-bold';
+
+                tr.innerHTML = `
+                    <td class="p-2.5 font-medium">${item.account}</td>
+                    <td class="p-2.5 font-semibold text-slate-900">${item.name}</td>
+                    <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[11px] ${badgeClass}">${item.class}</span></td>
+                    <td class="p-2.5 text-slate-600">${item.type}</td>
+                    <td class="p-2.5 text-right font-medium">${item.amount.toLocaleString()}원</td>
+                    <td class="p-2.5 text-right font-bold text-slate-800">${item.ratio}%</td>
+                    <td class="p-2.5 text-center font-semibold text-[11px] ${item.action.includes('매도') || item.action.includes('축소') ? 'text-rose-600' : 'text-emerald-600'}">${item.action}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Filter Holdings Logic
+        function filterHoldings() {
+            const accFilter = document.getElementById('filterAccount').value;
+            const clsFilter = document.getElementById('filterClass').value;
+            const searchText = document.getElementById('searchHoldings').value.toLowerCase();
+
+            const filtered = portfolioData.filter(item => {
+                const matchAcc = accFilter === 'ALL' || item.account === accFilter;
+                const matchCls = clsFilter === 'ALL' || item.class.includes(clsFilter);
+                const matchSearch = item.name.toLowerCase().includes(searchText) || item.type.toLowerCase().includes(searchText);
+                return matchAcc && matchCls && matchSearch;
+            });
+
+            renderHoldingsTable(filtered);
+        }
+
+        // Custom AI Score Calculator Logic
+        function calculateCustomScore() {
+            const c1 = parseInt(document.getElementById('sc1').value) || 0;
+            const c2 = parseInt(document.getElementById('sc2').value) || 0;
+            const c3 = parseInt(document.getElementById('sc3').value) || 0;
+            const c4 = parseInt(document.getElementById('sc4').value) || 0;
+            const c5 = parseInt(document.getElementById('sc5').value) || 0;
+
+            const total = c1 + c2 + c3 + c4 + c5;
+            let grade = 'C등급 (배제 권장)';
+            let color = 'text-rose-600';
+
+            if (total >= 90) { grade = 'S등급 (절대 독점: 최우선 주력 편입)'; color = 'text-emerald-600'; }
+            else if (total >= 80) { grade = 'A등급 (선도 독점: 주력 편입)'; color = 'text-indigo-600'; }
+            else if (total >= 70) { grade = 'B등급 (조건부 관찰: 비중 조절)'; color = 'text-amber-600'; }
+
+            document.getElementById('calcResult').innerHTML = `
+                합계: <span class="${color} text-sm">${total}점</span> (${grade})
+            `;
+        }
+
+        // Rebalance Simulator Logic
+        function runRebalanceSim() {
+            const capital = parseFloat(document.getElementById('simCapital').value) || 0;
+            document.getElementById('simSgov').innerText = Math.round(capital * 0.25).toLocaleString() + '원';
+            document.getElementById('simGold').innerText = Math.round(capital * 0.15).toLocaleString() + '원';
+            document.getElementById('simTech').innerText = Math.round(capital * 0.45).toLocaleString() + '원';
+            document.getElementById('simInfra').innerText = Math.round(capital * 0.15).toLocaleString() + '원';
+        }
+
+        // Initialize Chart.js Instances and Load Data
+        window.addEventListener('DOMContentLoaded', () => {
+            renderHoldingsTable(portfolioData);
+
+            // Chart 1: Current Asset Allocation
+            const ctx1 = document.getElementById('chartAssetCurrent').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['⚓ 닻 (초단기채/금/선진국)', '⛵ 돛 (AI빅테크/인프라)', '🚫 배제/위험자산 (장기채/SCHD/인도)'],
+                    datasets: [{
+                        data: [23.3, 41.5, 35.2],
+                        backgroundColor: ['#6366F1', '#10B981', '#F43F5E']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return context.label + ': ' + context.raw + '%'; }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Account Breakdown
+            const ctx2 = document.getElementById('chartAccounts').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['한투AIM', '삼성위탁', '한투연저', '한투ISA', '한투IRP'],
+                    datasets: [{
+                        label: '평가금액 (만원)',
+                        data: [9249, 5052, 3980, 3641, 441],
+                        backgroundColor: '#4F46E5'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#F1F5F9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart 3: AI Enterprise Scores
+            const ctx3 = document.getElementById('chartAiScores').getContext('2d');
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['NVDA', 'MSFT', 'AMZN', 'META', 'AVGO', 'GOOGL', 'AAPL', 'TSLA'],
+                    datasets: [{
+                        label: 'AI 채점 점수 (100점 만점)',
+                        data: [95, 93, 92, 90, 88, 86, 84, 78],
+                        backgroundColor: ['#10B981', '#10B981', '#10B981', '#10B981', '#3B82F6', '#3B82F6', '#3B82F6', '#F59E0B']
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { min: 60, max: 100, grid: { color: '#F1F5F9' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Chart 4: Before vs Target Model
+            const ctx4 = document.getElementById('chartBeforeAfter').getContext('2d');
+            new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['⚓ 닻 자산 (안전/실탄)', '⛵ 돛 자산 (AI/인프라)', '🚫 배제 자산 (채권/SCHD/인도)'],
+                    datasets: [
+                        { label: '현재 비중 (%)', data: [23.3, 41.5, 35.2], backgroundColor: '#94A3B8' },
+                        { label: '목표 비중 (%)', data: [40.0, 60.0, 0.0], backgroundColor: '#4F46E5' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 12 } } },
+                    scales: {
+                        y: { beginAtZero: true, max: 70, grid: { color: '#F1F5F9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
