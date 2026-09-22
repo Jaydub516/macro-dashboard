@@ -364,7 +364,8 @@
                     <div class="date-picker-wrap">
                         <input type="month" id="trend-start" value="2026-01" onchange="trendStartDateStr=this.value; triggerRebalance();" style="padding:2px 4px; font-size:0.7rem; border-radius:4px; border:1px solid var(--input-border); background:var(--bg-card); color:var(--text-main);">
                         <span style="font-size:0.7rem;">~</span>
-                        <input type="month" id="trend-end" value="2026-08" onchange="trendEndDateStr=this.value; triggerRebalance();" style="padding:2px 4px; font-size:0.7rem; border-radius:4px; border:1px solid var(--input-border); background:var(--bg-card); color:var(--text-main);">
+                        <!-- 💡 V65: 현재 접속 월로 JS에서 동적 설정되도록 초기화 -->
+                        <input type="month" id="trend-end" onchange="trendEndDateStr=this.value; triggerRebalance();" style="padding:2px 4px; font-size:0.7rem; border-radius:4px; border:1px solid var(--input-border); background:var(--bg-card); color:var(--text-main);">
                     </div>
                 </div>
                 <div style="height:190px; position:relative; cursor:pointer;"><canvas id="performance-trend-chart"></canvas></div>
@@ -381,14 +382,20 @@
         const MY_PROXY_URL = "https://script.google.com/macros/s/AKfycbzvORZeREAP6MKkYwLiqX10cApwleSCW96cezCTXAuDfAPD5zFz3O6THQ3izAUXNHxG/exec"; 
         const REBALANCING_THRESHOLD = 15000;
 
-        // 💡 V64: D-Day 최신화, MDD 버그 수정, 100% 무손실 데이터 승계
-        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV64_";
+        // 💡 V65: 성과 트렌드 현재 월 동적 연동 & 100% 무손실 마이그레이션
+        const STORAGE_KEY_PREFIX = "macroDashboard_MasterV65_";
         
         let currentView = 'portfolio_hub';
         const now = new Date();
         const currentYearMonth = `${now.getFullYear()}-${("0" + (now.getMonth() + 1)).slice(-2)}`;
         let trendStartDateStr = '2026-01';
         let trendEndDateStr = currentYearMonth; 
+
+        // 💡 날짜 선택 DOM 요소에 동적 기본값 주입
+        const trendEndInputEl = document.getElementById('trend-end');
+        if (trendEndInputEl) {
+            trendEndInputEl.value = currentYearMonth;
+        }
 
         let rawNumericPrincipal = 0;
         let rawNumericSimulation = 0;
@@ -404,7 +411,6 @@
         };
         const DIVIDEND_ACCOUNT_COLORS = ['#27ae60', '#2980b9', '#8e44ad', '#e67e22', '#f39c12', '#16a085', '#c0392b'];
 
-        // 💡 V64: 오늘 날짜 기준 리얼타임 D-Day 엔진
         function getDDayHTML(targetDateStr) {
             const currentBaseDate = new Date();
             currentBaseDate.setHours(0, 0, 0, 0);
@@ -444,7 +450,7 @@
         if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'tabs')) {
             const keysToMigrate = [];
             for (let i = 0; i < localStorage.length; i++) { keysToMigrate.push(localStorage.key(i)); }
-            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_', 'macroDashboard_MasterV59_', 'macroDashboard_MasterV60_', 'macroDashboard_MasterV61_', 'macroDashboard_MasterV62_', 'macroDashboard_MasterV63_'];
+            const oldPrefixes = ['macroDashboard_Master_', 'macroDashboard_MasterV22_', 'macroDashboard_MasterV23_', 'macroDashboard_MasterV24_', 'macroDashboard_MasterV25_', 'macroDashboard_MasterV26_', 'macroDashboard_MasterV27_', 'macroDashboard_MasterV27_1_', 'macroDashboard_MasterV27_Stable_', 'macroDashboard_MasterV28_', 'macroDashboard_MasterV29_', 'macroDashboard_MasterV30_', 'macroDashboard_MasterV31_', 'macroDashboard_MasterV32_', 'macroDashboard_MasterV33_', 'macroDashboard_MasterV34_', 'macroDashboard_MasterV35_', 'macroDashboard_MasterV36_', 'macroDashboard_MasterV37_', 'macroDashboard_MasterV38_', 'macroDashboard_MasterV39_', 'macroDashboard_MasterV40_', 'macroDashboard_MasterV41_', 'macroDashboard_MasterV42_', 'macroDashboard_MasterV43_', 'macroDashboard_MasterV44_', 'macroDashboard_MasterV45_', 'macroDashboard_MasterV46_', 'macroDashboard_MasterV47_', 'macroDashboard_MasterV48_', 'macroDashboard_MasterV49_', 'macroDashboard_MasterV50_', 'macroDashboard_MasterV51_', 'macroDashboard_MasterV52_', 'macroDashboard_MasterV53_', 'macroDashboard_MasterV54_', 'macroDashboard_MasterV55_', 'macroDashboard_MasterV56_', 'macroDashboard_MasterV57_', 'macroDashboard_MasterV58_', 'macroDashboard_MasterV59_', 'macroDashboard_MasterV60_', 'macroDashboard_MasterV61_', 'macroDashboard_MasterV62_', 'macroDashboard_MasterV63_', 'macroDashboard_MasterV64_'];
             let mergedTabsMap = {};
 
             oldPrefixes.forEach(prefix => {
@@ -471,7 +477,7 @@
         let dividendRecords = safeParse(STORAGE_KEY_PREFIX + 'dividends', []);
         function saveDividends() { localStorage.setItem(STORAGE_KEY_PREFIX + 'dividends', JSON.stringify(dividendRecords)); }
 
-        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v64')) {
+        if (!localStorage.getItem(STORAGE_KEY_PREFIX + 'init_v65')) {
             let macroCheck = safeParse(STORAGE_KEY_PREFIX + 'macro', DEFAULT_MACRO_ASSETS);
             const ensureAsset = (ticker, name, type='asset') => { 
                 if(!macroCheck.some(a => a.ticker === ticker)) macroCheck.push({ type: type, ticker: ticker, name: name }); 
@@ -483,7 +489,7 @@
             
             let tabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
             if(tabs.length === 0) { alert("초기화된 환경입니다. 엑셀을 붙여넣어 계좌를 활성화해주세요!"); }
-            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v64', 'true');
+            localStorage.setItem(STORAGE_KEY_PREFIX + 'init_v65', 'true');
         }
 
         let portfolioTabs = safeParse(STORAGE_KEY_PREFIX + 'tabs', []);
@@ -575,6 +581,14 @@
                 renderHubView();
             } else {
                 summaryWidget.style.display = 'flex';
+                
+                // 💡 뷰 전환 시 종료 날짜를 현재 접속 월로 갱신 보장
+                const endPicker = document.getElementById('trend-end');
+                if (endPicker && !endPicker.value) {
+                    endPicker.value = currentYearMonth;
+                    trendEndDateStr = currentYearMonth;
+                }
+
                 if(viewMode === 'combined') { 
                     combinedBox.style.display = 'flex'; principalInput.disabled = true; 
                     document.getElementById('checkbox-container').style.display = 'none';
@@ -1531,7 +1545,6 @@
             }
         }
 
-        // 💡 V64: 고점대비 수치 계산 버그(hp 예외처리) 완벽 수정
         function updateCardUI(asset, cardId, currentPrice, high52) {
             const tickerStr = String(asset.ticker || '').toUpperCase();
             const isWon = tickerStr.indexOf('.KS') !== -1 || tickerStr.indexOf('.KQ') !== -1 || tickerStr === 'CASH';
